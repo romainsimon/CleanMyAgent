@@ -5,12 +5,15 @@ final class AppModel: ObservableObject {
     @Published var selectedSection: AppSection? = .overview
     @Published private(set) var disk = DiskSnapshot.empty
     @Published private(set) var performance = PerformanceSnapshot.empty
+    @Published private(set) var liveSpeed = LiveSpeedSnapshot.inactive
     @Published private(set) var worktrees: [WorktreeRecord] = []
     @Published private(set) var isScanning = false
     @Published private(set) var lastError: String?
+    private let liveSpeedMonitor = LiveSpeedMonitor()
 
     init() {
         Task { await refresh() }
+        Task { await monitorLiveSpeed() }
     }
 
     func refresh() async {
@@ -30,5 +33,12 @@ final class AppModel: ObservableObject {
 
     var totalAgentBytes: Int64 {
         disk.agents.reduce(0) { $0 + $1.totalBytes } + disk.sharedCategories.reduce(0) { $0 + $1.bytes }
+    }
+
+    private func monitorLiveSpeed() async {
+        while !Task.isCancelled {
+            liveSpeed = await liveSpeedMonitor.sample()
+            try? await Task.sleep(for: .seconds(1))
+        }
     }
 }

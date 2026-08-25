@@ -11,6 +11,7 @@ struct OverviewView: View {
                     subtitle: "Local agent storage and performance, without reading conversation content."
                 )
                 diskStatus
+                LiveSpeedMeterView(snapshot: model.liveSpeed)
                 agentStorage
                 performanceSummary
             }

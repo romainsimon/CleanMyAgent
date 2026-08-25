@@ -11,6 +11,8 @@ struct PerformanceView: View {
                     subtitle: "Comparable local observations with source-specific coverage."
                 )
 
+                LiveSpeedMeterView(snapshot: model.liveSpeed)
+
                 VStack(spacing: 0) {
                     performanceHeader
                     Divider().overlay(Color.agentSpaceSeparator)

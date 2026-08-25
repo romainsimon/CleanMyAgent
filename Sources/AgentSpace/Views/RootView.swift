@@ -116,6 +116,9 @@ struct MenuBarSummaryView: View {
     var body: some View {
         Text("Agent Space")
         Text("\(ByteFormat.string(model.disk.freeBytes)) free")
+        Text(model.liveSpeed.active
+             ? "\(model.liveSpeed.observedTokensPerSecond.formatted(.number.precision(.fractionLength(1)))) tok/s · Codex live"
+             : "No active Codex turn")
         Divider()
         ForEach(model.disk.agents) { agent in
             Text("\(agent.agent.rawValue): \(ByteFormat.string(agent.totalBytes))")

@@ -142,6 +142,28 @@ struct PerformanceSnapshot: Sendable {
     )
 }
 
+struct LiveSpeedSnapshot: Sendable {
+    let active: Bool
+    let agent: AgentKind
+    let model: String?
+    let observedTokensPerSecond: Double
+    let outputTokens: Int64
+    let totalTokens: Int64
+    let elapsedMs: Double
+    let sampledAt: Date
+
+    static let inactive = LiveSpeedSnapshot(
+        active: false,
+        agent: .codex,
+        model: nil,
+        observedTokensPerSecond: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        elapsedMs: 0,
+        sampledAt: .distantPast
+    )
+}
+
 struct WorktreeRecord: Identifiable, Sendable, Hashable {
     let path: String
     let repository: String

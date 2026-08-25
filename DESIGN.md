@@ -17,9 +17,10 @@ Agent Space extends the visual language already approved for the Codex storage d
 
 ## Structure
 
-- A compact sidebar contains Overview, Agents, Performance, Storage, Worktrees, and Settings.
+- A compact sidebar contains Overview, Agents, Performance, Usage, Storage, Worktrees, and Settings.
 - The detail surface uses one primary table or list per screen rather than grids of repeated cards.
 - Overview leads with a plain-language disk status, then agent rows and current performance evidence.
+- Usage leads with one compact metric strip, then a dominant daily activity chart, supporting category and model charts, and a daily report table. Every chart states its range and coverage.
 - A menu-bar item provides free space and audit status without duplicating the full application.
 
 ## Color and material
@@ -30,7 +31,7 @@ Agent Space extends the visual language already approved for the Codex storage d
 - Blue: selected navigation and healthy informational emphasis.
 - Amber: low-space warning.
 - Red: critical disk pressure or scan failure only.
-- Agent colors identify source, never safety state.
+- Agent colors identify source in rows and charts, never safety state.
 
 ## Typography
 

@@ -9,6 +9,7 @@ The first MVP supports:
 - a read-only Git worktree inventory;
 - a live Codex observed-token speedometer, refreshed every second;
 - local token, TTFT, response-time, and observed-throughput metadata;
+- ccusage-style local usage analytics with native charts by day, agent, model, and token category;
 - a menu-bar summary;
 - privacy-preserving parsing that ignores prompt, response, code, and tool-output content.
 

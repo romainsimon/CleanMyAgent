@@ -164,6 +164,79 @@ struct LiveSpeedSnapshot: Sendable {
     )
 }
 
+enum UsageRange: Int, CaseIterable, Identifiable, Sendable {
+    case sevenDays = 7
+    case thirtyDays = 30
+    case ninetyDays = 90
+
+    var id: Int { rawValue }
+    var label: String { "\(rawValue)d" }
+    var title: String { "Last \(rawValue) days" }
+}
+
+struct UsageBucket: Identifiable, Sendable, Hashable {
+    let date: Date
+    let agent: AgentKind
+    let inputTokens: Int64
+    let outputTokens: Int64
+    let cacheReadTokens: Int64
+    let cacheWriteTokens: Int64
+    let reasoningTokens: Int64
+    let sessions: Int
+
+    var id: String { "\(date.timeIntervalSince1970)-\(agent.rawValue)" }
+    var totalTokens: Int64 { inputTokens + outputTokens }
+    var uncachedInputTokens: Int64 { max(0, inputTokens - cacheReadTokens - cacheWriteTokens) }
+    var visibleOutputTokens: Int64 { max(0, outputTokens - reasoningTokens) }
+}
+
+struct ModelUsage: Identifiable, Sendable, Hashable {
+    let agent: AgentKind
+    let model: String
+    let inputTokens: Int64
+    let outputTokens: Int64
+    let cacheReadTokens: Int64
+    let cacheWriteTokens: Int64
+    let reasoningTokens: Int64
+    let sessions: Int
+
+    var id: String { "\(agent.rawValue)-\(model)" }
+    var totalTokens: Int64 { inputTokens + outputTokens }
+}
+
+struct UsageCoverage: Identifiable, Sendable, Hashable {
+    let agent: AgentKind
+    let filesDiscovered: Int
+    let filesScanned: Int
+    let truncatedFiles: Int
+    let note: String
+
+    var id: AgentKind { agent }
+}
+
+struct UsageSnapshot: Sendable {
+    let range: UsageRange
+    let buckets: [UsageBucket]
+    let models: [ModelUsage]
+    let coverage: [UsageCoverage]
+    let sessionCount: Int
+    let capturedAt: Date
+
+    static func empty(range: UsageRange = .thirtyDays) -> UsageSnapshot {
+        UsageSnapshot(range: range, buckets: [], models: [], coverage: [], sessionCount: 0, capturedAt: .distantPast)
+    }
+
+    var inputTokens: Int64 { buckets.reduce(0) { $0 + $1.inputTokens } }
+    var outputTokens: Int64 { buckets.reduce(0) { $0 + $1.outputTokens } }
+    var cacheReadTokens: Int64 { buckets.reduce(0) { $0 + $1.cacheReadTokens } }
+    var cacheWriteTokens: Int64 { buckets.reduce(0) { $0 + $1.cacheWriteTokens } }
+    var reasoningTokens: Int64 { buckets.reduce(0) { $0 + $1.reasoningTokens } }
+    var totalTokens: Int64 { inputTokens + outputTokens }
+    var hasPartialCoverage: Bool {
+        coverage.contains { $0.truncatedFiles > 0 || $0.filesScanned < $0.filesDiscovered }
+    }
+}
+
 struct WorktreeRecord: Identifiable, Sendable, Hashable {
     let path: String
     let repository: String
@@ -182,6 +255,7 @@ enum AppSection: String, CaseIterable, Identifiable {
     case overview = "Overview"
     case agents = "Agents"
     case performance = "Performance"
+    case usage = "Usage"
     case storage = "Storage"
     case worktrees = "Worktrees"
     case settings = "Settings"
@@ -193,6 +267,7 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .overview: "square.grid.2x2"
         case .agents: "cpu"
         case .performance: "speedometer"
+        case .usage: "chart.xyaxis.line"
         case .storage: "internaldrive"
         case .worktrees: "arrow.triangle.branch"
         case .settings: "gearshape"

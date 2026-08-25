@@ -63,6 +63,7 @@ struct RootView: View {
         case .overview: OverviewView(model: model)
         case .agents: AgentsView(model: model)
         case .performance: PerformanceView(model: model)
+        case .usage: UsageView(model: model)
         case .storage: StorageView(model: model)
         case .worktrees: WorktreesView(model: model)
         case .settings: SettingsView(model: model)

@@ -33,7 +33,7 @@ Unlike an agent-specific plugin, Agent Space uses local adapters to present stor
 
 ## Capabilities and Constraints
 
-- The MVP audits disk usage, free capacity, agent storage, Git worktrees, and locally observable speed metrics.
+- The MVP audits disk usage, free capacity, agent storage, Git worktrees, locally observable speed metrics, and bounded local usage history by day, agent, model, and token category.
 - The MVP is read-only. It does not delete caches, sessions, dependencies, or worktrees.
 - Performance labels must distinguish observed output throughput, TTFT, end-to-end duration, token counts, and partial coverage.
 - Future cleaning actions must preserve dirty, active, unmerged, unknown, and open-PR worktrees.

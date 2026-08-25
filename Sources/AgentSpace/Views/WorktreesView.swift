@@ -7,54 +7,62 @@ struct WorktreesView: View {
     @State private var showsConfirmation = false
 
     var body: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 18) {
-                PageHeader(
-                    title: "Worktrees",
-                    subtitle: "Remove only clean worktrees whose code is verified as merged and remote-backed."
-                )
+        VStack(spacing: 0) {
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 18) {
+                    PageHeader(
+                        title: "Worktrees",
+                        subtitle: "Remove only clean worktrees whose code is verified as merged and remote-backed."
+                    )
 
-                auditSummary
-                cleanupNotice
+                    auditSummary
+                    cleanupNotice
 
-                HStack {
-                    Picker("Filter", selection: $filter) {
-                        ForEach(WorktreeFilter.allCases) { option in
-                            Text(option.title).tag(option)
+                    HStack {
+                        Picker("Filter", selection: $filter) {
+                            ForEach(WorktreeFilter.allCases) { option in
+                                Text(option.title).tag(option)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .labelsHidden()
+                        .fixedSize()
+
+                        Spacer()
+
+                        if model.isScanning {
+                            ProgressView()
+                                .controlSize(.small)
+                            Text("Verifying Git and pull requests…")
+                                .font(.caption)
+                                .foregroundStyle(Color.agentSpaceSecondary)
                         }
                     }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
-                    .fixedSize()
 
-                    Spacer()
-
-                    if model.isScanning {
-                        ProgressView()
-                            .controlSize(.small)
-                        Text("Verifying Git and pull requests…")
-                            .font(.caption)
-                            .foregroundStyle(Color.agentSpaceSecondary)
+                    if model.worktrees.isEmpty && !model.isScanning {
+                        ContentUnavailableView(
+                            "No worktrees found",
+                            systemImage: "arrow.triangle.branch",
+                            description: Text("CleanMyAgent found no linked Git worktrees under ~/dev.")
+                        )
+                        .frame(maxWidth: .infinity, minHeight: 320)
+                    } else {
+                        worktreeTable
                     }
                 }
-
-                if model.worktrees.isEmpty && !model.isScanning {
-                    ContentUnavailableView(
-                        "No worktrees found",
-                        systemImage: "arrow.triangle.branch",
-                        description: Text("CleanMyAgent found no linked Git worktrees under ~/dev.")
-                    )
-                    .frame(maxWidth: .infinity, minHeight: 320)
-                } else {
-                    worktreeTable
-                }
-
-                actionBar
+                .padding(28)
+                .frame(maxWidth: 1200, alignment: .topLeading)
             }
-            .padding(28)
-            .frame(maxWidth: 1200, alignment: .topLeading)
+            .minimalMacScrollbars()
+
+            Divider()
+                .overlay(Color.agentSpaceSeparator)
+
+            actionBar
+                .padding(.horizontal, 28)
+                .padding(.vertical, 14)
+                .background(Color.agentSpaceSurface)
         }
-        .minimalMacScrollbars()
         .onChange(of: model.worktrees) { _, worktrees in
             let removablePaths = Set(worktrees.filter { $0.safety == .removable }.map(\.path))
             selectedPaths.formIntersection(removablePaths)
@@ -214,12 +222,13 @@ struct WorktreesView: View {
             }
             .disabled(removableWorktrees.isEmpty || model.worktreeCleanupState == .removing)
 
-            Button("Remove selected…", role: .destructive) {
+            Button("Remove selected worktrees…", role: .destructive) {
                 showsConfirmation = true
             }
             .disabled(selectedRecords.isEmpty || model.worktreeCleanupState == .removing)
+            .buttonStyle(.borderedProminent)
+            .tint(.red)
         }
-        .padding(.top, 2)
     }
 
     @ViewBuilder

@@ -98,6 +98,29 @@ enum DiskPressure: String, Sendable {
     case critical = "Critical"
 }
 
+struct CleanupTargetSnapshot: Sendable, Equatable {
+    let path: String
+    let bytes: Int64
+    let fileCount: Int
+    let exists: Bool
+    let capturedAt: Date
+
+    static let empty = CleanupTargetSnapshot(
+        path: "~/.codex/archived_sessions",
+        bytes: 0,
+        fileCount: 0,
+        exists: false,
+        capturedAt: .distantPast
+    )
+}
+
+enum CleanupOperationState: Sendable, Equatable {
+    case idle
+    case movingToTrash
+    case succeeded(trashedPath: String)
+    case failed(message: String)
+}
+
 struct AgentMetric: Identifiable, Sendable {
     let agent: AgentKind
     let model: String
@@ -258,6 +281,7 @@ enum AppSection: String, CaseIterable, Identifiable {
     case usage = "Usage"
     case storage = "Storage"
     case worktrees = "Worktrees"
+    case cleanup = "Clean"
     case settings = "Settings"
 
     var id: String { rawValue }
@@ -270,6 +294,7 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .usage: "chart.xyaxis.line"
         case .storage: "internaldrive"
         case .worktrees: "arrow.triangle.branch"
+        case .cleanup: "trash.slash"
         case .settings: "gearshape"
         }
     }

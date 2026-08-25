@@ -10,6 +10,7 @@ The first MVP supports:
 - a live Codex observed-token speedometer, refreshed every second;
 - local token, TTFT, response-time, and observed-throughput metadata;
 - ccusage-style local usage analytics with native charts by day, agent, model, and token category;
+- a protected action that moves archived Codex sessions to the macOS Trash while Codex is closed;
 - a menu-bar summary;
 - privacy-preserving parsing that ignores prompt, response, code, and tool-output content.
 
@@ -34,4 +35,4 @@ open "dist/Agent Space.app"
 
 ## Safety boundary
 
-Version 0.1 is audit-only. It does not delete or modify sessions, caches, dependencies, repositories, branches, or worktrees.
+Agent Space never cleans active sessions. Its first cleanup action targets only `~/.codex/archived_sessions`, requires Codex to be closed and asks for explicit confirmation. The archive is moved to the macOS Trash, not permanently deleted. Space is reclaimed only after the user empties the Trash. Caches, dependencies, repositories, branches, and worktrees remain read-only.

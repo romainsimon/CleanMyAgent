@@ -24,10 +24,10 @@ struct SettingsView: View {
                     Divider().overlay(Color.agentSpaceSeparator)
                     settingRow(symbol: "network.slash", title: "Network", value: "No telemetry or uploads")
                     Divider().overlay(Color.agentSpaceSeparator)
-                    settingRow(symbol: "lock.shield", title: "Cleaning mode", value: "Disabled in MVP")
+                    settingRow(symbol: "lock.shield", title: "Cleaning mode", value: "Protected targets only")
                 }
 
-                Text("Future cleaning rules will require a preview and explicit confirmation. Sessions and active, dirty, unmerged, unknown, or open-PR worktrees will remain protected by default.")
+                Text("Cleaning requires a preview and explicit confirmation. Active sessions and active, dirty, unmerged, unknown, or open-PR worktrees remain protected by default. Archived Codex sessions can only be moved to the Trash while Codex is closed.")
                     .font(.callout)
                     .foregroundStyle(Color.agentSpaceSecondary)
                     .frame(maxWidth: 680, alignment: .leading)

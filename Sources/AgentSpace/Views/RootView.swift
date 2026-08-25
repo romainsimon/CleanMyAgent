@@ -41,10 +41,10 @@ struct RootView: View {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 7) {
                     StatusDot(color: .green)
-                    Text("Read-only audit")
+                    Text("Protected cleanup")
                         .font(.caption.weight(.medium))
                 }
-                Text("No files can be removed in this build.")
+                Text("Only reviewed targets can move to Trash.")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -66,6 +66,7 @@ struct RootView: View {
         case .usage: UsageView(model: model)
         case .storage: StorageView(model: model)
         case .worktrees: WorktreesView(model: model)
+        case .cleanup: CleanView(model: model)
         case .settings: SettingsView(model: model)
         }
     }

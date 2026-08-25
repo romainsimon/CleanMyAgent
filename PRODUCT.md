@@ -33,8 +33,9 @@ Unlike an agent-specific plugin, Agent Space uses local adapters to present stor
 
 ## Capabilities and Constraints
 
-- The MVP audits disk usage, free capacity, agent storage, Git worktrees, locally observable speed metrics, and bounded local usage history by day, agent, model, and token category.
-- The MVP is read-only. It does not delete caches, sessions, dependencies, or worktrees.
+- The application audits disk usage, free capacity, agent storage, Git worktrees, locally observable speed metrics, and bounded local usage history by day, agent, model, and token category.
+- Cleaning starts with one protected target: archived Codex sessions. It moves only `~/.codex/archived_sessions` to the macOS Trash after an explicit confirmation, then recreates an empty archive folder.
+- Active sessions, caches, dependencies, repositories, branches, and worktrees remain read-only.
 - Performance labels must distinguish observed output throughput, TTFT, end-to-end duration, token counts, and partial coverage.
 - Future cleaning actions must preserve dirty, active, unmerged, unknown, and open-PR worktrees.
 - Future agent integrations can use a local MCP server, but that server is not part of the first MVP.
@@ -60,7 +61,7 @@ Unlike an agent-specific plugin, Agent Space uses local adapters to present stor
 2. Preserve active work by default.
 3. Show provenance and coverage for every metric.
 4. Index numbers and opaque identifiers, never conversation content.
-5. Prefer native agent and Git lifecycle commands over raw deletion.
+5. Prefer reversible system actions and native agent or Git lifecycle commands over raw deletion.
 
 ## Accessibility & Inclusion
 

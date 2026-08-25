@@ -17,7 +17,7 @@ Agent Space extends the visual language already approved for the Codex storage d
 
 ## Structure
 
-- A compact sidebar contains Overview, Agents, Performance, Usage, Storage, Worktrees, and Settings.
+- A compact sidebar contains Overview, Agents, Performance, Usage, Storage, Worktrees, Clean, and Settings.
 - The detail surface uses one primary table or list per screen rather than grids of repeated cards.
 - Overview leads with a plain-language disk status, then agent rows and current performance evidence.
 - Usage leads with one compact metric strip, then a dominant daily activity chart, supporting category and model charts, and a daily report table. Every chart states its range and coverage.
@@ -43,4 +43,4 @@ No ornamental motion. Refresh and progress changes use native, interruptible fee
 
 ## Safety language
 
-Name the source, scope, last refresh time, and coverage. Do not call observed throughput provider speed. The MVP states “Read-only audit” anywhere a user might otherwise expect a cleaning action.
+Name the source, scope, last refresh time, and coverage. Do not call observed throughput provider speed. Cleaning surfaces must name the exact target, expected size, file count, reversibility, blocked states, and the point at which space is actually reclaimed. Never describe a destructive action as unconditionally safe.

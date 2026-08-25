@@ -13,6 +13,9 @@ MACOS_DIR="$CONTENTS_DIR/MacOS"
 rm -rf "$APP_DIR"
 mkdir -p "$MACOS_DIR" "$CONTENTS_DIR/Resources"
 cp "$PROJECT_ROOT/.build/release/AgentSpace" "$MACOS_DIR/AgentSpace"
+if [ -d "$PROJECT_ROOT/.build/release/AgentSpace_AgentSpace.bundle" ]; then
+  ditto "$PROJECT_ROOT/.build/release/AgentSpace_AgentSpace.bundle" "$CONTENTS_DIR/Resources/AgentSpace_AgentSpace.bundle"
+fi
 
 plutil -create xml1 "$CONTENTS_DIR/Info.plist"
 plutil -insert CFBundleExecutable -string AgentSpace "$CONTENTS_DIR/Info.plist"

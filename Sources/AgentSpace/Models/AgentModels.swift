@@ -15,6 +15,14 @@ enum AgentKind: String, CaseIterable, Codable, Sendable, Identifiable {
         }
     }
 
+    var iconResourceName: String {
+        switch self {
+        case .codex: "codex"
+        case .claude: "claude"
+        case .grok: "grok"
+        }
+    }
+
     var accentName: String {
         switch self {
         case .codex: "codex"

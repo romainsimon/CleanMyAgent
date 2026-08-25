@@ -22,15 +22,38 @@ struct AgentBadge: View {
     var size: CGFloat = 28
 
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: size * 0.28, style: .continuous)
-                .fill(Color.agentAccent(agent).opacity(0.16))
-            Image(systemName: agent.symbol)
-                .font(.system(size: size * 0.45, weight: .semibold))
-                .foregroundStyle(Color.agentAccent(agent))
+        Group {
+            if let image = iconImage {
+                Image(nsImage: image)
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFit()
+            } else {
+                ZStack {
+                    RoundedRectangle(cornerRadius: size * 0.28, style: .continuous)
+                        .fill(Color.agentAccent(agent).opacity(0.16))
+                    Image(systemName: agent.symbol)
+                        .font(.system(size: size * 0.45, weight: .semibold))
+                        .foregroundStyle(Color.agentAccent(agent))
+                }
+            }
         }
         .frame(width: size, height: size)
         .accessibilityHidden(true)
+    }
+
+    private var iconImage: NSImage? {
+        if let resourceURL = Bundle.main.resourceURL {
+            let packagedURL = resourceURL
+                .appendingPathComponent("AgentSpace_AgentSpace.bundle", isDirectory: true)
+                .appendingPathComponent("\(agent.iconResourceName).png")
+            if let image = NSImage(contentsOf: packagedURL) { return image }
+        }
+        guard let developmentURL = Bundle.module.url(
+            forResource: agent.iconResourceName,
+            withExtension: "png"
+        ) else { return nil }
+        return NSImage(contentsOf: developmentURL)
     }
 }
 

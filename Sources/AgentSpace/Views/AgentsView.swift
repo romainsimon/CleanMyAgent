@@ -18,23 +18,44 @@ struct AgentsView: View {
             .padding(28)
             .frame(maxWidth: 1120, alignment: .leading)
         }
+        .minimalMacScrollbars()
     }
 
     private func agentSection(_ storage: AgentStorage) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
+        let runtime = model.runtime(for: storage.agent)
+        return VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 12) {
                 AgentBadge(agent: storage.agent, size: 36)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(storage.agent.rawValue)
-                        .font(.headline)
+                    HStack(spacing: 7) {
+                        Text(storage.agent.rawValue)
+                            .font(.headline)
+                        if let version = storage.version {
+                            Text(version)
+                                .font(.caption.monospacedDigit())
+                                .foregroundStyle(Color.agentSpaceSecondary)
+                        }
+                    }
                     Text(storage.isInstalled ? storage.rootPath.replacingOccurrences(of: NSHomeDirectory(), with: "~") : "Not installed")
                         .font(.caption)
                         .foregroundStyle(Color.agentSpaceSecondary)
+                        .lineLimit(1)
+                    Text(storage.agent.capabilitySummary)
+                        .font(.caption2)
+                        .foregroundStyle(Color.agentSpaceSecondary)
                 }
                 Spacer()
-                Text(ByteFormat.string(storage.totalBytes))
-                    .font(.title3.weight(.semibold))
-                    .monospacedDigit()
+                VStack(alignment: .trailing, spacing: 3) {
+                    Text(ByteFormat.string(storage.totalBytes))
+                        .font(.title3.weight(.semibold))
+                        .monospacedDigit()
+                    Text(runtime.processCount > 0
+                         ? "\(ByteFormat.string(runtime.residentBytes)) RAM · \(runtime.processCount) processes"
+                         : "No active process")
+                        .font(.caption2)
+                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .monospacedDigit()
+                }
             }
             .padding(14)
 

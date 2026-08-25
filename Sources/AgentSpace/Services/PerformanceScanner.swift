@@ -122,7 +122,16 @@ enum PerformanceScanner {
     static func scan() -> PerformanceSnapshot {
         let home = FileManager.default.homeDirectoryForCurrentUser.path
         return PerformanceSnapshot(
-            metrics: [scanCodex(home: home), scanClaude(home: home), scanGrok(home: home)],
+            metrics: [
+                scanCodex(home: home),
+                scanClaude(home: home),
+                scanGrok(home: home),
+                .unavailable(.cursor, coverage: "Cursor does not expose stable local response timing."),
+                scanHermes(home: home),
+                scanOpenCode(home: home),
+                .unavailable(.ori, coverage: "Ori launcher totals are omitted to avoid duplicating the underlying agent."),
+                .unavailable(.kiloCode, coverage: "Kilo Code does not expose stable local response timing.")
+            ],
             capturedAt: Date()
         )
     }
@@ -320,6 +329,100 @@ enum PerformanceScanner {
         )
     }
 
+    static func scanOpenCode(home: String) -> AgentMetric {
+        let database = "\(home)/.local/share/opencode/opencode.db"
+        let sql = """
+            SELECT model, time_updated,
+                   COALESCE(tokens_input, 0) AS input_tokens,
+                   COALESCE(tokens_output, 0) AS output_tokens,
+                   COALESCE(tokens_reasoning, 0) AS reasoning_tokens,
+                   COALESCE(tokens_cache_read, 0) AS cache_read_tokens,
+                   COALESCE(tokens_cache_write, 0) AS cache_write_tokens
+            FROM session
+            WHERE COALESCE(tokens_input, 0) + COALESCE(tokens_output, 0) > 0
+            ORDER BY time_updated DESC
+            LIMIT 40;
+            """
+        guard let rows = SQLiteMetadata.query(database: database, sql: sql) else {
+            return .unavailable(.openCode, coverage: "No readable OpenCode session database found")
+        }
+        var accumulator = Accumulator(agent: .openCode)
+        for row in rows {
+            let cacheRead = integer(row["cache_read_tokens"])
+            let cacheWrite = integer(row["cache_write_tokens"])
+            let input = integer(row["input_tokens"]) + cacheRead + cacheWrite
+            let output = integer(row["output_tokens"])
+            guard input > 0 || output > 0 else { continue }
+            accumulator.add(
+                usage: Usage(
+                    input: input,
+                    output: output,
+                    cached: cacheRead,
+                    reasoning: integer(row["reasoning_tokens"]),
+                    total: input + output
+                ),
+                model: modelName(row["model"]),
+                tps: nil,
+                ttft: nil,
+                duration: nil,
+                date: timestampMilliseconds(row["time_updated"]).map { Date(timeIntervalSince1970: $0 / 1_000) }
+            )
+        }
+        guard accumulator.samples > 0 else {
+            return .unavailable(.openCode, coverage: "OpenCode database found, but no numeric session totals were covered")
+        }
+        return accumulator.metric(
+            coverage: "Recent OpenCode session totals. Stable per-response timing is not exposed, so tok/s remains unavailable."
+        )
+    }
+
+    static func scanHermes(home: String) -> AgentMetric {
+        let database = "\(home)/.hermes/state.db"
+        let sql = """
+            SELECT model, started_at, COALESCE(ended_at, started_at) AS occurred_at,
+                   COALESCE(input_tokens, 0) AS input_tokens,
+                   COALESCE(output_tokens, 0) AS output_tokens,
+                   COALESCE(reasoning_tokens, 0) AS reasoning_tokens,
+                   COALESCE(cache_read_tokens, 0) AS cache_read_tokens,
+                   COALESCE(cache_write_tokens, 0) AS cache_write_tokens
+            FROM sessions
+            WHERE COALESCE(input_tokens, 0) + COALESCE(output_tokens, 0) > 0
+            ORDER BY started_at DESC
+            LIMIT 40;
+            """
+        guard let rows = SQLiteMetadata.query(database: database, sql: sql) else {
+            return .unavailable(.hermes, coverage: "No readable Hermes session database found")
+        }
+        var accumulator = Accumulator(agent: .hermes)
+        for row in rows {
+            let cacheRead = integer(row["cache_read_tokens"])
+            let cacheWrite = integer(row["cache_write_tokens"])
+            let input = integer(row["input_tokens"]) + cacheRead + cacheWrite
+            let output = integer(row["output_tokens"])
+            guard input > 0 || output > 0 else { continue }
+            accumulator.add(
+                usage: Usage(
+                    input: input,
+                    output: output,
+                    cached: cacheRead,
+                    reasoning: integer(row["reasoning_tokens"]),
+                    total: input + output
+                ),
+                model: modelName(row["model"]),
+                tps: nil,
+                ttft: nil,
+                duration: nil,
+                date: timestampMilliseconds(row["occurred_at"]).map { Date(timeIntervalSince1970: $0 / 1_000) }
+            )
+        }
+        guard accumulator.samples > 0 else {
+            return .unavailable(.hermes, coverage: "Hermes database found, but no numeric session totals were covered")
+        }
+        return accumulator.metric(
+            coverage: "Recent Hermes session totals. Stable per-response timing is not exposed, so tok/s remains unavailable."
+        )
+    }
+
     private static func newestFiles(
         under roots: [String],
         named exactName: String?,
@@ -370,6 +473,13 @@ enum PerformanceScanner {
         if let number = value as? NSNumber { return number.int64Value }
         if let string = value as? String { return Int64(string) ?? 0 }
         return 0
+    }
+
+    private static func modelName(_ value: Any?) -> String {
+        guard let string = value as? String, !string.isEmpty else { return "Unknown" }
+        guard let data = string.data(using: .utf8),
+              let dictionary = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return string }
+        return (dictionary["id"] as? String) ?? (dictionary["model"] as? String) ?? string
     }
 
     private static func timestampMilliseconds(_ value: Any?) -> Double? {

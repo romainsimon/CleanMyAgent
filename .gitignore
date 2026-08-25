@@ -2,3 +2,9 @@
 dist/
 .DS_Store
 *.xcuserstate
+*.swp
+.idea/
+.vscode/
+DerivedData/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/

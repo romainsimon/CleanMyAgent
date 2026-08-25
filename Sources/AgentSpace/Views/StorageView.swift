@@ -9,26 +9,26 @@ struct StorageView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 22) {
-            PageHeader(
-                title: "Storage",
-                subtitle: "Measured local categories, largest first. Paths are never sent over the network."
-            )
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 22) {
+                PageHeader(
+                    title: "Storage",
+                    subtitle: "Measured local categories, largest first. Paths are never sent over the network."
+                )
 
-            VStack(spacing: 0) {
-                HStack {
-                    Text("Category").frame(maxWidth: .infinity, alignment: .leading)
-                    Text("Source").frame(width: 130, alignment: .leading)
-                    Text("Size").frame(width: 110, alignment: .trailing)
-                }
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(Color.agentSpaceSecondary)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
+                VStack(spacing: 0) {
+                    HStack {
+                        Text("Category").frame(maxWidth: .infinity, alignment: .leading)
+                        Text("Source").frame(width: 130, alignment: .leading)
+                        Text("Size").frame(width: 110, alignment: .trailing)
+                    }
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
 
-                Divider().overlay(Color.agentSpaceSeparator)
+                    Divider().overlay(Color.agentSpaceSeparator)
 
-                ScrollView {
                     LazyVStack(spacing: 0) {
                         ForEach(Array(categories.enumerated()), id: \.element.id) { index, category in
                             StorageCategoryRow(category: category, showAgent: true)
@@ -38,22 +38,23 @@ struct StorageView: View {
                         }
                     }
                 }
-            }
-            .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(Color.agentSpaceSeparator, lineWidth: 1)
-            }
+                .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(Color.agentSpaceSeparator, lineWidth: 1)
+                }
 
-            HStack(spacing: 7) {
-                Image(systemName: "lock.shield")
-                Text("Audit-only build. No cleanup actions are enabled.")
+                HStack(spacing: 7) {
+                    Image(systemName: "lock.shield")
+                    Text("Audit-only build. No cleanup actions are enabled.")
+                }
+                .font(.caption)
+                .foregroundStyle(Color.agentSpaceSecondary)
             }
-            .font(.caption)
-            .foregroundStyle(Color.agentSpaceSecondary)
+            .padding(28)
+            .frame(maxWidth: 1120, alignment: .topLeading)
         }
-        .padding(28)
-        .frame(maxWidth: 1120, maxHeight: .infinity, alignment: .topLeading)
+        .minimalMacScrollbars()
     }
 }
 

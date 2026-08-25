@@ -3,7 +3,12 @@ import Foundation
 enum AgentKind: String, CaseIterable, Codable, Sendable, Identifiable {
     case codex = "Codex"
     case claude = "Claude Code"
-    case grok = "Grok"
+    case grok = "Grok Build"
+    case cursor = "Cursor"
+    case hermes = "Hermes Agent"
+    case openCode = "OpenCode"
+    case ori = "Ori"
+    case kiloCode = "Kilo Code"
 
     var id: String { rawValue }
 
@@ -12,6 +17,11 @@ enum AgentKind: String, CaseIterable, Codable, Sendable, Identifiable {
         case .codex: "terminal"
         case .claude: "sparkles"
         case .grok: "bolt.horizontal"
+        case .cursor: "cursorarrow.rays"
+        case .hermes: "wing"
+        case .openCode: "chevron.left.forwardslash.chevron.right"
+        case .ori: "arrow.trianglehead.branch"
+        case .kiloCode: "k.square"
         }
     }
 
@@ -20,6 +30,11 @@ enum AgentKind: String, CaseIterable, Codable, Sendable, Identifiable {
         case .codex: "codex"
         case .claude: "claude"
         case .grok: "grok"
+        case .cursor: "cursor"
+        case .hermes: "hermes"
+        case .openCode: "opencode"
+        case .ori: "ori"
+        case .kiloCode: "kilocode"
         }
     }
 
@@ -28,6 +43,24 @@ enum AgentKind: String, CaseIterable, Codable, Sendable, Identifiable {
         case .codex: "codex"
         case .claude: "claude"
         case .grok: "grok"
+        case .cursor: "cursor"
+        case .hermes: "hermes"
+        case .openCode: "opencode"
+        case .ori: "ori"
+        case .kiloCode: "kilocode"
+        }
+    }
+
+    var capabilitySummary: String {
+        switch self {
+        case .codex: "Storage, live speed, usage"
+        case .claude: "Storage, observed speed, usage"
+        case .grok: "Storage, signal speed, context"
+        case .cursor: "Storage, worktrees, snapshots, processes"
+        case .hermes: "Storage, sessions, tokens, reported cost"
+        case .openCode: "Storage, sessions, tokens, reported cost"
+        case .ori: "Installation, version, launcher history"
+        case .kiloCode: "Extension and workspace storage"
         }
     }
 }
@@ -56,6 +89,7 @@ struct AgentStorage: Identifiable, Sendable {
     let totalBytes: Int64
     let categories: [StorageCategory]
     let isInstalled: Bool
+    let version: String?
 
     var id: AgentKind { agent }
 }
@@ -71,7 +105,7 @@ struct DiskSnapshot: Sendable {
         totalBytes: 0,
         freeBytes: 0,
         agents: AgentKind.allCases.map {
-            AgentStorage(agent: $0, rootPath: "", totalBytes: 0, categories: [], isInstalled: false)
+            AgentStorage(agent: $0, rootPath: "", totalBytes: 0, categories: [], isInstalled: false, version: nil)
         },
         sharedCategories: [],
         capturedAt: .distantPast
@@ -205,6 +239,7 @@ struct UsageBucket: Identifiable, Sendable, Hashable {
     let cacheReadTokens: Int64
     let cacheWriteTokens: Int64
     let reasoningTokens: Int64
+    let reportedCostUSD: Double
     let sessions: Int
 
     var id: String { "\(date.timeIntervalSince1970)-\(agent.rawValue)" }
@@ -221,6 +256,7 @@ struct ModelUsage: Identifiable, Sendable, Hashable {
     let cacheReadTokens: Int64
     let cacheWriteTokens: Int64
     let reasoningTokens: Int64
+    let reportedCostUSD: Double
     let sessions: Int
 
     var id: String { "\(agent.rawValue)-\(model)" }
@@ -228,10 +264,27 @@ struct ModelUsage: Identifiable, Sendable, Hashable {
 }
 
 struct UsageCoverage: Identifiable, Sendable, Hashable {
+    enum Status: String, Sendable, Hashable {
+        case measured
+        case estimated
+        case unavailable
+        case duplicate
+
+        var label: String {
+            switch self {
+            case .measured: "Measured"
+            case .estimated: "Estimated"
+            case .unavailable: "Not exposed"
+            case .duplicate: "Not counted"
+            }
+        }
+    }
+
     let agent: AgentKind
     let filesDiscovered: Int
     let filesScanned: Int
     let truncatedFiles: Int
+    let status: Status
     let note: String
 
     var id: AgentKind { agent }
@@ -254,24 +307,102 @@ struct UsageSnapshot: Sendable {
     var cacheReadTokens: Int64 { buckets.reduce(0) { $0 + $1.cacheReadTokens } }
     var cacheWriteTokens: Int64 { buckets.reduce(0) { $0 + $1.cacheWriteTokens } }
     var reasoningTokens: Int64 { buckets.reduce(0) { $0 + $1.reasoningTokens } }
+    var reportedCostUSD: Double { buckets.reduce(0) { $0 + $1.reportedCostUSD } }
     var totalTokens: Int64 { inputTokens + outputTokens }
     var hasPartialCoverage: Bool {
-        coverage.contains { $0.truncatedFiles > 0 || $0.filesScanned < $0.filesDiscovered }
+        coverage.contains {
+            $0.truncatedFiles > 0
+                || $0.filesScanned < $0.filesDiscovered
+                || $0.status != .measured
+        }
     }
+}
+
+struct AgentRuntime: Identifiable, Sendable, Hashable {
+    let agent: AgentKind
+    let residentBytes: Int64
+    let processCount: Int
+
+    var id: AgentKind { agent }
+}
+
+struct RuntimeSnapshot: Sendable {
+    let agents: [AgentRuntime]
+    let capturedAt: Date
+
+    static let empty = RuntimeSnapshot(
+        agents: AgentKind.allCases.map { AgentRuntime(agent: $0, residentBytes: 0, processCount: 0) },
+        capturedAt: .distantPast
+    )
 }
 
 struct WorktreeRecord: Identifiable, Sendable, Hashable {
     let path: String
+    let repositoryPath: String
     let repository: String
     let branch: String
     let head: String
     let bytes: Int64
     let isDirty: Bool
+    let hasUntrackedFiles: Bool
+    let hasUnpushedCommits: Bool
+    let hasActiveProcesses: Bool
     let statusKnown: Bool
     let isBare: Bool
     let isLocked: Bool
+    let pullRequest: WorktreePullRequest
+    let safety: WorktreeSafety
+    let safetyReason: String
 
     var id: String { path }
+}
+
+enum WorktreeSafety: String, Sendable, Hashable, CaseIterable {
+    case removable
+    case protected
+
+    var label: String {
+        switch self {
+        case .removable: "Safe to remove"
+        case .protected: "Keep"
+        }
+    }
+}
+
+enum WorktreePullRequestState: String, Sendable, Hashable {
+    case merged
+    case open
+    case closed
+    case none
+    case unknown
+}
+
+struct WorktreePullRequest: Sendable, Hashable {
+    let state: WorktreePullRequestState
+    let url: String?
+    let headOID: String?
+
+    static let none = WorktreePullRequest(state: .none, url: nil, headOID: nil)
+    static let unknown = WorktreePullRequest(state: .unknown, url: nil, headOID: nil)
+}
+
+struct WorktreeCleanupFailure: Sendable, Hashable {
+    let path: String
+    let message: String
+}
+
+struct WorktreeCleanupResult: Sendable, Hashable {
+    let removedPaths: [String]
+    let reclaimedBytes: Int64
+    let failures: [WorktreeCleanupFailure]
+}
+
+enum WorktreeCleanupOperationState: Sendable, Equatable {
+    case idle
+    case removing
+    case succeeded(removedCount: Int, reclaimedBytes: Int64)
+    case partial(removedCount: Int, reclaimedBytes: Int64, failures: [WorktreeCleanupFailure])
+    case failed(message: String)
 }
 
 enum AppSection: String, CaseIterable, Identifiable {

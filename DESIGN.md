@@ -1,45 +1,57 @@
-# Agent Space Design Direction
+# CleanMyAgent Design Direction
 
 ## Mode
 
-Operate. The interface exists for fast diagnosis and careful maintenance, not promotion.
+Operate. CleanMyAgent is a calm maintenance console for local AI tools: understand pressure quickly, inspect the evidence, and clean only after validation.
 
-## Visual authority
+## Visual world
 
-Agent Space extends the visual language already approved for the Codex storage dashboard: near-black layered surfaces, quiet separators, compact rows, white primary type, gray secondary type, and sparse blue status accents. macOS navigation, menus, toolbars, window behavior, focus, and accessibility remain native.
+The product uses a refined macOS utility language rather than a terminal or admin-dashboard aesthetic. A deep midnight canvas and flat raised surfaces keep the evidence calm and legible. Color appears only where it explains health, source, or action.
+
+The interface should feel reassuring under pressure. It can be friendly and dimensional without becoming playful, glossy everywhere, or visually detached from macOS.
 
 ## Reference synthesis
 
-- Codex storage dashboard: borrow its restrained table density, numeric alignment, and absence of decorative chrome.
-- Cursor desktop workspace: borrow the predictable left-to-right navigation and clear division between task list and detail surface.
-- Apple native utility conventions: borrow the menu-bar summary, toolbar refresh action, selection behavior, keyboard access, and system materials.
-- The Okara dashboard was reviewed as an anti-reference for this product: its multi-panel command-center density would make a safety utility harder to scan.
+- CleanMyMac: borrow warmth, approachable system-health language, and the idea that maintenance can feel calm. Do not copy its artwork, characters, icons, or screen composition.
+- DaisyDisk: borrow the immediate readability of used versus available storage and purposeful spectral color.
+- Raycast and Apple utilities: borrow compact navigation, native window behavior, keyboard access, and information density.
+- Existing CleanMyAgent product truth: preserve exact local evidence, agent identity, cleanup gates, and one-page scrolling for long tables.
 
 ## Structure
 
-- A compact sidebar contains Overview, Agents, Performance, Usage, Storage, Worktrees, Clean, and Settings.
-- The detail surface uses one primary table or list per screen rather than grids of repeated cards.
-- Overview leads with a plain-language disk status, then agent rows and current performance evidence.
-- Usage leads with one compact metric strip, then a dominant daily activity chart, supporting category and model charts, and a daily report table. Every chart states its range and coverage.
-- A menu-bar item provides free space and audit status without duplicating the full application.
+- The sidebar groups Monitor, Maintain, and System tasks. Selection is obvious but never louder than the current system state.
+- Overview begins with one dominant system-health surface, followed by live throughput and evidence lists.
+- Storage, worktrees, and usage retain one document-level scroll surface. Tables do not become nested scrolling islands.
+- A menu-bar summary provides free space and current throughput without duplicating the app.
 
 ## Color and material
 
-- Window base: neutral near-black.
-- Sidebar: native macOS material with reduced-transparency fallback.
-- Rows: transparent until hover or selection; separators carry structure.
-- Blue: selected navigation and healthy informational emphasis.
-- Amber: low-space warning.
-- Red: critical disk pressure or scan failure only.
-- Agent colors identify source in rows and charts, never safety state.
+- Canvas: flat near-black indigo.
+- Panels: flat deep blue-gray with one subtle edge; no decorative gradients, stacked borders, or shadows.
+- Electric blue: navigation, healthy informational emphasis, and primary audit actions.
+- Green: verified healthy or live state only.
+- Amber and red: warning and critical states only.
+- Violet and magenta: performance and agent identity, never cleanup safety.
+- Agent colors identify source; they do not imply whether deletion is allowed.
 
 ## Typography
 
-Use San Francisco through SwiftUI system styles. Measurements use monospaced digits, not a monospaced interface costume. Hierarchy comes from weight, size, and spacing.
+Use San Francisco through SwiftUI system styles. Page titles are 29 pt semibold with tight tracking. Measurements use rounded system numerals and monospaced digits. Supporting text stays compact and high-contrast enough to read without competing with evidence.
 
-## Motion
+## Shape and spacing
 
-No ornamental motion. Refresh and progress changes use native, interruptible feedback. Reduced Motion removes nonessential transitions.
+Panels use 18–22 pt continuous corners. Sidebar items use 10–12 pt corners and compact 34 pt rows. The main content follows a 28 pt rhythm and remains readable from an 820 pt window to wide desktop layouts.
+
+## Motion thesis
+
+Motion explains change rather than decorating idle screens.
+
+- Focal moment: an audit resolves into updated disk and agent measurements.
+- Continuity: section changes use a short fade and 1% scale transition.
+- Feedback: progress tracks ease to new values and the refresh control shows active work.
+- Routine transitions run for 120–250 ms; metric resolution may take 350–500 ms.
+- No bounce, perpetual glow, or ambient looping animation.
+- Reduce Motion removes section transforms and metric interpolation while retaining status feedback.
 
 ## Safety language
 

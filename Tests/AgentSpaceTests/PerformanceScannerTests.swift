@@ -45,6 +45,34 @@ struct PerformanceScannerTests {
         #expect(metric.timeToFirstTokenMs == 400)
     }
 
+    @Test func readsOpenCodeSessionTotalsWithoutInventingThroughput() throws {
+        let home = try temporaryHome()
+        let directory = home.appendingPathComponent(".local/share/opencode", isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let database = directory.appendingPathComponent("opencode.db")
+        let result = Shell.run(
+            "/usr/bin/sqlite3",
+            [
+                database.path,
+                """
+                CREATE TABLE session (
+                    model TEXT, time_updated INTEGER, tokens_input INTEGER, tokens_output INTEGER,
+                    tokens_reasoning INTEGER, tokens_cache_read INTEGER, tokens_cache_write INTEGER
+                );
+                INSERT INTO session VALUES ('{"id":"open-test"}', 1787659200000, 100, 40, 8, 20, 5);
+                """
+            ],
+            timeout: 3
+        )
+        #expect(result.status == 0)
+
+        let metric = PerformanceScanner.scanOpenCode(home: home.path)
+        #expect(metric.model == "open-test")
+        #expect(metric.inputTokens == 125)
+        #expect(metric.outputTokens == 40)
+        #expect(metric.observedTokensPerSecond == nil)
+    }
+
     private func temporaryHome() throws -> URL {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)

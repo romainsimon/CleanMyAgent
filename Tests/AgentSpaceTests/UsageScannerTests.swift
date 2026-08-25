@@ -37,9 +37,76 @@ struct UsageScannerTests {
         #expect(snapshot.models.contains { $0.model == "claude-test" && $0.totalTokens == 100 })
     }
 
+    @Test func aggregatesOpenCodeAndHermesReportedMetadata() throws {
+        let home = try temporaryHome()
+        let now = try #require(ISO8601DateFormatter().date(from: "2026-08-25T12:00:00Z"))
+        let timestampMilliseconds = Int64(now.addingTimeInterval(-60).timeIntervalSince1970 * 1_000)
+        let timestampSeconds = now.addingTimeInterval(-120).timeIntervalSince1970
+
+        let openCodeDirectory = home.appendingPathComponent(".local/share/opencode", isDirectory: true)
+        try FileManager.default.createDirectory(at: openCodeDirectory, withIntermediateDirectories: true)
+        let openCodeDatabase = openCodeDirectory.appendingPathComponent("opencode.db")
+        try runSQLite(
+            database: openCodeDatabase,
+            sql: """
+                CREATE TABLE session (
+                    id TEXT, model TEXT, time_updated INTEGER, tokens_input INTEGER,
+                    tokens_output INTEGER, tokens_reasoning INTEGER, tokens_cache_read INTEGER,
+                    tokens_cache_write INTEGER, cost REAL
+                );
+                INSERT INTO session VALUES (
+                    'open-one', '{"id":"open-model"}', \(timestampMilliseconds),
+                    100, 50, 10, 20, 5, 0.42
+                );
+                """
+        )
+
+        let hermesDirectory = home.appendingPathComponent(".hermes", isDirectory: true)
+        try FileManager.default.createDirectory(at: hermesDirectory, withIntermediateDirectories: true)
+        let hermesDatabase = hermesDirectory.appendingPathComponent("state.db")
+        try runSQLite(
+            database: hermesDatabase,
+            sql: """
+                CREATE TABLE sessions (
+                    id TEXT, model TEXT, started_at REAL, ended_at REAL,
+                    input_tokens INTEGER, output_tokens INTEGER, reasoning_tokens INTEGER,
+                    cache_read_tokens INTEGER, cache_write_tokens INTEGER,
+                    actual_cost_usd REAL, estimated_cost_usd REAL
+                );
+                INSERT INTO sessions VALUES (
+                    'hermes-one', 'hermes-model', \(timestampSeconds), \(timestampSeconds + 30),
+                    200, 60, 15, 30, 10, 0.80, 0.75
+                );
+                """
+        )
+
+        let snapshot = UsageScanner.scan(range: .sevenDays, home: home.path, now: now)
+
+        #expect(snapshot.totalTokens == 475)
+        #expect(snapshot.cacheReadTokens == 50)
+        #expect(snapshot.cacheWriteTokens == 15)
+        #expect(snapshot.reasoningTokens == 25)
+        #expect(abs(snapshot.reportedCostUSD - 1.22) < 0.0001)
+        #expect(snapshot.models.contains { $0.agent == .openCode && $0.model == "open-model" && $0.totalTokens == 175 })
+        #expect(snapshot.models.contains { $0.agent == .hermes && $0.model == "hermes-model" && $0.totalTokens == 300 })
+        #expect(snapshot.coverage.contains { $0.agent == .ori && $0.status == .duplicate })
+        #expect(snapshot.coverage.contains { $0.agent == .cursor && $0.status == .unavailable })
+    }
+
+    private func runSQLite(database: URL, sql: String) throws {
+        let result = Shell.run("/usr/bin/sqlite3", [database.path, sql], timeout: 3)
+        guard result.status == 0 else {
+            throw SQLiteFixtureError.failed(result.stderr)
+        }
+    }
+
     private func temporaryHome() throws -> URL {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }
+}
+
+private enum SQLiteFixtureError: Error {
+    case failed(String)
 }

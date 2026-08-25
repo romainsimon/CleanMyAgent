@@ -3,12 +3,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "AgentSpace",
+    name: "CleanMyAgent",
     platforms: [
         .macOS(.v14)
     ],
     products: [
-        .executable(name: "AgentSpace", targets: ["AgentSpace"])
+        .executable(name: "CleanMyAgent", targets: ["AgentSpace"])
     ],
     targets: [
         .executableTarget(

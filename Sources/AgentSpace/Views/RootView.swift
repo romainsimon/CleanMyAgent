@@ -1,15 +1,30 @@
+import AppKit
 import SwiftUI
 
 struct RootView: View {
     @ObservedObject var model: AppModel
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var currentSection: AppSection {
+        model.selectedSection ?? .overview
+    }
 
     var body: some View {
         NavigationSplitView {
             sidebar
-                .navigationSplitViewColumnWidth(min: 190, ideal: 208, max: 240)
+                .navigationSplitViewColumnWidth(min: 206, ideal: 222, max: 248)
         } detail: {
-            detail
-                .background(Color.agentSpaceBackground)
+            ZStack {
+                AgentSpaceBackground()
+                detail(for: currentSection)
+                    .id(currentSection)
+                    .transition(
+                        reduceMotion
+                        ? .opacity
+                        : .opacity.combined(with: .scale(scale: 0.99, anchor: .topLeading))
+                    )
+            }
+            .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: currentSection)
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
@@ -20,9 +35,10 @@ struct RootView: View {
                         ProgressView()
                             .controlSize(.small)
                     } else {
-                        Label("Refresh", systemImage: "arrow.clockwise")
+                        Image(systemName: "arrow.clockwise")
                     }
                 }
+                .accessibilityLabel(model.isScanning ? "Audit in progress" : "Refresh audit")
                 .disabled(model.isScanning)
                 .help("Refresh audit (⌘R)")
             }
@@ -31,12 +47,47 @@ struct RootView: View {
 
     private var sidebar: some View {
         VStack(spacing: 0) {
-            List(AppSection.allCases, selection: $model.selectedSection) { section in
-                Label(section.rawValue, systemImage: section.symbol)
-                    .tag(section)
-                    .padding(.vertical, 3)
+            HStack(spacing: 10) {
+                Image(nsImage: NSApplication.shared.applicationIconImage)
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFit()
+                    .frame(width: 34, height: 34)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("CleanMyAgent")
+                        .font(.headline.weight(.semibold))
+                    Text("Local agent care")
+                        .font(.caption2)
+                        .foregroundStyle(Color.agentSpaceSecondary)
+                }
+                Spacer(minLength: 0)
             }
-            .listStyle(.sidebar)
+            .padding(.horizontal, 14)
+            .padding(.top, 16)
+            .padding(.bottom, 14)
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 17) {
+                    SidebarGroup(
+                        title: "Monitor",
+                        sections: [.overview, .agents, .performance, .usage],
+                        selection: $model.selectedSection
+                    )
+                    SidebarGroup(
+                        title: "Maintain",
+                        sections: [.storage, .worktrees, .cleanup],
+                        selection: $model.selectedSection
+                    )
+                    SidebarGroup(
+                        title: "System",
+                        sections: [.settings],
+                        selection: $model.selectedSection
+                    )
+                }
+                .padding(.horizontal, 10)
+                .padding(.bottom, 16)
+            }
+            .minimalMacScrollbars()
 
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 7) {
@@ -44,7 +95,7 @@ struct RootView: View {
                     Text("Protected cleanup")
                         .font(.caption.weight(.medium))
                 }
-                Text("Only reviewed targets can move to Trash.")
+                Text("Only revalidated targets can be cleaned.")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -55,11 +106,17 @@ struct RootView: View {
                 Rectangle().fill(Color.agentSpaceSeparator).frame(height: 1)
             }
         }
+        .background {
+            ZStack {
+                Rectangle().fill(.ultraThinMaterial)
+                Color.agentSpaceBackground.opacity(0.72)
+            }
+        }
     }
 
     @ViewBuilder
-    private var detail: some View {
-        switch model.selectedSection ?? .overview {
+    private func detail(for section: AppSection) -> some View {
+        switch section {
         case .overview: OverviewView(model: model)
         case .agents: AgentsView(model: model)
         case .performance: PerformanceView(model: model)
@@ -72,6 +129,82 @@ struct RootView: View {
     }
 }
 
+private struct SidebarGroup: View {
+    let title: String
+    let sections: [AppSection]
+    @Binding var selection: AppSection?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title.uppercased())
+                .font(.system(size: 10, weight: .semibold))
+                .tracking(0.8)
+                .foregroundStyle(Color.agentSpaceSecondary)
+                .padding(.horizontal, 10)
+
+            ForEach(sections) { section in
+                SidebarItem(
+                    section: section,
+                    isSelected: selection == section
+                ) {
+                    selection = section
+                }
+            }
+        }
+    }
+}
+
+private struct SidebarItem: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var isHovered = false
+
+    let section: AppSection
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(isSelected ? Color.agentSpaceBlue.opacity(0.22) : Color.white.opacity(0.055))
+                    Image(systemName: section.symbol)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(isSelected ? Color.agentSpaceBlue : Color.agentSpaceSecondary)
+                }
+                .frame(width: 27, height: 27)
+
+                Text(section.rawValue)
+                    .font(.callout.weight(isSelected ? .semibold : .regular))
+                    .foregroundStyle(isSelected ? Color.white : Color.agentSpaceSecondary)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 8)
+            .frame(height: 38)
+            .background {
+                RoundedRectangle(cornerRadius: 11, style: .continuous)
+                    .fill(
+                        isSelected
+                        ? Color.agentSpaceBlue.opacity(0.13)
+                        : Color.white.opacity(isHovered ? 0.045 : 0)
+                    )
+            }
+            .overlay {
+                if isSelected {
+                    RoundedRectangle(cornerRadius: 11, style: .continuous)
+                        .stroke(Color.agentSpaceBlue.opacity(0.22), lineWidth: 1)
+                }
+            }
+            .contentShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: isHovered)
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: isSelected)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+}
+
 struct PageHeader: View {
     let title: String
     let subtitle: String
@@ -79,8 +212,8 @@ struct PageHeader: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)
-                .font(.system(size: 25, weight: .semibold))
-                .tracking(-0.35)
+                .font(.system(size: 29, weight: .semibold))
+                .tracking(-0.55)
             Text(subtitle)
                 .font(.callout)
                 .foregroundStyle(Color.agentSpaceSecondary)
@@ -116,7 +249,10 @@ struct MenuBarSummaryView: View {
     @ObservedObject var model: AppModel
 
     var body: some View {
-        Text("Agent Space")
+        Button("Show CleanMyAgent Window") {
+            AgentSpaceWindowPresenter.shared.show(model: model)
+        }
+        Divider()
         Text("\(ByteFormat.string(model.disk.freeBytes)) free")
         Text(model.liveSpeed.active
              ? "\(model.liveSpeed.observedTokensPerSecond.formatted(.number.precision(.fractionLength(1)))) tok/s · Codex live"
@@ -130,12 +266,7 @@ struct MenuBarSummaryView: View {
             Task { await model.refresh() }
         }
         .disabled(model.isScanning)
-        Button("Open Agent Space") {
-            NSApplication.shared.activate(ignoringOtherApps: true)
-            NSApplication.shared.windows.first?.makeKeyAndOrderFront(nil)
-        }
-        Divider()
-        Button("Quit Agent Space") {
+        Button("Quit CleanMyAgent") {
             NSApplication.shared.terminate(nil)
         }
     }

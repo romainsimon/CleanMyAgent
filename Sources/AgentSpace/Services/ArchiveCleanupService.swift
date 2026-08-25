@@ -12,9 +12,9 @@ enum ArchiveCleanupError: LocalizedError, Equatable {
         case .codexIsRunning:
             "Quit Codex before moving its archived sessions to the Trash."
         case .invalidTarget:
-            "Agent Space refused the cleanup because the archive path was not the expected Codex folder."
+            "CleanMyAgent refused the cleanup because the archive path was not the expected Codex folder."
         case .symbolicLink:
-            "Agent Space refused the cleanup because the archive folder is a symbolic link."
+            "CleanMyAgent refused the cleanup because the archive folder is a symbolic link."
         case .nothingToClean:
             "There are no archived Codex sessions to clean."
         }

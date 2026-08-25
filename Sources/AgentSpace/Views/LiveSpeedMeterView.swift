@@ -6,66 +6,74 @@ struct LiveSpeedMeterView: View {
     private let scaleMaximum = 120.0
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 15) {
-            HStack(alignment: .firstTextBaseline) {
-                HStack(spacing: 8) {
-                    StatusDot(color: snapshot.active ? .green : .secondary)
-                    Text(snapshot.active ? "Live Codex turn" : "Live speedometer")
+        VStack(alignment: .leading, spacing: 18) {
+            HStack(alignment: .center) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(meterColor.opacity(0.14))
+                    Image(systemName: "gauge.with.dots.needle.50percent")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(meterColor)
+                }
+                .frame(width: 36, height: 36)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(alignment: .firstTextBaseline, spacing: 7) {
+                        Text(snapshot.observedTokensPerSecond, format: .number.precision(.fractionLength(1)))
+                            .font(.system(size: 31, weight: .semibold, design: .rounded))
+                            .monospacedDigit()
+                        Text("tok/s")
+                            .font(.callout)
+                            .foregroundStyle(Color.agentSpaceSecondary)
+                    }
+                    HStack(spacing: 7) {
+                        StatusDot(color: meterColor)
+                        Text(snapshot.active ? "Live Codex turn" : "Waiting for an active turn")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(snapshot.active ? meterColor : Color.agentSpaceSecondary)
+                    }
+                }
+                Spacer()
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(snapshot.model ?? "No model active")
                         .font(.headline)
-                }
-                Spacer()
-                Text(snapshot.observedTokensPerSecond, format: .number.precision(.fractionLength(1)))
-                    .font(.system(size: 31, weight: .semibold, design: .rounded))
-                    .monospacedDigit()
-                Text("tok/s")
-                    .font(.callout)
-                    .foregroundStyle(Color.agentSpaceSecondary)
-            }
-
-            GeometryReader { proxy in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Color.white.opacity(0.08))
-                    Capsule()
-                        .fill(snapshot.active ? Color.green : Color.white.opacity(0.16))
-                        .frame(width: max(4, proxy.size.width * meterFraction))
+                        .lineLimit(1)
+                    Text(snapshot.active ? "Running for \(formatElapsed(snapshot.elapsedMs))" : "Monitoring local metadata")
+                        .font(.caption)
+                        .foregroundStyle(Color.agentSpaceSecondary)
                 }
             }
-            .frame(height: 7)
-            .accessibilityLabel("Live observed output tokens per second")
-            .accessibilityValue("\(snapshot.observedTokensPerSecond.formatted(.number.precision(.fractionLength(1)))) tokens per second")
 
-            HStack(spacing: 18) {
-                detail(snapshot.model ?? "Waiting for an active turn", label: "Model")
-                detail(snapshot.outputTokens.formatted(), label: "Output tokens")
-                detail(formatElapsed(snapshot.elapsedMs), label: "Elapsed")
+            MetricProgressTrack(fraction: meterFraction, color: meterColor)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Live observed output tokens per second")
+                .accessibilityValue("\(formattedSpeed) tokens per second on a \(scaleMaximum.formatted()) token per second scale")
+
+            HStack(spacing: 22) {
+                MetricLegendItem(color: meterColor, label: "Observed", value: "\(formattedSpeed) tok/s")
+                MetricLegendItem(color: Color.white.opacity(0.28), label: "Scale", value: "\(scaleMaximum.formatted()) tok/s")
                 Spacer()
-                Text("Output tokens reported so far ÷ elapsed wall-clock time")
-                    .font(.caption2)
+                Text(snapshot.active
+                     ? "\(snapshot.outputTokens.formatted()) output tokens reported"
+                     : "Output tokens ÷ elapsed wall-clock time")
+                    .font(.caption)
                     .foregroundStyle(Color.agentSpaceSecondary)
             }
         }
-        .padding(18)
-        .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color.agentSpaceSeparator, lineWidth: 1)
-        }
+        .padding(20)
+        .agentSpacePanel(accent: snapshot.active ? .green : .agentSpaceViolet)
     }
 
     private var meterFraction: Double {
         min(1, max(0, snapshot.observedTokensPerSecond / scaleMaximum))
     }
 
-    private func detail(_ value: String, label: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(value)
-                .font(.caption.weight(.semibold))
-                .monospacedDigit()
-                .lineLimit(1)
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(Color.agentSpaceSecondary)
-        }
+    private var meterColor: Color {
+        snapshot.active ? .green : Color.white.opacity(0.22)
+    }
+
+    private var formattedSpeed: String {
+        snapshot.observedTokensPerSecond.formatted(.number.precision(.fractionLength(1)))
     }
 
     private func formatElapsed(_ milliseconds: Double) -> String {

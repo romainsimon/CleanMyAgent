@@ -42,6 +42,7 @@ struct PerformanceView: View {
             .padding(28)
             .frame(maxWidth: 1120, alignment: .leading)
         }
+        .minimalMacScrollbars()
     }
 
     private var performanceHeader: some View {

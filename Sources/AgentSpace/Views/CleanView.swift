@@ -85,6 +85,7 @@ struct CleanView: View {
             .padding(28)
             .frame(maxWidth: 1120, alignment: .leading)
         }
+        .minimalMacScrollbars()
         .task { await model.refreshCleanupTarget() }
         .confirmationDialog(
             "Move archived Codex sessions to the Trash?",

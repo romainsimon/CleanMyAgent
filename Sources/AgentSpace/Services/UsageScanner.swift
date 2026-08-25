@@ -7,6 +7,7 @@ enum UsageScanner {
         var cacheRead: Int64 = 0
         var cacheWrite: Int64 = 0
         var reasoning: Int64 = 0
+        var reportedCostUSD: Double = 0
 
         var hasTokens: Bool {
             input > 0 || output > 0 || cacheRead > 0 || cacheWrite > 0 || reasoning > 0
@@ -88,6 +89,7 @@ enum UsageScanner {
         var cacheRead: Int64 = 0
         var cacheWrite: Int64 = 0
         var reasoning: Int64 = 0
+        var reportedCostUSD: Double = 0
         var sessions: Set<String> = []
 
         mutating func add(_ event: Event) {
@@ -96,6 +98,7 @@ enum UsageScanner {
             cacheRead += event.usage.cacheRead
             cacheWrite += event.usage.cacheWrite
             reasoning += event.usage.reasoning
+            reportedCostUSD += event.usage.reportedCostUSD
             sessions.insert(event.session)
         }
     }
@@ -117,7 +120,12 @@ enum UsageScanner {
         let results = [
             scanCodex(home: home, start: start, now: now, limit: fileLimit),
             scanClaude(home: home, start: start, limit: fileLimit),
-            scanGrok(home: home, start: start, limit: fileLimit)
+            scanGrok(home: home, start: start, limit: fileLimit),
+            unavailable(.cursor, note: "Cursor does not expose a stable local token ledger."),
+            scanHermes(home: home, start: start, limit: fileLimit),
+            scanOpenCode(home: home, start: start, limit: fileLimit),
+            scanOri(home: home, start: start),
+            unavailable(.kiloCode, note: "Kilo Code token telemetry is not exposed through a stable local format.")
         ]
         let events = results.flatMap(\.events).filter { $0.date >= start && $0.date <= now }
         var daily: [BucketKey: Aggregate] = [:]
@@ -139,6 +147,7 @@ enum UsageScanner {
                 cacheReadTokens: aggregate.cacheRead,
                 cacheWriteTokens: aggregate.cacheWrite,
                 reasoningTokens: aggregate.reasoning,
+                reportedCostUSD: aggregate.reportedCostUSD,
                 sessions: aggregate.sessions.count
             ))
         }
@@ -156,6 +165,7 @@ enum UsageScanner {
                 cacheReadTokens: aggregate.cacheRead,
                 cacheWriteTokens: aggregate.cacheWrite,
                 reasoningTokens: aggregate.reasoning,
+                reportedCostUSD: aggregate.reportedCostUSD,
                 sessions: aggregate.sessions.count
             ))
         }
@@ -203,6 +213,7 @@ enum UsageScanner {
                 filesDiscovered: candidates.count,
                 filesScanned: selected.count,
                 truncatedFiles: truncated,
+                status: .measured,
                 note: "Active Codex session history; archived sessions are not scanned."
             )
         )
@@ -311,6 +322,7 @@ enum UsageScanner {
                 filesDiscovered: candidates.count,
                 filesScanned: selected.count,
                 truncatedFiles: truncated,
+                status: .measured,
                 note: "Recent Claude Code project sessions selected by modification date."
             )
         )
@@ -342,7 +354,147 @@ enum UsageScanner {
                 filesDiscovered: candidates.count,
                 filesScanned: selected.count,
                 truncatedFiles: 0,
+                status: .estimated,
                 note: "Grok exposes context estimates per session, not complete input/output billing usage."
+            )
+        )
+    }
+
+    private static func scanOpenCode(home: String, start: Date, limit: Int) -> ScanResult {
+        let database = "\(home)/.local/share/opencode/opencode.db"
+        let startMilliseconds = Int64(start.timeIntervalSince1970 * 1_000)
+        let sql = """
+            SELECT id, model, time_updated,
+                   COALESCE(tokens_input, 0) AS input_tokens,
+                   COALESCE(tokens_output, 0) AS output_tokens,
+                   COALESCE(tokens_reasoning, 0) AS reasoning_tokens,
+                   COALESCE(tokens_cache_read, 0) AS cache_read_tokens,
+                   COALESCE(tokens_cache_write, 0) AS cache_write_tokens,
+                   COALESCE(cost, 0) AS reported_cost
+            FROM session
+            WHERE time_updated >= \(startMilliseconds)
+              AND COALESCE(tokens_input, 0) + COALESCE(tokens_output, 0) > 0
+            ORDER BY time_updated DESC
+            LIMIT \(limit);
+            """
+        guard let rows = SQLiteMetadata.query(database: database, sql: sql) else {
+            return unavailable(.openCode, note: "No readable OpenCode session database was found.")
+        }
+        let events = rows.compactMap { row -> Event? in
+            guard let timestamp = date(row["time_updated"]) else { return nil }
+            let cacheRead = integer(row["cache_read_tokens"])
+            let cacheWrite = integer(row["cache_write_tokens"])
+            let directInput = integer(row["input_tokens"])
+            let usage = Usage(
+                input: directInput + cacheRead + cacheWrite,
+                output: integer(row["output_tokens"]),
+                cacheRead: cacheRead,
+                cacheWrite: cacheWrite,
+                reasoning: integer(row["reasoning_tokens"]),
+                reportedCostUSD: decimal(row["reported_cost"])
+            )
+            guard usage.hasTokens else { return nil }
+            return Event(
+                date: timestamp,
+                agent: .openCode,
+                model: modelName(row["model"]),
+                usage: usage,
+                session: (row["id"] as? String) ?? "opencode-\(timestamp.timeIntervalSince1970)"
+            )
+        }
+        return ScanResult(
+            events: events,
+            coverage: UsageCoverage(
+                agent: .openCode,
+                filesDiscovered: 1,
+                filesScanned: 1,
+                truncatedFiles: 0,
+                status: .measured,
+                note: "Session totals and provider-reported costs from OpenCode's local database."
+            )
+        )
+    }
+
+    private static func scanHermes(home: String, start: Date, limit: Int) -> ScanResult {
+        let database = "\(home)/.hermes/state.db"
+        let startSeconds = start.timeIntervalSince1970
+        let sql = """
+            SELECT id, model, COALESCE(ended_at, started_at) AS occurred_at,
+                   COALESCE(input_tokens, 0) AS input_tokens,
+                   COALESCE(output_tokens, 0) AS output_tokens,
+                   COALESCE(reasoning_tokens, 0) AS reasoning_tokens,
+                   COALESCE(cache_read_tokens, 0) AS cache_read_tokens,
+                   COALESCE(cache_write_tokens, 0) AS cache_write_tokens,
+                   COALESCE(actual_cost_usd, estimated_cost_usd, 0) AS reported_cost
+            FROM sessions
+            WHERE started_at >= \(startSeconds)
+              AND COALESCE(input_tokens, 0) + COALESCE(output_tokens, 0) > 0
+            ORDER BY started_at DESC
+            LIMIT \(limit);
+            """
+        guard let rows = SQLiteMetadata.query(database: database, sql: sql) else {
+            return unavailable(.hermes, note: "No readable Hermes session database was found.")
+        }
+        let events = rows.compactMap { row -> Event? in
+            guard let timestamp = date(row["occurred_at"]) else { return nil }
+            let cacheRead = integer(row["cache_read_tokens"])
+            let cacheWrite = integer(row["cache_write_tokens"])
+            let usage = Usage(
+                input: integer(row["input_tokens"]) + cacheRead + cacheWrite,
+                output: integer(row["output_tokens"]),
+                cacheRead: cacheRead,
+                cacheWrite: cacheWrite,
+                reasoning: integer(row["reasoning_tokens"]),
+                reportedCostUSD: decimal(row["reported_cost"])
+            )
+            guard usage.hasTokens else { return nil }
+            return Event(
+                date: timestamp,
+                agent: .hermes,
+                model: modelName(row["model"]),
+                usage: usage,
+                session: (row["id"] as? String) ?? "hermes-\(timestamp.timeIntervalSince1970)"
+            )
+        }
+        return ScanResult(
+            events: events,
+            coverage: UsageCoverage(
+                agent: .hermes,
+                filesDiscovered: 1,
+                filesScanned: 1,
+                truncatedFiles: 0,
+                status: .measured,
+                note: "Session totals and recorded costs from Hermes' local database."
+            )
+        )
+    }
+
+    private static func scanOri(home: String, start: Date) -> ScanResult {
+        let root = URL(fileURLWithPath: home).appendingPathComponent(".ori/logs/sessions", isDirectory: true)
+        let metadata = recursiveFiles(under: root, exactName: "metadata.json", modifiedAfter: start)
+        return ScanResult(
+            events: [],
+            coverage: UsageCoverage(
+                agent: .ori,
+                filesDiscovered: metadata.count,
+                filesScanned: metadata.count,
+                truncatedFiles: 0,
+                status: .duplicate,
+                note: "Ori launcher history is detected, but its tokens are not counted again after the underlying agent."
+            )
+        )
+    }
+
+    private static func unavailable(_ agent: AgentKind, note: String) -> ScanResult {
+        ScanResult(
+            events: [],
+            coverage: UsageCoverage(
+                agent: agent,
+                filesDiscovered: 0,
+                filesScanned: 0,
+                truncatedFiles: 0,
+                status: .unavailable,
+                note: note
             )
         )
     }
@@ -414,6 +566,19 @@ enum UsageScanner {
         if let number = value as? NSNumber { return number.int64Value }
         if let string = value as? String { return Int64(string) ?? 0 }
         return 0
+    }
+
+    private static func decimal(_ value: Any?) -> Double {
+        if let number = value as? NSNumber { return number.doubleValue }
+        if let string = value as? String { return Double(string) ?? 0 }
+        return 0
+    }
+
+    private static func modelName(_ value: Any?) -> String {
+        guard let string = value as? String, !string.isEmpty else { return "Unknown" }
+        guard let data = string.data(using: .utf8),
+              let dictionary = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return string }
+        return (dictionary["id"] as? String) ?? (dictionary["model"] as? String) ?? string
     }
 
     private static func date(_ value: Any?) -> Date? {

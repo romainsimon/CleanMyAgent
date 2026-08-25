@@ -22,12 +22,12 @@ struct SettingsView: View {
                 settingsGroup("Privacy and safety") {
                     settingRow(symbol: "text.badge.xmark", title: "Conversation content", value: "Never indexed")
                     Divider().overlay(Color.agentSpaceSeparator)
-                    settingRow(symbol: "network.slash", title: "Network", value: "No telemetry or uploads")
+                    settingRow(symbol: "network", title: "Network", value: "GitHub PR verification only")
                     Divider().overlay(Color.agentSpaceSeparator)
                     settingRow(symbol: "lock.shield", title: "Cleaning mode", value: "Protected targets only")
                 }
 
-                Text("Cleaning requires a preview and explicit confirmation. Active sessions and active, dirty, unmerged, unknown, or open-PR worktrees remain protected by default. Archived Codex sessions can only be moved to the Trash while Codex is closed.")
+                Text("Cleaning requires a preview and explicit confirmation. GitHub PR metadata is read through the local gh login and is never uploaded by CleanMyAgent. Active sessions and active, dirty, unmerged, unknown, or open-PR worktrees remain protected. Archived Codex sessions can only be moved to the Trash while Codex is closed.")
                     .font(.callout)
                     .foregroundStyle(Color.agentSpaceSecondary)
                     .frame(maxWidth: 680, alignment: .leading)
@@ -35,6 +35,7 @@ struct SettingsView: View {
             .padding(28)
             .frame(maxWidth: 1120, alignment: .leading)
         }
+        .minimalMacScrollbars()
     }
 
     private func settingsGroup<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {

@@ -35,6 +35,7 @@ struct UsageView: View {
             .padding(28)
             .frame(maxWidth: 1180, alignment: .leading)
         }
+        .minimalMacScrollbars()
         .onChange(of: model.usageRange) {
             Task { await model.refreshUsage() }
         }
@@ -60,6 +61,8 @@ struct UsageView: View {
             summaryMetric("Output", value: compact(model.usage.outputTokens))
             metricDivider
             summaryMetric("Cache read", value: compact(model.usage.cacheReadTokens))
+            metricDivider
+            summaryMetric("Reported cost", value: currency(model.usage.reportedCostUSD))
             metricDivider
             summaryMetric("Sessions", value: model.usage.sessionCount.formatted())
         }
@@ -99,11 +102,7 @@ struct UsageView: View {
                 )
                 .foregroundStyle(by: .value("Agent", bucket.agent.rawValue))
             }
-            .chartForegroundStyleScale([
-                "Codex": Color.agentAccent(.codex),
-                "Claude Code": Color.agentAccent(.claude),
-                "Grok": Color.agentAccent(.grok)
-            ])
+            .chartForegroundStyleScale(agentStyleScale)
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount: model.usageRange == .sevenDays ? 7 : 8)) { value in
                     AxisGridLine().foregroundStyle(Color.agentSpaceSeparator)
@@ -269,7 +268,7 @@ struct UsageView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 StatusDot(color: model.usage.hasPartialCoverage ? .orange : .green)
-                Text(model.usage.hasPartialCoverage ? "Partial local coverage" : "Local coverage complete within the selected bounds")
+                Text(model.usage.hasPartialCoverage ? "Coverage varies by agent" : "Local coverage complete within the selected bounds")
                     .font(.headline)
             }
             ForEach(model.usage.coverage) { coverage in
@@ -277,8 +276,12 @@ struct UsageView: View {
                     AgentBadge(agent: coverage.agent, size: 20)
                     Text(coverage.agent.rawValue)
                         .font(.callout.weight(.medium))
-                        .frame(width: 90, alignment: .leading)
-                    Text("\(coverage.filesScanned) of \(coverage.filesDiscovered) files")
+                        .frame(width: 104, alignment: .leading)
+                    Text(coverage.status.label)
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(coverage.status == .measured ? Color.agentSpaceSecondary : .orange)
+                        .frame(width: 80, alignment: .leading)
+                    Text(coverage.filesDiscovered > 0 ? "\(coverage.filesScanned) of \(coverage.filesDiscovered) files" : "—")
                         .font(.caption.monospacedDigit())
                         .frame(width: 120, alignment: .leading)
                     if coverage.truncatedFiles > 0 {
@@ -292,7 +295,7 @@ struct UsageView: View {
                         .foregroundStyle(Color.agentSpaceSecondary)
                 }
             }
-            Text("Only numeric usage, timestamps, model identifiers, and opaque session boundaries are aggregated. Estimated cost is intentionally omitted until Agent Space has a versioned pricing catalog.")
+            Text("Only numeric usage, timestamps, model identifiers, and opaque session boundaries are aggregated. Provider-reported cost is included where available; CleanMyAgent does not estimate prices.")
                 .font(.caption)
                 .foregroundStyle(Color.agentSpaceSecondary)
                 .padding(.top, 2)
@@ -318,7 +321,7 @@ struct UsageView: View {
                 .foregroundStyle(Color.agentSpaceSecondary)
             Text("No usage found for this period")
                 .font(.headline)
-            Text("Refresh after a Codex, Claude Code, or Grok session produces local numeric metadata.")
+            Text("Refresh after a supported agent produces local numeric metadata.")
                 .font(.callout)
                 .foregroundStyle(Color.agentSpaceSecondary)
         }
@@ -382,6 +385,23 @@ struct UsageView: View {
 
     private func compact(_ value: Int64) -> String {
         value.formatted(.number.notation(.compactName).precision(.fractionLength(0...1)))
+    }
+
+    private func currency(_ value: Double) -> String {
+        value.formatted(.currency(code: "USD").precision(.fractionLength(2)))
+    }
+
+    private var agentStyleScale: KeyValuePairs<String, Color> {
+        [
+            "Codex": Color.agentAccent(.codex),
+            "Claude Code": Color.agentAccent(.claude),
+            "Grok Build": Color.agentAccent(.grok),
+            "Cursor": Color.agentAccent(.cursor),
+            "Hermes Agent": Color.agentAccent(.hermes),
+            "OpenCode": Color.agentAccent(.openCode),
+            "Ori": Color.agentAccent(.ori),
+            "Kilo Code": Color.agentAccent(.kiloCode)
+        ]
     }
 }
 

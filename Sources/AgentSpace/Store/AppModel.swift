@@ -33,15 +33,12 @@ final class AppModel: ObservableObject {
         async let diskTask = Task.detached(priority: .utility) { StorageScanner.scan() }.value
         async let performanceTask = Task.detached(priority: .utility) { PerformanceScanner.scan() }.value
         async let runtimeTask = Task.detached(priority: .utility) { ProcessScanner.scan() }.value
-        let selectedUsageRange = usageRange
-        async let usageTask = Task.detached(priority: .utility) { UsageScanner.scan(range: selectedUsageRange) }.value
         async let worktreeTask = Task.detached(priority: .utility) { WorktreeScanner.scan() }.value
         async let archiveTask = Task.detached(priority: .utility) { ArchiveCleanupService.scan() }.value
 
         disk = await diskTask
         performance = await performanceTask
         runtime = await runtimeTask
-        usage = await usageTask
         worktrees = await worktreeTask
         archivedSessions = await archiveTask
         codexIsRunning = Self.detectCodexRunning()

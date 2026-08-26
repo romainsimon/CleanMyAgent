@@ -4,16 +4,25 @@ import SwiftUI
 struct RootView: View {
     @ObservedObject var model: AppModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var isSidebarVisible = true
 
     private var currentSection: AppSection {
         model.selectedSection ?? .overview
     }
 
     var body: some View {
-        NavigationSplitView {
-            sidebar
-                .navigationSplitViewColumnWidth(min: 206, ideal: 222, max: 248)
-        } detail: {
+        HStack(spacing: 0) {
+            if isSidebarVisible {
+                sidebar
+                    .frame(width: 222)
+                    .transition(.move(edge: .leading).combined(with: .opacity))
+
+                Rectangle()
+                    .fill(Color.agentSpaceSeparator)
+                    .frame(width: 1)
+                    .transition(.opacity)
+            }
+
             ZStack {
                 AgentSpaceBackground()
                 detail(for: currentSection)
@@ -26,7 +35,18 @@ struct RootView: View {
             }
             .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: currentSection)
         }
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: isSidebarVisible)
         .toolbar {
+            ToolbarItem(placement: .navigation) {
+                Button {
+                    toggleSidebar()
+                } label: {
+                    Image(systemName: "sidebar.left")
+                }
+                .accessibilityLabel(isSidebarVisible ? "Hide sidebar" : "Show sidebar")
+                .help(isSidebarVisible ? "Hide sidebar" : "Show sidebar")
+            }
+
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     Task { await model.refresh() }
@@ -41,6 +61,16 @@ struct RootView: View {
                 .accessibilityLabel(model.isScanning ? "Audit in progress" : "Refresh audit")
                 .disabled(model.isScanning)
                 .help("Refresh audit (⌘R)")
+            }
+        }
+    }
+
+    private func toggleSidebar() {
+        if reduceMotion {
+            isSidebarVisible.toggle()
+        } else {
+            withAnimation(.easeInOut(duration: 0.18)) {
+                isSidebarVisible.toggle()
             }
         }
     }
@@ -247,10 +277,12 @@ struct SectionTitle: View {
 
 struct MenuBarSummaryView: View {
     @ObservedObject var model: AppModel
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         Button("Show CleanMyAgent Window") {
-            AgentSpaceWindowPresenter.shared.show(model: model)
+            NSApplication.shared.activate(ignoringOtherApps: true)
+            openWindow(id: "main")
         }
         Divider()
         Text("\(ByteFormat.string(model.disk.freeBytes)) free")

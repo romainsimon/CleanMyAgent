@@ -15,7 +15,7 @@ struct UsageView: View {
                     rangePicker
                 }
 
-                if (model.isUsageScanning || model.isScanning) && model.usage.buckets.isEmpty {
+                if model.isUsageScanning && model.usage.buckets.isEmpty {
                     loadingState
                 } else if model.usage.buckets.isEmpty {
                     emptyState
@@ -36,6 +36,11 @@ struct UsageView: View {
             .frame(maxWidth: 1180, alignment: .leading)
         }
         .minimalMacScrollbars()
+        .task {
+            if model.usage.buckets.isEmpty {
+                await model.refreshUsage()
+            }
+        }
         .onChange(of: model.usageRange) {
             Task { await model.refreshUsage() }
         }

@@ -18,8 +18,13 @@ trap 'rm -rf "$ICON_WORK_ROOT"' EXIT
 rm -rf "$APP_DIR"
 mkdir -p "$MACOS_DIR" "$CONTENTS_DIR/Resources"
 cp "$PROJECT_ROOT/.build/release/CleanMyAgent" "$MACOS_DIR/CleanMyAgent"
-if [ -d "$PROJECT_ROOT/.build/release/AgentSpace_AgentSpace.bundle" ]; then
-  ditto "$PROJECT_ROOT/.build/release/AgentSpace_AgentSpace.bundle" "$CONTENTS_DIR/Resources/AgentSpace_AgentSpace.bundle"
+RESOURCE_BUNDLE="$PROJECT_ROOT/.build/release/CleanMyAgent_AgentSpace.bundle"
+if [ ! -d "$RESOURCE_BUNDLE" ]; then
+  RESOURCE_BUNDLE="$PROJECT_ROOT/.build/release/AgentSpace_AgentSpace.bundle"
+fi
+if [ -d "$RESOURCE_BUNDLE" ]; then
+  ditto "$RESOURCE_BUNDLE" "$CONTENTS_DIR/Resources/CleanMyAgent_AgentSpace.bundle"
+  ditto "$RESOURCE_BUNDLE" "$CONTENTS_DIR/Resources/AgentSpace_AgentSpace.bundle"
 fi
 
 mkdir -p "$ICONSET_DIR"

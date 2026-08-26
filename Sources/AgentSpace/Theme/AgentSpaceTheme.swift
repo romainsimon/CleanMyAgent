@@ -59,17 +59,21 @@ struct AgentBadge: View {
     }
 
     private var iconImage: NSImage? {
+        let fileName = "\(agent.iconResourceName).png"
+        let bundleNames = ["CleanMyAgent_AgentSpace.bundle", "AgentSpace_AgentSpace.bundle"]
         if let resourceURL = Bundle.main.resourceURL {
-            let packagedURL = resourceURL
-                .appendingPathComponent("AgentSpace_AgentSpace.bundle", isDirectory: true)
-                .appendingPathComponent("\(agent.iconResourceName).png")
-            if let image = NSImage(contentsOf: packagedURL) { return image }
+            for bundleName in bundleNames {
+                let packagedURL = resourceURL
+                    .appendingPathComponent(bundleName, isDirectory: true)
+                    .appendingPathComponent(fileName)
+                if let image = NSImage(contentsOf: packagedURL) { return image }
+            }
         }
-        guard let developmentURL = Bundle.module.url(
-            forResource: agent.iconResourceName,
-            withExtension: "png"
-        ) else { return nil }
-        return NSImage(contentsOf: developmentURL)
+        let sibling = URL(fileURLWithPath: Bundle.main.bundlePath)
+            .deletingLastPathComponent()
+            .appendingPathComponent("CleanMyAgent_AgentSpace.bundle", isDirectory: true)
+            .appendingPathComponent(fileName)
+        return NSImage(contentsOf: sibling)
     }
 }
 

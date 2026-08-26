@@ -155,6 +155,90 @@ enum CleanupOperationState: Sendable, Equatable {
     case failed(message: String)
 }
 
+enum RegenerableCleanupFamily: String, Sendable, Hashable, CaseIterable, Identifiable {
+    case worktreeDependencies
+    case developerCaches
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .worktreeDependencies: "Worktree node_modules"
+        case .developerCaches: "Regenerable developer caches"
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .worktreeDependencies: "shippingbox"
+        case .developerCaches: "internaldrive"
+        }
+    }
+
+    var summary: String {
+        switch self {
+        case .worktreeDependencies:
+            "Gitignored node_modules folders in inactive extra worktrees. Git history, source, and the worktree itself stay in place."
+        case .developerCaches:
+            "Allowlisted package-manager, browser-automation, and Codex runtime caches. Session history, images, and archives are not selected."
+        }
+    }
+}
+
+struct RegenerableCleanupItem: Identifiable, Sendable, Equatable {
+    let id: String
+    let family: RegenerableCleanupFamily
+    let title: String
+    let path: String
+    let bytes: Int64
+    let blockedReason: String?
+
+    var isEligible: Bool { blockedReason == nil && bytes > 0 }
+}
+
+struct RegenerableCleanupSnapshot: Sendable, Equatable {
+    let items: [RegenerableCleanupItem]
+    let skippedActiveWorktrees: Int
+    let capturedAt: Date
+
+    static let empty = RegenerableCleanupSnapshot(items: [], skippedActiveWorktrees: 0, capturedAt: .distantPast)
+
+    var dependencies: [RegenerableCleanupItem] {
+        items.filter { $0.family == .worktreeDependencies }
+    }
+
+    var caches: [RegenerableCleanupItem] {
+        items.filter { $0.family == .developerCaches }
+    }
+
+    func eligibleItems(in family: RegenerableCleanupFamily) -> [RegenerableCleanupItem] {
+        items.filter { $0.family == family && $0.isEligible }
+    }
+
+    func eligibleBytes(in family: RegenerableCleanupFamily) -> Int64 {
+        eligibleItems(in: family).reduce(0) { $0 + $1.bytes }
+    }
+}
+
+struct RegenerableCleanupFailure: Sendable, Hashable {
+    let path: String
+    let message: String
+}
+
+struct RegenerableCleanupResult: Sendable, Hashable {
+    let trashedPaths: [String]
+    let reclaimedBytes: Int64
+    let failures: [RegenerableCleanupFailure]
+}
+
+enum RegenerableCleanupOperationState: Sendable, Equatable {
+    case idle
+    case movingToTrash
+    case succeeded(removedCount: Int, reclaimedBytes: Int64)
+    case partial(removedCount: Int, reclaimedBytes: Int64, failures: [RegenerableCleanupFailure])
+    case failed(message: String)
+}
+
 struct AgentMetric: Identifiable, Sendable {
     let agent: AgentKind
     let model: String

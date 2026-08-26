@@ -12,7 +12,10 @@ final class AppModel: ObservableObject {
     @Published private(set) var usage = UsageSnapshot.empty()
     @Published private(set) var worktrees: [WorktreeRecord] = []
     @Published private(set) var archivedSessions = CleanupTargetSnapshot.empty
+    @Published private(set) var regenerableCleanup = RegenerableCleanupSnapshot.empty
     @Published private(set) var cleanupState = CleanupOperationState.idle
+    @Published private(set) var dependencyCleanupState = RegenerableCleanupOperationState.idle
+    @Published private(set) var cacheCleanupState = RegenerableCleanupOperationState.idle
     @Published private(set) var worktreeCleanupState = WorktreeCleanupOperationState.idle
     @Published private(set) var codexIsRunning = false
     @Published private(set) var isScanning = false
@@ -45,6 +48,11 @@ final class AppModel: ObservableObject {
         worktrees = await worktreeTask
         archivedSessions = await archiveTask
         codexIsRunning = Self.detectCodexRunning()
+        let scannedWorktrees = worktrees
+        let scannedCodexRunning = codexIsRunning
+        regenerableCleanup = await Task.detached(priority: .utility) {
+            RegenerableCleanupService.scan(worktrees: scannedWorktrees, isCodexRunning: scannedCodexRunning)
+        }.value
         isScanning = false
     }
 
@@ -72,6 +80,58 @@ final class AppModel: ObservableObject {
             ArchiveCleanupService.scan()
         }.value
         codexIsRunning = Self.detectCodexRunning()
+        let scannedWorktrees = worktrees
+        let scannedCodexRunning = codexIsRunning
+        regenerableCleanup = await Task.detached(priority: .utility) {
+            RegenerableCleanupService.scan(worktrees: scannedWorktrees, isCodexRunning: scannedCodexRunning)
+        }.value
+    }
+
+    func moveRegenerableFamilyToTrash(_ family: RegenerableCleanupFamily) async {
+        let state = family == .worktreeDependencies ? dependencyCleanupState : cacheCleanupState
+        guard state != .movingToTrash else { return }
+        codexIsRunning = Self.detectCodexRunning()
+        setRegenerableState(family, .movingToTrash)
+        let records = worktrees
+        let running = codexIsRunning
+        let result = await Task.detached(priority: .userInitiated) {
+            RegenerableCleanupService.moveToTrash(
+                family,
+                worktrees: records,
+                isCodexRunning: { running }
+            )
+        }.value
+        await refresh()
+
+        if result.failures.isEmpty && !result.trashedPaths.isEmpty {
+            setRegenerableState(
+                family,
+                .succeeded(removedCount: result.trashedPaths.count, reclaimedBytes: result.reclaimedBytes)
+            )
+        } else if !result.trashedPaths.isEmpty {
+            setRegenerableState(
+                family,
+                .partial(removedCount: result.trashedPaths.count, reclaimedBytes: result.reclaimedBytes, failures: result.failures)
+            )
+        } else {
+            setRegenerableState(
+                family,
+                .failed(message: result.failures.map(\.message).joined(separator: "\n"))
+            )
+        }
+    }
+
+    func resetRegenerableCleanupMessage(_ family: RegenerableCleanupFamily) {
+        setRegenerableState(family, .idle)
+    }
+
+    private func setRegenerableState(_ family: RegenerableCleanupFamily, _ state: RegenerableCleanupOperationState) {
+        switch family {
+        case .worktreeDependencies:
+            dependencyCleanupState = state
+        case .developerCaches:
+            cacheCleanupState = state
+        }
     }
 
     func moveArchivedSessionsToTrash() async {

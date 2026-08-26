@@ -26,6 +26,7 @@ CleanMyAgent explains what your local coding agents are using before it offers t
 - Monitors attributable process count and resident memory.
 - Audits linked Git worktrees and explains exactly why each one is removable or protected.
 - Removes a worktree only after rechecking that it is inactive, unlocked, clean, tracked, pushed, and integrated.
+- Moves gitignored `node_modules` from inactive extra worktrees, and allowlisted regenerable caches, to the Trash after confirmation.
 - Charts local token activity by day, agent, model, and token category where structured metadata is available.
 - Shows locally observed throughput, TTFT, response time, and coverage without presenting them as provider-side benchmarks.
 - Moves archived Codex sessions to the macOS Trash only after confirmation and only while Codex is closed.
@@ -58,6 +59,13 @@ CleanMyAgent defaults to protection. A worktree remains blocked if any of these 
 - Git or GitHub verification fails.
 
 Eligible worktrees are removed with `git worktree remove`, never by deleting their directories directly. The branch and remote pull request are left intact. All checks run again immediately before removal.
+
+Two additional Clean-tab rules reclaim regenerable disk without touching Git history:
+
+- gitignored `node_modules` folders in extra worktrees that have no running process;
+- allowlisted caches: npm `_cacache`, Yarn, Playwright, Puppeteer, and Codex runtime caches (the last group stays blocked while Codex is running).
+
+Those folders are moved to the macOS Trash after confirmation. Session history, generated images, the primary checkout, tracked dependencies, and any path outside the allowlist stay protected.
 
 Archived Codex sessions use the macOS Trash and remain recoverable until the Trash is emptied. Active Codex sessions are never selected by that action.
 

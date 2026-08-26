@@ -36,8 +36,10 @@ Unlike an agent-specific plugin, CleanMyAgent uses local adapters to present sto
 - The application audits disk usage, free capacity, agent storage, Git worktrees, attributable process memory, locally observable speed metrics, and bounded local usage history by day, agent, model, token category, and provider-reported cost.
 - Installed adapters cover Codex, Claude Code, Grok Build, Cursor, Hermes Agent, OpenCode, Ori, and Kilo Code. Each adapter declares the metrics its local format can support.
 - Archived Codex sessions can be moved to the macOS Trash after an explicit confirmation, then the empty archive folder is recreated.
+- Gitignored `node_modules` directories in inactive extra worktrees can be moved to the Trash after confirmation. The worktree, branch, and source remain. A running process, a symbolic link, or a non-gitignored folder blocks the target. Every target is revalidated immediately before removal.
+- Allowlisted regenerable caches (npm `_cacache`, Yarn, Playwright, Puppeteer, Codex runtime caches) can be moved to the Trash after confirmation. Codex runtime caches stay blocked while Codex is running. Session history, generated images, and any path outside the allowlist stay protected.
 - Worktree cleanup is selective and uses `git worktree remove`, never raw directory deletion. A target is eligible only when it is inactive, unlocked, clean, has no untracked or unpushed work, and is verified in the default branch or at the exact remote head of a merged pull request. Every target is revalidated immediately before removal. Repository branches and pull requests are not deleted.
-- Active sessions, caches, dependencies, repositories, branches, active worktrees, dirty worktrees, open-PR worktrees, unmerged worktrees, and unknown worktrees remain protected.
+- Active sessions, generated images, repositories, branches, active worktrees, dirty worktrees, open-PR worktrees, unmerged worktrees, unknown worktrees, tracked dependencies, and caches outside the allowlist remain protected.
 - Performance labels must distinguish observed output throughput, TTFT, end-to-end duration, token counts, and partial coverage.
 - Future agent integrations can use a local MCP server, but that server is not part of the first MVP.
 - Cross-agent comparisons are shown only for metrics that each adapter can support honestly.

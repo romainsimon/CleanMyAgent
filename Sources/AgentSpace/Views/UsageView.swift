@@ -10,7 +10,7 @@ struct UsageView: View {
                 HStack(alignment: .top) {
                     PageHeader(
                         title: "Usage",
-                        subtitle: "Local token activity across agents, inspired by ccusage and rendered as native charts."
+                    subtitle: "Where your tokens went, from the activity recorded on this Mac."
                     )
                     rangePicker
                 }
@@ -23,9 +23,15 @@ struct UsageView: View {
                     summaryStrip
                     activityChart
 
-                    HStack(alignment: .top, spacing: 18) {
-                        compositionChart
-                        modelChart
+                    ViewThatFits(in: .horizontal) {
+                        HStack(alignment: .top, spacing: 18) {
+                            compositionChart.frame(minWidth: 340)
+                            modelChart.frame(minWidth: 340)
+                        }
+                        VStack(spacing: 18) {
+                            compositionChart
+                            modelChart
+                        }
                     }
 
                     dailyTable
@@ -61,13 +67,9 @@ struct UsageView: View {
     private var summaryStrip: some View {
         HStack(spacing: 0) {
             summaryMetric("Total tokens", value: compact(model.usage.totalTokens))
-            metricDivider
             summaryMetric("Output", value: compact(model.usage.outputTokens))
-            metricDivider
             summaryMetric("Cache read", value: compact(model.usage.cacheReadTokens))
-            metricDivider
             summaryMetric("Reported cost", value: currency(model.usage.reportedCostUSD))
-            metricDivider
             summaryMetric("Sessions", value: model.usage.sessionCount.formatted())
         }
         .padding(.vertical, 16)

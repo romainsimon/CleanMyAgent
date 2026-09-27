@@ -2,12 +2,12 @@ import AppKit
 import SwiftUI
 
 extension Color {
-    static let agentSpaceBackground = Color(red: 0.025, green: 0.032, blue: 0.070)
-    static let agentSpaceSurface = Color(red: 0.060, green: 0.070, blue: 0.125)
-    static let agentSpaceRaised = Color(red: 0.095, green: 0.105, blue: 0.175)
-    static let agentSpaceSeparator = Color.white.opacity(0.105)
-    static let agentSpaceSecondary = Color.white.opacity(0.64)
-    static let agentSpaceBlue = Color(red: 0.30, green: 0.58, blue: 1.00)
+    static let agentSpaceBackground = Color(red: 0.051, green: 0.063, blue: 0.090)
+    static let agentSpaceSurface = Color(red: 0.086, green: 0.102, blue: 0.137)
+    static let agentSpaceRaised = Color(red: 0.125, green: 0.145, blue: 0.184)
+    static let agentSpaceSeparator = Color.white.opacity(0.065)
+    static let agentSpaceSecondary = Color(red: 0.65, green: 0.69, blue: 0.76)
+    static let agentSpaceBlue = Color(red: 0.48, green: 0.69, blue: 1.00)
     static let agentSpaceViolet = Color(red: 0.57, green: 0.42, blue: 1.00)
     static let agentSpaceMagenta = Color(red: 0.94, green: 0.36, blue: 0.73)
 
@@ -74,11 +74,9 @@ struct StatusDot: View {
 }
 
 struct MetricProgressTrack: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
     let fraction: Double
     let color: Color
-    var height: CGFloat = 20
+    var height: CGFloat = 8
 
     var body: some View {
         GeometryReader { proxy in
@@ -100,7 +98,6 @@ struct MetricProgressTrack: View {
                         .frame(maxWidth: .infinity)
                 }
             }
-            .animation(reduceMotion ? nil : .smooth(duration: 0.45), value: fraction)
         }
         .frame(height: height)
         .accessibilityHidden(true)
@@ -178,14 +175,14 @@ extension View {
             .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(accent.opacity(0.13), lineWidth: 1)
+                    .stroke(Color.agentSpaceSeparator, lineWidth: 1)
             }
     }
 
     func agentSpaceRow() -> some View {
         self
-            .padding(.horizontal, 14)
-            .padding(.vertical, 11)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
             .contentShape(Rectangle())
     }
 

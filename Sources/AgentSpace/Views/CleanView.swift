@@ -10,13 +10,12 @@ struct CleanView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 PageHeader(
-                    title: "Clean safely",
-                    subtitle: "Each rule names its allowlist, blocked states, and that space returns only after the Trash is emptied."
+                    title: "Leftovers, meet the exit.",
+                    subtitle: "Review what can go. Keep your code, sessions, and active work."
                 )
 
                 HStack(spacing: 10) {
-                    Label("Revalidated at click", systemImage: "checkmark.shield")
-                    Text("Sessions, images, and source stay protected")
+                    Label("Rechecked before every cleanup", systemImage: "checkmark.shield")
                 }
                 .font(.caption.weight(.medium))
                 .foregroundStyle(Color.agentSpaceSecondary)
@@ -32,8 +31,6 @@ struct CleanView: View {
                             : "Unmerged worktrees stay. Only gitignored node_modules are selected."
                     )
 
-                    Divider().overlay(Color.agentSpaceSeparator)
-
                     regenerableRow(
                         family: .developerCaches,
                         state: model.cacheCleanupState,
@@ -42,15 +39,9 @@ struct CleanView: View {
                         extra: cacheFootnote
                     )
 
-                    Divider().overlay(Color.agentSpaceSeparator)
-
                     archiveRow
                 }
-                .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                .overlay {
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .stroke(Color.agentSpaceSeparator, lineWidth: 1)
-                }
+                .agentSpacePanel()
 
                 regenerableNotice(model.dependencyCleanupState, family: .worktreeDependencies)
                 regenerableNotice(model.cacheCleanupState, family: .developerCaches)
@@ -127,7 +118,7 @@ struct CleanView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top, spacing: 16) {
                 Image(systemName: family.symbol)
-                    .font(.system(size: 20, weight: .medium))
+                    .font(.system(size: 24, weight: .medium))
                     .foregroundStyle(Color.agentSpaceBlue)
                     .frame(width: 30, height: 30)
 
@@ -148,7 +139,7 @@ struct CleanView: View {
 
                 VStack(alignment: .trailing, spacing: 4) {
                     Text(ByteFormat.string(eligibleBytes))
-                        .font(.title3.weight(.semibold).monospacedDigit())
+                        .font(.system(size: 28, weight: .semibold, design: .rounded).monospacedDigit())
                     Text(eligibleCount == 1 ? "1 folder" : "\(eligibleCount.formatted()) folders")
                         .font(.caption)
                         .foregroundStyle(Color.agentSpaceSecondary)
@@ -162,6 +153,8 @@ struct CleanView: View {
                     pendingFamily = family
                 }
                 .disabled(eligibleCount == 0 || state == .movingToTrash)
+                .buttonStyle(.bordered)
+                .controlSize(.large)
             }
         }
         .agentSpaceRow()
@@ -171,7 +164,7 @@ struct CleanView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top, spacing: 16) {
                 Image(systemName: "archivebox")
-                    .font(.system(size: 20, weight: .medium))
+                    .font(.system(size: 24, weight: .medium))
                     .foregroundStyle(Color.agentSpaceBlue)
                     .frame(width: 30, height: 30)
 
@@ -192,7 +185,7 @@ struct CleanView: View {
 
                 VStack(alignment: .trailing, spacing: 4) {
                     Text(ByteFormat.string(model.archivedSessions.bytes))
-                        .font(.title3.weight(.semibold).monospacedDigit())
+                        .font(.system(size: 28, weight: .semibold, design: .rounded).monospacedDigit())
                     Text("\(model.archivedSessions.fileCount.formatted()) files")
                         .font(.caption)
                         .foregroundStyle(Color.agentSpaceSecondary)
@@ -206,6 +199,8 @@ struct CleanView: View {
                     showsArchiveConfirmation = true
                 }
                 .disabled(!canCleanArchives)
+                .buttonStyle(.bordered)
+                .controlSize(.large)
             }
         }
         .agentSpaceRow()

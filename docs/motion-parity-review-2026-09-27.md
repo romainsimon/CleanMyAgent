@@ -13,7 +13,7 @@ This milestone applies the user's request for more delightful transitions and ch
 | Symmetric button feedback | 120ms press, 80ms release | Acknowledge the deliberate action, then settle quickly |
 | Currency wraps in the native minimum window | Adaptive summary grid and one-line values | Preserve readable measurements at 940×620 content size |
 | 10px preview metric qualifications | 11px minimum | Keep functional evidence readable |
-| A CSS contour crops a real screenshot window | Preserve the capture's original alpha contour | Native toolbar and corners stay intact |
+| A CSS contour crops a real screenshot window | Use a mask derived from the actual captured outer boundary | Native toolbar and corners stay intact |
 
 ## Motion verdict
 
@@ -32,3 +32,5 @@ Swift checks cover the input/reduced-motion policy and fixture parity, alongside
 The Impeccable detector ran once over changed web UI targets. Its 10px qualification findings were fixed. The report-table padding warning is a wrapper false positive: cells have 12px×14px inset. Coral headings exceed large-text contrast; the two invisible images are the inactive mascot sprites already reviewed in the earlier milestone. Cream, native color/radius advisories and aphoristic copy preserve the approved brand and product context. Native SwiftUI was reviewed directly because the HTML/CSS detector does not validate it.
 
 Public screenshots use --screenshots fixtures, with no Demo data label in the image. Captions disclose example data. No real user cleanup was exercised. The download stays on v0.2.1 until a separate native release is published; these source/build results are not notarization or production launch evidence.
+
+Capture note: CUA returned RGB images with white exterior corners. The website uses a display mask derived from the real outer pixel boundary; screenshot UI pixels are unchanged. The capture provenance pins the native UI revision used.

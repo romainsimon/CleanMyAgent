@@ -10,6 +10,10 @@ The product uses a refined macOS utility language rather than a terminal or admi
 
 The interface should feel reassuring under pressure. It can be friendly and dimensional without becoming playful, glossy everywhere, or visually detached from macOS.
 
+## App icon
+
+The app identity is a cheerful coral trash can on a warm ivory macOS tile, with dark oval eyes and a slightly tilted lid. The user requested a cleaner, more readable, fun icon on 2026-09-27. One strong object replaces the earlier lens-and-files composition. The raster artwork has a standardized rounded export and transparent outer padding; it must remain identifiable at Dock and sidebar sizes. This warmth belongs to the brand asset; interface controls and safety colors retain their existing meanings. The menu-bar pressure symbols remain functional native symbols.
+
 ## Reference synthesis
 
 - CleanMyMac: borrow warmth, approachable system-health language, and the idea that maintenance can feel calm. Do not copy its artwork, characters, icons, or screen composition.

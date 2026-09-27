@@ -50,7 +50,7 @@ plutil -insert CFBundleDisplayName -string CleanMyAgent "$CONTENTS_DIR/Info.plis
 plutil -insert CFBundleIconFile -string CleanMyAgent "$CONTENTS_DIR/Info.plist"
 plutil -insert CFBundlePackageType -string APPL "$CONTENTS_DIR/Info.plist"
 plutil -insert CFBundleShortVersionString -string "$VERSION" "$CONTENTS_DIR/Info.plist"
-plutil -insert CFBundleVersion -string 3 "$CONTENTS_DIR/Info.plist"
+plutil -insert CFBundleVersion -string 4 "$CONTENTS_DIR/Info.plist"
 plutil -insert LSMinimumSystemVersion -string 14.0 "$CONTENTS_DIR/Info.plist"
 plutil -insert NSHighResolutionCapable -bool true "$CONTENTS_DIR/Info.plist"
 

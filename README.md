@@ -101,6 +101,8 @@ The default build is ad-hoc signed for development. To produce a Developer ID bu
 
 Use `--demo` when launching the executable to render public sample data for screenshots; cleanup and live scans are disabled. The Settings screen lets you change the development folder.
 
+For marketing captures built from source, use `--screenshots`. It uses the same public fixtures and disables all scans and cleanup, while keeping the normal sidebar subtitle and coverage wording free of “Demo data”. Disclose that the values are examples in the surrounding page caption. Regular `--demo` retains its visible demo warnings. This capture option does not alter the published 0.2.1 ZIP.
+
 ## Privacy
 
 Scans happen on your Mac. CleanMyAgent reads numeric metadata, opaque identifiers, filesystem sizes, process information, and Git state. It intentionally ignores conversation content, generated code, prompts, responses, and tool output.

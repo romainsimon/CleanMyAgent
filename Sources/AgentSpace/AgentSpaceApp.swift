@@ -8,7 +8,11 @@ struct AgentSpaceApp: App {
 
     init() {
         if ProcessInfo.processInfo.arguments.contains("--smoke-test") { exit(ReleaseSmoke.run()) }
-        _model = StateObject(wrappedValue: AppModel(demo: ProcessInfo.processInfo.arguments.contains("--demo")))
+        let arguments = ProcessInfo.processInfo.arguments
+        _model = StateObject(wrappedValue: AppModel(
+            demo: arguments.contains("--demo"),
+            screenshotMode: arguments.contains("--screenshots")
+        ))
     }
 
     var body: some Scene {

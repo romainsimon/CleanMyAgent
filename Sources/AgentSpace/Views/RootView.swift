@@ -86,7 +86,7 @@ struct RootView: View {
                 VStack(alignment: .leading, spacing: 1) {
                     Text("CleanMyAgent")
                         .font(.headline.weight(.semibold))
-                    Text(model.isDemo ? "Demo data · cleanup disabled" : "Local agent care")
+                    Text(model.isDemo && !model.isScreenshotMode ? "Demo data · cleanup disabled" : "Local agent care")
                         .font(.caption2)
                         .foregroundStyle(Color.agentSpaceSecondary)
                 }

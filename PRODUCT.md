@@ -27,7 +27,7 @@ Unlike an agent-specific plugin, CleanMyAgent uses local adapters to present sto
 ## Operating Context
 
 - Agent data lives under `~/.codex`, `~/.claude`, `~/.grok`, `~/.cursor`, `~/.hermes`, `~/.local/share/opencode`, `~/.ori`, and related macOS application-support folders.
-- Projects and temporary worktrees are discovered under the current user's configurable development root (currently `~/dev`).
+- Projects and temporary worktrees are discovered under the current user's configurable development root (defaults to `~/dev`).
 - The application must remain useful when an agent UI is closed.
 - Measurements come from local structured metadata and native agent commands when available.
 
@@ -38,7 +38,7 @@ Unlike an agent-specific plugin, CleanMyAgent uses local adapters to present sto
 - Archived Codex sessions can be moved to the macOS Trash after an explicit confirmation, then the empty archive folder is recreated.
 - Gitignored `node_modules` directories in inactive extra worktrees can be moved to the Trash after confirmation. The worktree, branch, and source remain. A running process, a symbolic link, or a non-gitignored folder blocks the target. Every target is revalidated immediately before removal.
 - Allowlisted regenerable caches (npm `_cacache`, Yarn, Playwright, Puppeteer, Codex runtime caches) can be moved to the Trash after confirmation. Codex runtime caches stay blocked while Codex is running. Session history, generated images, and any path outside the allowlist stay protected.
-- Worktree cleanup is selective and uses `git worktree remove`, never raw directory deletion. A target is eligible only when it is inactive, unlocked, clean, has no untracked or unpushed work, and is verified in the default branch or at the exact remote head of a merged pull request. Every target is revalidated immediately before removal. Repository branches and pull requests are not deleted.
+- Worktree cleanup is selective and uses `git worktree remove`, never raw directory deletion. A target is eligible only when it is inactive, unlocked, clean, has no untracked or unpushed work or unique ignored contents, and is verified in the default branch or at the exact head of a merged pull request. Every target is revalidated immediately before removal. Repository branches and pull requests are not deleted.
 - Active sessions, generated images, repositories, branches, active worktrees, dirty worktrees, open-PR worktrees, unmerged worktrees, unknown worktrees, tracked dependencies, and caches outside the allowlist remain protected.
 - Performance labels must distinguish observed output throughput, TTFT, end-to-end duration, token counts, and partial coverage.
 - Future agent integrations can use a local MCP server, but that server is not part of the first MVP.

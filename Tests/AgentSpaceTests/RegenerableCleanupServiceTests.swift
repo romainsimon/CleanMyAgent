@@ -145,6 +145,38 @@ struct RegenerableCleanupServiceTests {
         #expect(FileManager.default.fileExists(atPath: tracked.appendingPathComponent("pkg.js").path))
     }
 
+    @Test func rechecksProcessActivityBeforeTrashingDependencies() throws {
+        let fixture = try makeWorktreeFixture(gitignore: "node_modules\n")
+        defer { try? FileManager.default.removeItem(at: fixture.root) }
+        let dependencies = fixture.worktree.appendingPathComponent("node_modules")
+        try FileManager.default.createDirectory(at: dependencies, withIntermediateDirectories: true)
+        try Data("fixture".utf8).write(to: dependencies.appendingPathComponent("pkg.js"))
+        let record = worktreeRecord(path: fixture.worktree.path, repository: fixture.repository.path, active: false)
+        for activity: Set<String>? in [nil, [fixture.worktree.resolvingSymlinksInPath().path]] {
+            let result = RegenerableCleanupService.moveToTrash(.worktreeDependencies, homeURL: fixture.root, worktrees: [record], activeDirectories: { activity }, pathInUse: { _ in false }, trash: { _ in
+                Issue.record("A newly active or unknown target must stay protected")
+                return nil
+            })
+            #expect(result.trashedPaths.isEmpty)
+        }
+        #expect(FileManager.default.fileExists(atPath: dependencies.path))
+    }
+
+    @Test func rechecksCodexAfterTheCacheScan() throws {
+        let root = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let cache = root.appendingPathComponent(".cache/codex-runtimes")
+        try FileManager.default.createDirectory(at: cache, withIntermediateDirectories: true)
+        try Data("fixture".utf8).write(to: cache.appendingPathComponent("runtime"))
+        let running = RunningAfterFirstCheck()
+        let result = RegenerableCleanupService.moveToTrash(.developerCaches, homeURL: root, worktrees: [], isCodexRunning: { running.check() }, activeDirectories: { [] }, pathInUse: { _ in false }, trash: { _ in
+            Issue.record("Codex started after the scan")
+            return nil
+        })
+        #expect(result.trashedPaths.isEmpty)
+        #expect(FileManager.default.fileExists(atPath: cache.path))
+    }
+
     private func temporaryDirectory() throws -> URL {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("AgentSpaceRegenerableCleanupTests-\(UUID().uuidString)", isDirectory: true)
@@ -201,4 +233,10 @@ struct RegenerableCleanupServiceTests {
 
 private enum RegenerableTestCommandError: Error {
     case failed(String)
+}
+
+private final class RunningAfterFirstCheck: @unchecked Sendable {
+    private let lock = NSLock()
+    private var count = 0
+    func check() -> Bool { lock.lock(); defer { lock.unlock() }; count += 1; return count > 1 }
 }

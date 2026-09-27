@@ -92,16 +92,16 @@ enum StorageScanner {
             )
         }
 
-        let sharedPath = "\(home)/dev/.worktrees"
+        let sharedPath = ScanConfiguration.developmentRoot + "/.worktrees"
         let shared: [StorageCategory]
         if fileManager.fileExists(atPath: sharedPath) {
             shared = [
                 StorageCategory(
                     id: "shared:worktrees",
                     agent: nil,
-                    name: "Git worktrees (last deep audit)",
+                    name: "Git worktrees",
                     path: sharedPath,
-                    bytes: cachedWorktreeBytes(home: home),
+                    bytes: Shell.directoryBytes(at: sharedPath),
                     kind: .worktrees
                 )
             ]
@@ -375,18 +375,4 @@ enum StorageScanner {
             .map(String.init)
     }
 
-    private static func cachedWorktreeBytes(home: String) -> Int64 {
-        let report = "\(home)/.codex-disk-space-management/reports/latest.json"
-        guard let data = try? Data(contentsOf: URL(fileURLWithPath: report)),
-              let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let audit = root["audit"] as? [String: Any],
-              let codex = audit["codex"] as? [String: Any],
-              let categories = codex["categories"] as? [[String: Any]] else { return 0 }
-
-        return categories
-            .filter { (($0["label"] as? String) ?? "").localizedCaseInsensitiveContains("Git worktrees") }
-            .reduce(0) { total, category in
-                total + ((category["bytes"] as? NSNumber)?.int64Value ?? 0)
-            }
-    }
 }

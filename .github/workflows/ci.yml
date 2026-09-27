@@ -19,3 +19,12 @@ jobs:
         run: swift --version
       - name: Run tests
         run: swift test
+
+  runtime:
+    name: Production runtime smoke
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./scripts/build-app.sh
+      - run: ./scripts/runtime-smoke.sh

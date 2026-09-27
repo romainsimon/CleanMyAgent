@@ -23,13 +23,28 @@ final class AppModel: ObservableObject {
     @Published private(set) var lastError: String?
     private let liveSpeedMonitor = LiveSpeedMonitor()
 
-    init() {
-        Task { await refresh() }
-        Task { await monitorLiveSpeed() }
+    let isDemo: Bool
+    private let usageScanner: @Sendable (UsageRange) -> UsageSnapshot
+    init(scanOnLaunch: Bool = true, demo: Bool = false, usageScanner: @escaping @Sendable (UsageRange) -> UsageSnapshot = { UsageScanner.scan(range: $0) }) {
+        self.isDemo = demo
+        self.usageScanner = usageScanner
+        if demo {
+            disk = DemoData.disk
+            worktrees = DemoData.worktrees
+            regenerableCleanup = DemoData.cleanup
+            performance = DemoData.performance
+            runtime = DemoData.runtime
+            usage = DemoData.usage(range: usageRange)
+            return
+        }
+        if scanOnLaunch {
+            Task { await refresh() }
+            Task { await monitorLiveSpeed() }
+        }
     }
 
     func refresh() async {
-        guard !isScanning else { return }
+        guard !isDemo, !isScanning else { return }
         isScanning = true
         lastError = nil
 
@@ -54,12 +69,19 @@ final class AppModel: ObservableObject {
     }
 
     func refreshUsage() async {
+        if isDemo { usage = DemoData.usage(range: usageRange); return }
         guard !isUsageScanning else { return }
         isUsageScanning = true
-        let selectedRange = usageRange
-        usage = await Task.detached(priority: .utility) {
-            UsageScanner.scan(range: selectedRange)
-        }.value
+        repeat {
+            let selectedRange = usageRange
+            usage = .empty(range: selectedRange)
+            let scanner = usageScanner
+            let snapshot = await Task.detached(priority: .utility) { scanner(selectedRange) }.value
+            if selectedRange == usageRange {
+                usage = snapshot
+                break
+            }
+        } while !Task.isCancelled
         isUsageScanning = false
     }
 
@@ -73,6 +95,7 @@ final class AppModel: ObservableObject {
     }
 
     func refreshCleanupTarget() async {
+        guard !isDemo else { return }
         archivedSessions = await Task.detached(priority: .utility) {
             ArchiveCleanupService.scan()
         }.value
@@ -85,17 +108,17 @@ final class AppModel: ObservableObject {
     }
 
     func moveRegenerableFamilyToTrash(_ family: RegenerableCleanupFamily) async {
+        guard !isDemo else { return }
         let state = family == .worktreeDependencies ? dependencyCleanupState : cacheCleanupState
         guard state != .movingToTrash else { return }
         codexIsRunning = Self.detectCodexRunning()
         setRegenerableState(family, .movingToTrash)
         let records = worktrees
-        let running = codexIsRunning
         let result = await Task.detached(priority: .userInitiated) {
             RegenerableCleanupService.moveToTrash(
                 family,
                 worktrees: records,
-                isCodexRunning: { running }
+                isCodexRunning: ArchiveCleanupService.systemCodexRunningCheck
             )
         }.value
         await refresh()
@@ -132,6 +155,7 @@ final class AppModel: ObservableObject {
     }
 
     func moveArchivedSessionsToTrash() async {
+        guard !isDemo else { return }
         guard cleanupState != .movingToTrash else { return }
         codexIsRunning = Self.detectCodexRunning()
         guard !codexIsRunning else {
@@ -157,6 +181,7 @@ final class AppModel: ObservableObject {
     }
 
     func removeWorktrees(paths: Set<String>) async {
+        guard !isDemo else { return }
         guard worktreeCleanupState != .removing else { return }
         let selectedRecords = worktrees.filter { paths.contains($0.path) && $0.safety == .removable }
         guard !selectedRecords.isEmpty else {

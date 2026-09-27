@@ -55,7 +55,6 @@ struct UsageView: View {
         .pickerStyle(.segmented)
         .labelsHidden()
         .frame(width: 210)
-        .disabled(model.isUsageScanning)
         .accessibilityLabel("Usage history range")
     }
 

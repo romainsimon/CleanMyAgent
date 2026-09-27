@@ -52,11 +52,11 @@ CleanMyAgent explains what your local coding agents are using before it offers t
 CleanMyAgent defaults to protection. A worktree remains blocked if any of these conditions is true or cannot be established:
 
 - it is the active or a locked worktree;
-- it has modified, staged, or untracked files;
+- it has modified, staged, or untracked files, or ignored content without a verified primary copy;
 - it contains commits that have not been pushed;
-- its branch is not integrated into the default branch;
+- its HEAD is not in the remote default branch or does not match the exact head of a merged pull request;
 - its pull request is open, closed without merging, or unknown;
-- Git or GitHub verification fails.
+- Git, GitHub or process verification fails.
 
 Eligible worktrees are removed with `git worktree remove`, never by deleting their directories directly. The branch and remote pull request are left intact. All checks run again immediately before removal.
 
@@ -97,7 +97,9 @@ Build a local application bundle:
 open "dist/CleanMyAgent.app"
 ```
 
-The generated app is ad-hoc signed for local development. It is not notarized or distributed as a release yet.
+The default build is ad-hoc signed for development. To produce a Developer ID build, set `CLEANMYAGENT_SIGNING_IDENTITY`. The script creates a universal Apple silicon / Intel bundle. Run `./scripts/runtime-smoke.sh` to test a copy outside the source checkout. Notarization is a separate step; check the release notes for the actual distributed artifact status.
+
+Use `--demo` when launching the executable to render public sample data for screenshots; cleanup and live scans are disabled. The Settings screen lets you change the development folder.
 
 ## Privacy
 

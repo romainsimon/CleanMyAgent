@@ -7,7 +7,8 @@ struct AgentSpaceApp: App {
     @StateObject private var model: AppModel
 
     init() {
-        _model = StateObject(wrappedValue: AppModel())
+        if ProcessInfo.processInfo.arguments.contains("--smoke-test") { exit(ReleaseSmoke.run()) }
+        _model = StateObject(wrappedValue: AppModel(demo: ProcessInfo.processInfo.arguments.contains("--demo")))
     }
 
     var body: some Scene {

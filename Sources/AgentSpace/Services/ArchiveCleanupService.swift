@@ -75,6 +75,8 @@ enum ArchiveCleanupService {
         guard values?.isDirectory == true else { throw ArchiveCleanupError.nothingToClean }
         guard scan(homeURL: homeURL).fileCount > 0 else { throw ArchiveCleanupError.nothingToClean }
 
+        guard target.resolvingSymlinksInPath().path == homeURL.resolvingSymlinksInPath().appendingPathComponent(".codex/archived_sessions").path else { throw ArchiveCleanupError.symbolicLink }
+        guard !isCodexRunning() else { throw ArchiveCleanupError.codexIsRunning }
         let trashedURL = try trash(target)
         try FileManager.default.createDirectory(at: target, withIntermediateDirectories: true)
         return trashedURL
@@ -93,7 +95,7 @@ enum ArchiveCleanupService {
         return result as URL?
     }
 
-    private static func systemCodexRunningCheck() -> Bool {
+    static func systemCodexRunningCheck() -> Bool {
         !NSRunningApplication.runningApplications(withBundleIdentifier: "com.openai.codex").isEmpty
     }
 }

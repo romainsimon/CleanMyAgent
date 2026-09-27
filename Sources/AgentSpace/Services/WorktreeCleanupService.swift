@@ -37,54 +37,52 @@ enum WorktreeCleanupService {
         var reclaimedBytes: Int64 = 0
         var failures: [WorktreeCleanupFailure] = []
 
-        for (repositoryPath, repositoryRecords) in Dictionary(grouping: records, by: \.repositoryPath) {
+        for record in records {
+            let repositoryPath = record.repositoryPath
             let freshRecords: [WorktreeRecord]
             if let pullRequestLookup {
                 freshRecords = WorktreeScanner.scan(
                     repositoryPaths: [repositoryPath],
                     includeSizes: false,
+                    targetPaths: [record.path],
                     pullRequestLookup: pullRequestLookup
                 )
             } else {
-                freshRecords = WorktreeScanner.scan(repositoryPaths: [repositoryPath], includeSizes: false)
+                freshRecords = WorktreeScanner.scan(repositoryPaths: [repositoryPath], includeSizes: false, targetPaths: [record.path])
             }
             let freshByPath = Dictionary(uniqueKeysWithValues: freshRecords.map { ($0.path, $0) })
 
-            for record in repositoryRecords {
-                guard let fresh = freshByPath[record.path] else {
-                    failures.append(WorktreeCleanupFailure(
-                        path: record.path,
-                        message: WorktreeCleanupError.noLongerRegistered.localizedDescription
-                    ))
-                    continue
-                }
-                guard fresh.safety == .removable else {
-                    failures.append(WorktreeCleanupFailure(
-                        path: record.path,
-                        message: WorktreeCleanupError.noLongerSafe(fresh.safetyReason).localizedDescription
-                    ))
-                    continue
-                }
-
-                let removal = Shell.run(
-                    "/usr/bin/git",
-                    ["-C", repositoryPath, "worktree", "remove", "--", record.path],
-                    timeout: 30
-                )
-                guard removal.status == 0 else {
-                    let detail = removal.stderr.trimmingCharacters(in: .whitespacesAndNewlines)
-                    failures.append(WorktreeCleanupFailure(
-                        path: record.path,
-                        message: WorktreeCleanupError.removalFailed(detail.isEmpty ? "Unknown Git error" : detail).localizedDescription
-                    ))
-                    continue
-                }
-
-                removedPaths.append(record.path)
-                reclaimedBytes += record.bytes
+            guard let fresh = freshByPath[record.path] else {
+                failures.append(WorktreeCleanupFailure(
+                    path: record.path,
+                    message: WorktreeCleanupError.noLongerRegistered.localizedDescription
+                ))
+                continue
+            }
+            guard fresh.safety == .removable else {
+                failures.append(WorktreeCleanupFailure(
+                    path: record.path,
+                    message: WorktreeCleanupError.noLongerSafe(fresh.safetyReason).localizedDescription
+                ))
+                continue
             }
 
-            _ = Shell.run("/usr/bin/git", ["-C", repositoryPath, "worktree", "prune"], timeout: 10)
+            let removal = Shell.run(
+                "/usr/bin/git",
+                ["-C", repositoryPath, "worktree", "remove", "--", record.path],
+                timeout: 30
+            )
+            guard removal.status == 0 else {
+                let detail = removal.stderr.trimmingCharacters(in: .whitespacesAndNewlines)
+                failures.append(WorktreeCleanupFailure(
+                    path: record.path,
+                    message: WorktreeCleanupError.removalFailed(detail.isEmpty ? "Unknown Git error" : detail).localizedDescription
+                ))
+                continue
+            }
+
+            removedPaths.append(record.path)
+            reclaimedBytes += record.bytes
         }
 
         return WorktreeCleanupResult(

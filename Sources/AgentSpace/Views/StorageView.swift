@@ -46,7 +46,7 @@ struct StorageView: View {
 
                 HStack(spacing: 7) {
                     Image(systemName: "lock.shield")
-                    Text("Audit-only build. No cleanup actions are enabled.")
+                    Text("Review cleanup options in Clean and Worktrees. Every target is checked again before removal.")
                 }
                 .font(.caption)
                 .foregroundStyle(Color.agentSpaceSecondary)

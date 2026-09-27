@@ -4,7 +4,10 @@ set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
-swift build -c release
+swift build -c release --arch arm64 --arch x86_64
+BINARY_ROOT="$PROJECT_ROOT/.build/apple/Products/Release"
+VERSION="$(cat "$PROJECT_ROOT/VERSION")"
+SIGNING_IDENTITY="${CLEANMYAGENT_SIGNING_IDENTITY:--}"
 
 APP_DIR="$PROJECT_ROOT/dist/CleanMyAgent.app"
 CONTENTS_DIR="$APP_DIR/Contents"
@@ -17,14 +20,13 @@ trap 'rm -rf "$ICON_WORK_ROOT"' EXIT
 
 rm -rf "$APP_DIR"
 mkdir -p "$MACOS_DIR" "$CONTENTS_DIR/Resources"
-cp "$PROJECT_ROOT/.build/release/CleanMyAgent" "$MACOS_DIR/CleanMyAgent"
-RESOURCE_BUNDLE="$PROJECT_ROOT/.build/release/CleanMyAgent_AgentSpace.bundle"
+cp "$BINARY_ROOT/CleanMyAgent" "$MACOS_DIR/CleanMyAgent"
+RESOURCE_BUNDLE="$BINARY_ROOT/CleanMyAgent_AgentSpace.bundle"
 if [ ! -d "$RESOURCE_BUNDLE" ]; then
-  RESOURCE_BUNDLE="$PROJECT_ROOT/.build/release/AgentSpace_AgentSpace.bundle"
+  RESOURCE_BUNDLE="$BINARY_ROOT/AgentSpace_AgentSpace.bundle"
 fi
 if [ -d "$RESOURCE_BUNDLE" ]; then
   ditto "$RESOURCE_BUNDLE" "$CONTENTS_DIR/Resources/CleanMyAgent_AgentSpace.bundle"
-  ditto "$RESOURCE_BUNDLE" "$CONTENTS_DIR/Resources/AgentSpace_AgentSpace.bundle"
 fi
 
 mkdir -p "$ICONSET_DIR"
@@ -47,10 +49,17 @@ plutil -insert CFBundleName -string CleanMyAgent "$CONTENTS_DIR/Info.plist"
 plutil -insert CFBundleDisplayName -string CleanMyAgent "$CONTENTS_DIR/Info.plist"
 plutil -insert CFBundleIconFile -string CleanMyAgent "$CONTENTS_DIR/Info.plist"
 plutil -insert CFBundlePackageType -string APPL "$CONTENTS_DIR/Info.plist"
-plutil -insert CFBundleShortVersionString -string 0.1.1 "$CONTENTS_DIR/Info.plist"
-plutil -insert CFBundleVersion -string 2 "$CONTENTS_DIR/Info.plist"
+plutil -insert CFBundleShortVersionString -string "$VERSION" "$CONTENTS_DIR/Info.plist"
+plutil -insert CFBundleVersion -string 3 "$CONTENTS_DIR/Info.plist"
 plutil -insert LSMinimumSystemVersion -string 14.0 "$CONTENTS_DIR/Info.plist"
 plutil -insert NSHighResolutionCapable -bool true "$CONTENTS_DIR/Info.plist"
 
-codesign --force --deep --sign - "$APP_DIR"
+plutil -insert CleanMyAgentSourceRevision -string "$(git rev-parse HEAD)" "$CONTENTS_DIR/Info.plist"
+if [[ "$SIGNING_IDENTITY" == "-" ]]; then
+  codesign --force --deep --sign - "$APP_DIR"
+else
+  codesign --force --deep --options runtime --timestamp --sign "$SIGNING_IDENTITY" "$APP_DIR"
+fi
+codesign --verify --deep --strict "$APP_DIR"
+lipo "$MACOS_DIR/CleanMyAgent" -verify_arch arm64 x86_64
 echo "$APP_DIR"

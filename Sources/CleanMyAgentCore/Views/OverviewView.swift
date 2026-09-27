@@ -48,14 +48,14 @@ struct OverviewView: View {
                         .monospacedDigit()
                     Text("free")
                         .font(.callout)
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 4) {
                     Text(model.disk.totalBytes > 0 ? "\(usedPercentage) used" : "Measuring disk space…")
                         .font(.callout.weight(.medium)).monospacedDigit()
                     Text(model.disk.totalBytes > 0 ? "\(ByteFormat.string(model.disk.totalBytes)) capacity" : "Local audit")
-                        .font(.caption).foregroundStyle(Color.agentSpaceSecondary)
+                        .font(.caption).foregroundStyle(Color.cleanMyAgentSecondary)
                 }
             }
             MetricProgressTrack(fraction: usedFraction, color: pressureColor, height: 10)
@@ -72,7 +72,7 @@ struct OverviewView: View {
                     value: model.disk.totalBytes > 0 ? ByteFormat.string(model.disk.usedBytes) : "—"
                 )
                 MetricLegendItem(
-                    color: Color.agentSpaceTrack,
+                    color: Color.cleanMyAgentTrack,
                     label: "Free",
                     value: model.disk.totalBytes > 0 ? ByteFormat.string(model.disk.freeBytes) : "—"
                 )
@@ -81,11 +81,11 @@ struct OverviewView: View {
                      ? "Checked \(model.disk.capturedAt.formatted(date: .omitted, time: .shortened))"
                      : "Audit in progress")
                     .font(.caption)
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
             }
         }
         .padding(22)
-        .agentSpacePanel(cornerRadius: 18)
+        .cleanMyAgentPanel(cornerRadius: 18)
     }
 
     private var nextSteps: some View {
@@ -100,17 +100,17 @@ struct OverviewView: View {
             model.selectedSection = section
         } label: {
             HStack(spacing: 12) {
-                PhosphorIcon(symbol: symbol, size: 22).font(.system(size: 20)).foregroundStyle(Color.agentSpaceBlue)
+                PhosphorIcon(symbol: symbol, size: 22).font(.system(size: 20)).foregroundStyle(Color.cleanMyAgentBlue)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title).font(.callout.weight(.semibold)).foregroundStyle(.primary)
-                    Text(detail).font(.caption).foregroundStyle(Color.agentSpaceSecondary)
+                    Text(detail).font(.caption).foregroundStyle(Color.cleanMyAgentSecondary)
                 }
                 Spacer(minLength: 0)
-                PhosphorIcon(symbol: "chevron.right", size: 16).font(.caption).foregroundStyle(Color.agentSpaceSecondary)
+                PhosphorIcon(symbol: "chevron.right", size: 16).font(.caption).foregroundStyle(Color.cleanMyAgentSecondary)
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: 12))
+            .background(Color.cleanMyAgentSurface, in: RoundedRectangle(cornerRadius: 12))
             .contentShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(AgentPressStyle())
@@ -134,11 +134,11 @@ struct OverviewView: View {
                 ForEach(Array(displayedAgents.enumerated()), id: \.element.id) { index, storage in
                     AgentStorageRow(storage: storage, isScanning: model.isScanning && model.disk.totalBytes == 0)
                     if index < displayedAgents.count - 1 {
-                        Divider().overlay(Color.agentSpaceSeparator).padding(.leading, 56)
+                        Divider().overlay(Color.cleanMyAgentSeparator).padding(.leading, 56)
                     }
                 }
             }
-            .agentSpacePanel(accent: .agentSpaceBlue)
+            .cleanMyAgentPanel(accent: .cleanMyAgentBlue)
             Button("View all \(model.disk.agents.count) agents") { model.selectedSection = .agents }
                 .buttonStyle(.link)
                 .font(.callout)
@@ -156,11 +156,11 @@ struct OverviewView: View {
                 ForEach(Array(model.performance.metrics.prefix(3).enumerated()), id: \.element.id) { index, metric in
                     PerformanceRow(metric: metric, compact: true)
                     if index < min(3, model.performance.metrics.count) - 1 {
-                        Divider().overlay(Color.agentSpaceSeparator).padding(.leading, 56)
+                        Divider().overlay(Color.cleanMyAgentSeparator).padding(.leading, 56)
                     }
                 }
             }
-            .agentSpacePanel(accent: .agentSpaceViolet)
+            .cleanMyAgentPanel(accent: .cleanMyAgentViolet)
             Button("View performance & coverage") { model.selectedSection = .performance }
                 .buttonStyle(.link)
                 .font(.callout)
@@ -188,9 +188,9 @@ struct OverviewView: View {
     private var pressureColor: Color {
         switch model.disk.pressure {
         case .unknown: .secondary
-        case .healthy: Color.agentSpaceGreen
-        case .warning: Color.agentSpaceAmber
-        case .critical: Color.agentSpaceRed
+        case .healthy: Color.cleanMyAgentGreen
+        case .warning: Color.cleanMyAgentAmber
+        case .critical: Color.cleanMyAgentRed
         }
     }
 }
@@ -207,7 +207,7 @@ struct AgentStorageRow: View {
                     .font(.body.weight(.medium))
                 Text(isScanning ? "Measuring local data…" : storage.isInstalled ? storage.rootPath.replacingOccurrences(of: NSHomeDirectory(), with: "~") : "Not installed")
                     .font(.caption)
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
                     .lineLimit(1)
             }
             Spacer()
@@ -215,6 +215,6 @@ struct AgentStorageRow: View {
                 .font(.body.weight(.medium))
                 .monospacedDigit()
         }
-        .agentSpaceRow()
+        .cleanMyAgentRow()
     }
 }

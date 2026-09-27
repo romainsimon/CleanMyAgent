@@ -1,5 +1,5 @@
 import XCTest
-@testable import AgentSpace
+@testable import CleanMyAgentCore
 
 final class PreviewParityTests: XCTestCase {
     func testSevenDayPublicFixtureAgreesWithTheWebsiteAndCountsTokensOnce() {

@@ -26,19 +26,19 @@ struct LiveSpeedMeterView: View {
             if snapshot.active {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Text(formattedSpeed).font(.system(size: 30, weight: .semibold, design: .rounded)).monospacedDigit()
-                    Text("observed tok/s").font(.caption).foregroundStyle(Color.agentSpaceSecondary)
+                    Text("observed tok/s").font(.caption).foregroundStyle(Color.cleanMyAgentSecondary)
                 }
                 MetricProgressTrack(fraction: meterFraction, color: meterColor)
                 Text(snapshot.model ?? "Local Codex metadata")
-                    .font(.caption).foregroundStyle(Color.agentSpaceSecondary)
+                    .font(.caption).foregroundStyle(Color.cleanMyAgentSecondary)
             } else {
                 Text("Live output speed appears here when Codex reports an active turn.")
-                    .font(.callout).foregroundStyle(Color.agentSpaceSecondary)
+                    .font(.callout).foregroundStyle(Color.cleanMyAgentSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(18)
-        .agentSpacePanel()
+        .cleanMyAgentPanel()
     }
 
     private var fullMeter: some View {
@@ -60,13 +60,13 @@ struct LiveSpeedMeterView: View {
                             .monospacedDigit()
                         Text("tok/s")
                             .font(.callout)
-                            .foregroundStyle(Color.agentSpaceSecondary)
+                            .foregroundStyle(Color.cleanMyAgentSecondary)
                     }
                     HStack(spacing: 7) {
                         StatusDot(color: meterColor)
                         Text(snapshot.active ? "Live Codex turn" : "Waiting for an active turn")
                             .font(.caption.weight(.semibold))
-                            .foregroundStyle(snapshot.active ? meterColor : Color.agentSpaceSecondary)
+                            .foregroundStyle(snapshot.active ? meterColor : Color.cleanMyAgentSecondary)
                     }
                 }
                 Spacer()
@@ -76,7 +76,7 @@ struct LiveSpeedMeterView: View {
                         .lineLimit(1)
                     Text(snapshot.active ? "Running for \(formatElapsed(snapshot.elapsedMs))" : "Monitoring local metadata")
                         .font(.caption)
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                 }
             }
 
@@ -87,17 +87,17 @@ struct LiveSpeedMeterView: View {
 
             HStack(spacing: 22) {
                 MetricLegendItem(color: meterColor, label: "Observed", value: "\(formattedSpeed) tok/s")
-                MetricLegendItem(color: Color.agentSpaceTrack, label: "Scale", value: "\(scaleMaximum.formatted()) tok/s")
+                MetricLegendItem(color: Color.cleanMyAgentTrack, label: "Scale", value: "\(scaleMaximum.formatted()) tok/s")
                 Spacer()
                 Text(snapshot.active
                      ? "\(snapshot.outputTokens.formatted()) output tokens reported"
                      : "Output tokens ÷ elapsed wall-clock time")
                     .font(.caption)
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
             }
         }
         .padding(20)
-        .agentSpacePanel(accent: snapshot.active ? Color.agentSpaceGreen : .agentSpaceViolet)
+        .cleanMyAgentPanel(accent: snapshot.active ? Color.cleanMyAgentGreen : .cleanMyAgentViolet)
     }
 
     private var meterFraction: Double {
@@ -105,7 +105,7 @@ struct LiveSpeedMeterView: View {
     }
 
     private var meterColor: Color {
-        snapshot.active ? Color.agentSpaceGreen : Color.agentSpaceSecondary
+        snapshot.active ? Color.cleanMyAgentGreen : Color.cleanMyAgentSecondary
     }
 
     private var formattedSpeed: String {

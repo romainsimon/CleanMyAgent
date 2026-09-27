@@ -2,32 +2,32 @@ import AppKit
 import SwiftUI
 
 extension Color {
-    static let agentSpaceBackground = AgentPalette.color(.background)
-    static let agentSpaceSidebar = AgentPalette.color(.sidebar)
-    static let agentSpaceSurface = AgentPalette.color(.surface)
-    static let agentSpaceRaised = AgentPalette.color(.raised)
-    static let agentSpaceText = AgentPalette.color(.text)
-    static let agentSpaceSeparator = AgentPalette.color(.separator)
-    static let agentSpaceSecondary = AgentPalette.color(.secondary)
-    static let agentSpaceTrack = AgentPalette.color(.track)
-    static let agentSpaceHover = AgentPalette.color(.hover)
-    static let agentSpaceSelection = AgentPalette.color(.selection)
-    static let agentSpaceAccent = AgentPalette.color(.accent)
-    static let agentSpaceBlue = AgentPalette.color(.blue)
-    static let agentSpaceGreen = AgentPalette.color(.green)
-    static let agentSpaceAmber = AgentPalette.color(.amber)
-    static let agentSpaceRed = AgentPalette.color(.red)
-    static let agentSpaceViolet = AgentPalette.color(.violet)
-    static let agentSpaceMagenta = AgentPalette.color(.magenta)
+    static let cleanMyAgentBackground = AgentPalette.color(.background)
+    static let cleanMyAgentSidebar = AgentPalette.color(.sidebar)
+    static let cleanMyAgentSurface = AgentPalette.color(.surface)
+    static let cleanMyAgentRaised = AgentPalette.color(.raised)
+    static let cleanMyAgentText = AgentPalette.color(.text)
+    static let cleanMyAgentSeparator = AgentPalette.color(.separator)
+    static let cleanMyAgentSecondary = AgentPalette.color(.secondary)
+    static let cleanMyAgentTrack = AgentPalette.color(.track)
+    static let cleanMyAgentHover = AgentPalette.color(.hover)
+    static let cleanMyAgentSelection = AgentPalette.color(.selection)
+    static let cleanMyAgentAccent = AgentPalette.color(.accent)
+    static let cleanMyAgentBlue = AgentPalette.color(.blue)
+    static let cleanMyAgentGreen = AgentPalette.color(.green)
+    static let cleanMyAgentAmber = AgentPalette.color(.amber)
+    static let cleanMyAgentRed = AgentPalette.color(.red)
+    static let cleanMyAgentViolet = AgentPalette.color(.violet)
+    static let cleanMyAgentMagenta = AgentPalette.color(.magenta)
 
     static func agentAccent(_ agent: AgentKind) -> Color {
         AgentPalette.color(AgentPalette.agentRole(for: agent))
     }
 }
 
-struct AgentSpaceBackground: View {
+struct AppBackground: View {
     var body: some View {
-        Color.agentSpaceBackground
+        Color.cleanMyAgentBackground
         .ignoresSafeArea()
         .accessibilityHidden(true)
     }
@@ -90,7 +90,7 @@ struct MetricProgressTrack: View {
                 }
                 if hasTrailingSegment {
                     RoundedRectangle(cornerRadius: 7, style: .continuous)
-                        .fill(Color.agentSpaceTrack)
+                        .fill(Color.cleanMyAgentTrack)
                         .frame(maxWidth: .infinity)
                 }
             }
@@ -112,7 +112,7 @@ struct MetricLegendItem: View {
                 .frame(width: 7, height: 7)
                 .accessibilityHidden(true)
             Text(label)
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
             Text(value)
                 .foregroundStyle(.primary)
                 .monospacedDigit()
@@ -166,16 +166,16 @@ private final class MinimalMacScrollbarProbe: NSView {
 }
 
 extension View {
-    func agentSpacePanel(accent: Color = .agentSpaceBlue, cornerRadius: CGFloat = 18) -> some View {
+    func cleanMyAgentPanel(accent: Color = .cleanMyAgentBlue, cornerRadius: CGFloat = 18) -> some View {
         self
-            .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .background(Color.cleanMyAgentSurface, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .stroke(Color.agentSpaceSeparator, lineWidth: 1)
+                    .stroke(Color.cleanMyAgentSeparator, lineWidth: 1)
             }
     }
 
-    func agentSpaceRow() -> some View {
+    func cleanMyAgentRow() -> some View {
         self
             .padding(.horizontal, 16)
             .padding(.vertical, 14)

@@ -63,16 +63,16 @@ struct AppearanceSettings: View {
                                 Text(option.title).font(.callout.weight(.medium))
                                 Spacer(minLength: 0)
                                 PhosphorIcon(appearance == option ? "check-circle" : "circle", size: 18)
-                                    .foregroundStyle(appearance == option ? Color.agentSpaceAccent : Color.agentSpaceSecondary)
+                                    .foregroundStyle(appearance == option ? Color.cleanMyAgentAccent : Color.cleanMyAgentSecondary)
                             }
                         }
                         .padding(12)
-                        .foregroundStyle(Color.agentSpaceText)
-                        .background(appearance == option ? Color.agentSpaceSelection : Color.agentSpaceSurface,
+                        .foregroundStyle(Color.cleanMyAgentText)
+                        .background(appearance == option ? Color.cleanMyAgentSelection : Color.cleanMyAgentSurface,
                                     in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .overlay {
                             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .stroke(appearance == option ? Color.agentSpaceAccent : Color.agentSpaceSeparator,
+                                .stroke(appearance == option ? Color.cleanMyAgentAccent : Color.cleanMyAgentSeparator,
                                         lineWidth: appearance == option ? 1.5 : 1)
                         }
                         .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -83,7 +83,7 @@ struct AppearanceSettings: View {
                 }
             }
             Text("System follows your Mac. Your choice is saved for the next launch.")
-                .font(.callout).foregroundStyle(Color.agentSpaceSecondary)
+                .font(.callout).foregroundStyle(Color.cleanMyAgentSecondary)
         }
     }
 

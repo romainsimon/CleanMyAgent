@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 import XCTest
-@testable import AgentSpace
+@testable import CleanMyAgentCore
 
 final class AgentAppearanceTests: XCTestCase {
     func testSystemPreferenceAndSavedAppearance() {

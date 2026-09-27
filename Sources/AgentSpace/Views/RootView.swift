@@ -81,25 +81,6 @@ struct RootView: View {
 
     private var sidebar: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 10) {
-                Image(nsImage: NSApplication.shared.applicationIconImage)
-                    .resizable()
-                    .interpolation(.high)
-                    .scaledToFit()
-                    .frame(width: 38, height: 38)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("CleanMyAgent")
-                        .font(.system(size: 14, weight: .semibold))
-                    Text(model.isDemo && !model.isScreenshotMode ? "Demo data · cleanup disabled" : "Local agent care")
-                        .font(.caption)
-                        .foregroundStyle(Color.agentSpaceSecondary)
-                }
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 22)
-            .padding(.bottom, 28)
-
             ScrollView {
                 VStack(alignment: .leading, spacing: 26) {
                     SidebarGroup(
@@ -119,6 +100,7 @@ struct RootView: View {
                     )
                 }
                 .padding(.horizontal, 10)
+                .padding(.top, 22)
                 .padding(.bottom, 16)
             }
             .minimalMacScrollbars()
@@ -130,7 +112,7 @@ struct RootView: View {
                     Text("You're in control")
                         .font(.caption.weight(.medium))
                 }
-                Text("Review first. Confirm each cleanup.")
+                Text(model.isDemo && !model.isScreenshotMode ? "Demo data · cleanup disabled" : "Review first. Confirm each cleanup.")
                     .font(.caption)
                     .foregroundStyle(Color.agentSpaceSecondary)
                     .fixedSize(horizontal: false, vertical: true)

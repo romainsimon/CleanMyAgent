@@ -24,17 +24,19 @@ final class AppModel: ObservableObject {
     private let liveSpeedMonitor = LiveSpeedMonitor()
 
     let isDemo: Bool
+    let isScreenshotMode: Bool
     private let usageScanner: @Sendable (UsageRange) -> UsageSnapshot
-    init(scanOnLaunch: Bool = true, demo: Bool = false, usageScanner: @escaping @Sendable (UsageRange) -> UsageSnapshot = { UsageScanner.scan(range: $0) }) {
-        self.isDemo = demo
+    init(scanOnLaunch: Bool = true, demo: Bool = false, screenshotMode: Bool = false, usageScanner: @escaping @Sendable (UsageRange) -> UsageSnapshot = { UsageScanner.scan(range: $0) }) {
+        self.isDemo = demo || screenshotMode
+        self.isScreenshotMode = screenshotMode
         self.usageScanner = usageScanner
-        if demo {
+        if isDemo {
             disk = DemoData.disk
             worktrees = DemoData.worktrees
             regenerableCleanup = DemoData.cleanup
-            performance = DemoData.performance
+            performance = DemoData.performance(annotateDemo: !screenshotMode)
             runtime = DemoData.runtime
-            usage = DemoData.usage(range: usageRange)
+            usage = DemoData.usage(range: usageRange, annotateDemo: !screenshotMode)
             return
         }
         if scanOnLaunch {
@@ -69,7 +71,7 @@ final class AppModel: ObservableObject {
     }
 
     func refreshUsage() async {
-        if isDemo { usage = DemoData.usage(range: usageRange); return }
+        if isDemo { usage = DemoData.usage(range: usageRange, annotateDemo: !isScreenshotMode); return }
         guard !isUsageScanning else { return }
         isUsageScanning = true
         repeat {

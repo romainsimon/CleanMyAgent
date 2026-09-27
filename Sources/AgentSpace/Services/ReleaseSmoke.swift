@@ -10,10 +10,11 @@ enum ReleaseSmoke {
             for agent in AgentKind.allCases where agent != .ori {
                 guard AppResources.icon(for: agent) != nil else { throw SmokeError.failed("Packaged icon missing: \(agent.rawValue)") }
             }
-            for section in AppSection.allCases {
-                let glyph = "ph-\(PhosphorIcon.glyph(for: section.symbol))"
-                guard AppResources.image(named: glyph) != nil else {
-                    throw SmokeError.failed("Packaged navigation glyph missing: \(section.rawValue)")
+            let glyphs = AppSection.allCases.map { PhosphorIcon.glyph(for: $0.symbol) } + ["desktop", "sun", "moon"]
+            for glyph in glyphs {
+                guard let image = AppResources.duotoneIcon(named: glyph, pointSize: 18),
+                      image.isTemplate, image.size == NSSize(width: 18, height: 18) else {
+                    throw SmokeError.failed("Packaged template glyph has missing or invalid native size: \(glyph)")
                 }
             }
             for name in ["hero-mascot", "protected-folder", "bento-storage", "bento-usage", "bento-performance", "bento-mac", "bento-dependencies", "bento-caches", "bento-archives"] {

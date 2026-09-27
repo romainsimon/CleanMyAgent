@@ -10,7 +10,7 @@ struct PhosphorIcon: View {
 
     var body: some View {
         Group {
-            if let image = AppResources.image(named: "ph-\(name)") {
+            if let image = AppResources.duotoneIcon(named: name, pointSize: size) {
                 Image(nsImage: image)
                     .renderingMode(.template)
                     .resizable().interpolation(.high).scaledToFit()

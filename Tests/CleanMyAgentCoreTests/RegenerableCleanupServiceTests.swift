@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import AgentSpace
+@testable import CleanMyAgentCore
 
 struct RegenerableCleanupServiceTests {
     @Test func trashesAllowlistedCachesAndLeavesSessionsAlone() throws {
@@ -179,7 +179,7 @@ struct RegenerableCleanupServiceTests {
 
     private func temporaryDirectory() throws -> URL {
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("AgentSpaceRegenerableCleanupTests-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("CleanMyAgentCoreRegenerableCleanupTests-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }

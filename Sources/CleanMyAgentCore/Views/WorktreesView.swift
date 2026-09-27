@@ -36,7 +36,7 @@ struct WorktreesView: View {
                                 .controlSize(.small)
                             Text("Verifying Git and pull requests…")
                                 .font(.caption)
-                                .foregroundStyle(Color.agentSpaceSecondary)
+                                .foregroundStyle(Color.cleanMyAgentSecondary)
                         }
                     }
 
@@ -57,12 +57,12 @@ struct WorktreesView: View {
             .minimalMacScrollbars()
 
             Divider()
-                .overlay(Color.agentSpaceSeparator)
+                .overlay(Color.cleanMyAgentSeparator)
 
             actionBar
                 .padding(.horizontal, 28)
                 .padding(.vertical, 14)
-                .background(Color.agentSpaceSurface)
+                .background(Color.cleanMyAgentSurface)
         }
         .onChange(of: model.worktrees) { _, worktrees in
             let removablePaths = Set(worktrees.filter { $0.safety == .removable }.map(\.path))
@@ -82,16 +82,16 @@ struct WorktreesView: View {
         VStack(alignment: .leading, spacing: 16) {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), alignment: .leading)], alignment: .leading, spacing: 16) {
             summaryItem(value: model.worktrees.count.formatted(), label: "Audited", color: .primary)
-            summaryItem(value: removableWorktrees.count.formatted(), label: "Ready for review", color: Color.agentSpaceGreen)
-            summaryItem(value: ByteFormat.string(removableBytes), label: "Verified space", color: Color.agentSpaceGreen)
-            summaryItem(value: protectedWorktrees.count.formatted(), label: "Protected", color: Color.agentSpaceAmber)
+            summaryItem(value: removableWorktrees.count.formatted(), label: "Ready for review", color: Color.cleanMyAgentGreen)
+            summaryItem(value: ByteFormat.string(removableBytes), label: "Verified space", color: Color.cleanMyAgentGreen)
+            summaryItem(value: protectedWorktrees.count.formatted(), label: "Protected", color: Color.cleanMyAgentAmber)
             }
             AgentLabel("Clean, inactive and verified merged. Rechecked before Git removes a checkout.", symbol: "checkmark.shield")
                 .font(.caption.weight(.medium))
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
         }
         .padding(18)
-        .agentSpacePanel(cornerRadius: 14)
+        .cleanMyAgentPanel(cornerRadius: 14)
     }
 
     private func summaryItem(value: String, label: String, color: Color) -> some View {
@@ -101,7 +101,7 @@ struct WorktreesView: View {
                 .foregroundStyle(color)
             Text(label)
                 .font(.caption)
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
         }
     }
 
@@ -115,21 +115,21 @@ struct WorktreesView: View {
     private var wideWorktreeTable: some View {
         VStack(spacing: 0) {
             worktreeTableHeader
-            Divider().overlay(Color.agentSpaceSeparator)
+            Divider().overlay(Color.cleanMyAgentSeparator)
 
             LazyVStack(spacing: 0) {
                 ForEach(Array(filteredWorktrees.enumerated()), id: \.element.id) { index, item in
                     worktreeRow(item)
                     if index < filteredWorktrees.count - 1 {
-                        Divider().overlay(Color.agentSpaceSeparator).padding(.leading, 54)
+                        Divider().overlay(Color.cleanMyAgentSeparator).padding(.leading, 54)
                     }
                 }
             }
         }
-        .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(Color.cleanMyAgentSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color.agentSpaceSeparator, lineWidth: 1)
+                .stroke(Color.cleanMyAgentSeparator, lineWidth: 1)
         }
     }
 
@@ -142,7 +142,7 @@ struct WorktreesView: View {
             Text("Size").frame(width: 88, alignment: .trailing)
         }
         .font(.caption.weight(.semibold))
-        .foregroundStyle(Color.agentSpaceSecondary)
+        .foregroundStyle(Color.cleanMyAgentSecondary)
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
     }
@@ -155,7 +155,7 @@ struct WorktreesView: View {
                 Text(item.repository).fontWeight(.medium)
                 Text(item.branch)
                     .font(.caption)
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
                     .lineLimit(1)
                     .truncationMode(.middle)
             }
@@ -164,12 +164,12 @@ struct WorktreesView: View {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
                     AgentLabel(item.safety == .removable ? "Ready for review" : item.safety.label, symbol: item.safety == .removable ? "checkmark.shield" : "lock")
-                        .foregroundStyle(item.safety == .removable ? Color.agentSpaceGreen : Color.agentSpaceAmber)
+                        .foregroundStyle(item.safety == .removable ? Color.cleanMyAgentGreen : Color.cleanMyAgentAmber)
                         .fontWeight(.medium)
                 }
                 Text(item.safetyReason)
                     .font(.caption)
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
                     .lineLimit(1)
             }
             .frame(width: 220, alignment: .leading)
@@ -177,7 +177,7 @@ struct WorktreesView: View {
 
             Text(shortPath(item.path))
                 .font(.caption)
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
                 .lineLimit(1)
                 .truncationMode(.middle)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -197,7 +197,7 @@ struct WorktreesView: View {
             toggleSelection(item)
         } label: {
             Image(systemName: selectedPaths.contains(item.path) ? "checkmark.square.fill" : "square")
-                .foregroundStyle(item.safety == .removable ? Color.agentSpaceBlue : Color.agentSpaceSecondary.opacity(0.45))
+                .foregroundStyle(item.safety == .removable ? Color.cleanMyAgentBlue : Color.cleanMyAgentSecondary.opacity(0.45))
                 .font(.system(size: 18))
                 .frame(width: 28, height: 28)
         }
@@ -215,18 +215,18 @@ struct WorktreesView: View {
                     VStack(alignment: .leading, spacing: 7) {
                         HStack {
                             Text(item.repository).font(.body.weight(.semibold))
-                            Text(item.branch).font(.caption).foregroundStyle(Color.agentSpaceSecondary).lineLimit(1)
+                            Text(item.branch).font(.caption).foregroundStyle(Color.cleanMyAgentSecondary).lineLimit(1)
                             Spacer(minLength: 4)
                             Text(item.bytes > 0 ? ByteFormat.string(item.bytes) : "—").monospacedDigit()
                         }
                         AgentLabel(item.safety == .removable ? "Ready for review" : item.safety.label, symbol: item.safety == .removable ? "checkmark.shield" : "lock")
                             .font(.caption.weight(.semibold))
-                            .foregroundStyle(item.safety == .removable ? Color.agentSpaceGreen : Color.agentSpaceAmber)
+                            .foregroundStyle(item.safety == .removable ? Color.cleanMyAgentGreen : Color.cleanMyAgentAmber)
                         Text(item.safetyReason)
-                            .font(.caption).foregroundStyle(Color.agentSpaceSecondary)
+                            .font(.caption).foregroundStyle(Color.cleanMyAgentSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                         Text(shortPath(item.path))
-                            .font(.caption).foregroundStyle(Color.agentSpaceSecondary)
+                            .font(.caption).foregroundStyle(Color.cleanMyAgentSecondary)
                             .lineLimit(1).truncationMode(.middle).help(item.path)
                     }
                 }
@@ -234,7 +234,7 @@ struct WorktreesView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
-        .agentSpacePanel(cornerRadius: 14)
+        .cleanMyAgentPanel(cornerRadius: 14)
     }
 
     private var actionBar: some View {
@@ -261,7 +261,7 @@ struct WorktreesView: View {
                     : "\(selectedRecords.count) selected · \(ByteFormat.string(selectedBytes))", symbol: "checkmark.shield"
             )
             .font(.callout)
-            .foregroundStyle(selectedRecords.isEmpty ? Color.agentSpaceSecondary : Color.agentSpaceGreen)
+            .foregroundStyle(selectedRecords.isEmpty ? Color.cleanMyAgentSecondary : Color.cleanMyAgentGreen)
 
     }
 
@@ -281,7 +281,7 @@ struct WorktreesView: View {
             }
             .disabled(selectedRecords.isEmpty || model.worktreeCleanupState == .removing)
             .buttonStyle(.borderedProminent)
-            .tint(Color.agentSpaceRed)
+            .tint(Color.cleanMyAgentRed)
         }
     }
 
@@ -293,21 +293,21 @@ struct WorktreesView: View {
         case .removing:
             AgentLabel("Rechecking every selected worktree before Git removes it…", symbol: "arrow.triangle.2.circlepath")
                 .font(.callout)
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
         case let .succeeded(removedCount, reclaimedBytes):
             notice(
                 "Removed \(removedCount) worktrees and reclaimed about \(ByteFormat.string(reclaimedBytes)). Branches and remote pull requests were not deleted.",
-                color: Color.agentSpaceGreen,
+                color: Color.cleanMyAgentGreen,
                 symbol: "checkmark.circle.fill"
             )
         case let .partial(removedCount, reclaimedBytes, failures):
             notice(
                 "Removed \(removedCount) worktrees (about \(ByteFormat.string(reclaimedBytes))). Protected \(failures.count) that changed or failed revalidation.",
-                color: Color.agentSpaceAmber,
+                color: Color.cleanMyAgentAmber,
                 symbol: "exclamationmark.triangle.fill"
             )
         case let .failed(message):
-            notice(message, color: Color.agentSpaceAmber, symbol: "exclamationmark.triangle.fill")
+            notice(message, color: Color.cleanMyAgentAmber, symbol: "exclamationmark.triangle.fill")
         }
     }
 
@@ -387,12 +387,12 @@ private struct WorktreeCleanupConfirmationView: View {
             HStack(alignment: .top, spacing: 14) {
                 PhosphorIcon(symbol: "externaldrive.badge.checkmark")
                     .font(.system(size: 28, weight: .medium))
-                    .foregroundStyle(Color.agentSpaceAmber)
+                    .foregroundStyle(Color.cleanMyAgentAmber)
                 VStack(alignment: .leading, spacing: 5) {
                     Text("Remove \(records.count) verified worktrees?")
                         .font(.title2.weight(.semibold))
                     Text("This reclaims about \(ByteFormat.string(records.reduce(0) { $0 + $1.bytes })). Git will recheck every target before removal.")
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                 }
             }
 
@@ -403,7 +403,7 @@ private struct WorktreeCleanupConfirmationView: View {
                 AgentLabel("Branches and pull requests remain intact", symbol: "checkmark.circle.fill")
             }
             .font(.callout)
-            .foregroundStyle(Color.agentSpaceGreen)
+            .foregroundStyle(Color.cleanMyAgentGreen)
 
             List(records) { record in
                 VStack(alignment: .leading, spacing: 3) {
@@ -411,7 +411,7 @@ private struct WorktreeCleanupConfirmationView: View {
                         .fontWeight(.medium)
                     Text(record.path)
                         .font(.caption.monospaced())
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                         .lineLimit(1)
                         .truncationMode(.middle)
                 }

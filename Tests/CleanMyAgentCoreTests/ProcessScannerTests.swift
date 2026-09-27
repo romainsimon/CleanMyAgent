@@ -1,5 +1,5 @@
 import Testing
-@testable import AgentSpace
+@testable import CleanMyAgentCore
 
 struct ProcessScannerTests {
     @Test func classifiesInstalledAgentProcessesWithoutClaimingSharedExtensionHosts() {

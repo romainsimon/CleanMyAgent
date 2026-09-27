@@ -8,20 +8,20 @@ let package = Package(
         .macOS(.v14)
     ],
     products: [
-        .executable(name: "CleanMyAgent", targets: ["AgentSpace"])
+        .executable(name: "CleanMyAgent", targets: ["CleanMyAgentCore"])
     ],
     targets: [
         .executableTarget(
-            name: "AgentSpace",
-            path: "Sources/AgentSpace",
+            name: "CleanMyAgentCore",
+            path: "Sources/CleanMyAgentCore",
             resources: [
                 .process("Resources")
             ]
         ),
         .testTarget(
-            name: "AgentSpaceTests",
-            dependencies: ["AgentSpace"],
-            path: "Tests/AgentSpaceTests"
+            name: "CleanMyAgentCoreTests",
+            dependencies: ["CleanMyAgentCore"],
+            path: "Tests/CleanMyAgentCoreTests"
         )
     ]
 )

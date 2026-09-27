@@ -24,25 +24,25 @@ struct StorageView: View {
                         Text("Size").frame(width: 110, alignment: .trailing)
                     }
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
 
-                    Divider().overlay(Color.agentSpaceSeparator)
+                    Divider().overlay(Color.cleanMyAgentSeparator)
 
                     LazyVStack(spacing: 0) {
                         ForEach(Array(categories.enumerated()), id: \.element.id) { index, category in
                             StorageCategoryRow(category: category, showAgent: true)
                             if index < categories.count - 1 {
-                                Divider().overlay(Color.agentSpaceSeparator).padding(.leading, 42)
+                                Divider().overlay(Color.cleanMyAgentSeparator).padding(.leading, 42)
                             }
                         }
                     }
                 }
-                .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .background(Color.cleanMyAgentSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .overlay {
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(Color.agentSpaceSeparator, lineWidth: 1)
+                        .stroke(Color.cleanMyAgentSeparator, lineWidth: 1)
                 }
 
                 HStack(spacing: 7) {
@@ -50,7 +50,7 @@ struct StorageView: View {
                     Text("Review cleanup options in Clean and Worktrees. Every target is checked again before removal.")
                 }
                 .font(.caption)
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
             }
             .padding(28)
             .frame(maxWidth: 1120, alignment: .topLeading)
@@ -75,7 +75,7 @@ struct StorageCategoryRow: View {
                     .font(.body)
                 Text(category.path.replacingOccurrences(of: NSHomeDirectory(), with: "~"))
                     .font(.caption2)
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
                     .lineLimit(1)
                     .truncationMode(.middle)
             }
@@ -84,7 +84,7 @@ struct StorageCategoryRow: View {
             if showAgent {
                 Text(category.agent?.rawValue ?? "Shared")
                     .font(.caption)
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
                     .frame(width: 130, alignment: .leading)
             }
 
@@ -93,7 +93,7 @@ struct StorageCategoryRow: View {
                 .monospacedDigit()
                 .frame(width: 110, alignment: .trailing)
         }
-        .agentSpaceRow()
+        .cleanMyAgentRow()
     }
 
     private var symbol: String {

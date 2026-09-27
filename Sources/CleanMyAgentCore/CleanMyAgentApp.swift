@@ -3,7 +3,7 @@ import SwiftUI
 
 @main
 @MainActor
-struct AgentSpaceApp: App {
+struct CleanMyAgentApp: App {
     @StateObject private var model: AppModel
     @AppStorage(AgentAppearance.preferenceKey) private var appearance = AgentAppearance.system
 

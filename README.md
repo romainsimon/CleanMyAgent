@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Sources/AgentSpace/Resources/AppIcon/cleanmyagent-app-icon.png" width="144" alt="CleanMyAgent app icon">
+  <img src="Sources/CleanMyAgentCore/Resources/AppIcon/cleanmyagent-app-icon.png" width="144" alt="CleanMyAgent app icon">
 </p>
 
 <h1 align="center">CleanMyAgent</h1>
@@ -112,7 +112,7 @@ There is no application telemetry. Network access is limited to GitHub pull-requ
 ## Project structure
 
 ```text
-Sources/AgentSpace/
+Sources/CleanMyAgentCore/
 ├── Models/       Data contracts and safety states
 ├── Services/     Agent, disk, process, usage, and Git scanners
 ├── Store/        Application state and refresh orchestration
@@ -120,7 +120,7 @@ Sources/AgentSpace/
 └── Views/        SwiftUI screens
 ```
 
-The Swift package and executable are named `CleanMyAgent`. The internal module remains `AgentSpace` for now to preserve the project history and keep this first public release focused.
+The shipped executable is `CleanMyAgent`. Its Swift code lives in the `CleanMyAgentCore` module, with tests in `CleanMyAgentCoreTests`.
 
 ## Contributing
 

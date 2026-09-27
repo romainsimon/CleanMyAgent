@@ -12,7 +12,7 @@ SIGNING_IDENTITY="${CLEANMYAGENT_SIGNING_IDENTITY:--}"
 APP_DIR="$PROJECT_ROOT/dist/CleanMyAgent.app"
 CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
-ICON_SOURCE="$PROJECT_ROOT/Sources/AgentSpace/Resources/AppIcon/cleanmyagent-app-icon.png"
+ICON_SOURCE="$PROJECT_ROOT/Sources/CleanMyAgentCore/Resources/AppIcon/cleanmyagent-app-icon.png"
 ICON_WORK_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/cleanmyagent-icon.XXXXXX")"
 ICONSET_DIR="$ICON_WORK_ROOT/CleanMyAgent.iconset"
 
@@ -21,12 +21,9 @@ trap 'rm -rf "$ICON_WORK_ROOT"' EXIT
 rm -rf "$APP_DIR"
 mkdir -p "$MACOS_DIR" "$CONTENTS_DIR/Resources"
 cp "$BINARY_ROOT/CleanMyAgent" "$MACOS_DIR/CleanMyAgent"
-RESOURCE_BUNDLE="$BINARY_ROOT/CleanMyAgent_AgentSpace.bundle"
-if [ ! -d "$RESOURCE_BUNDLE" ]; then
-  RESOURCE_BUNDLE="$BINARY_ROOT/AgentSpace_AgentSpace.bundle"
-fi
+RESOURCE_BUNDLE="$BINARY_ROOT/CleanMyAgent_CleanMyAgentCore.bundle"
 if [ -d "$RESOURCE_BUNDLE" ]; then
-  ditto "$RESOURCE_BUNDLE" "$CONTENTS_DIR/Resources/CleanMyAgent_AgentSpace.bundle"
+  ditto "$RESOURCE_BUNDLE" "$CONTENTS_DIR/Resources/CleanMyAgent_CleanMyAgentCore.bundle"
 fi
 
 mkdir -p "$ICONSET_DIR"

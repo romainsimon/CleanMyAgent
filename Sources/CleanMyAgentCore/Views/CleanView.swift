@@ -19,7 +19,7 @@ struct CleanView: View {
                     AgentLabel("Rechecked before every cleanup", symbol: "checkmark.shield")
                 }
                 .font(.caption.weight(.medium))
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
 
                 VStack(alignment: .leading, spacing: 0) {
                     regenerableRow(
@@ -42,7 +42,7 @@ struct CleanView: View {
 
                     archiveRow
                 }
-                .agentSpacePanel()
+                .cleanMyAgentPanel()
 
                 regenerableNotice(model.dependencyCleanupState, family: .worktreeDependencies)
                 regenerableNotice(model.cacheCleanupState, family: .developerCaches)
@@ -53,7 +53,7 @@ struct CleanView: View {
                         .font(.headline)
                     Text("Items go to the macOS Trash and stay recoverable until you empty it. Disk space is reclaimed only after that. Active Codex sessions, generated images, repositories, and non-gitignored files are never selected.")
                         .font(.callout)
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 .frame(maxWidth: 680, alignment: .leading)
@@ -125,11 +125,11 @@ struct CleanView: View {
                         .font(.headline)
                     Text(family.summary)
                         .font(.callout)
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                     Text(extra)
                         .font(.caption)
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
@@ -140,7 +140,7 @@ struct CleanView: View {
                         .font(.system(size: 28, weight: .semibold, design: .rounded).monospacedDigit())
                     Text(eligibleCount == 1 ? "1 folder" : "\(eligibleCount.formatted()) folders")
                         .font(.caption)
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                 }
             }
 
@@ -155,7 +155,7 @@ struct CleanView: View {
                 .controlSize(.large)
             }
         }
-        .agentSpaceRow()
+        .cleanMyAgentRow()
     }
 
     private var archiveRow: some View {
@@ -168,11 +168,11 @@ struct CleanView: View {
                         .font(.headline)
                     Text(model.archivedSessions.path)
                         .font(.caption.monospaced())
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                         .textSelection(.enabled)
                     Text("Removes archived task history from Codex. Current sessions, repositories, and worktrees are not touched.")
                         .font(.callout)
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
@@ -183,7 +183,7 @@ struct CleanView: View {
                         .font(.system(size: 28, weight: .semibold, design: .rounded).monospacedDigit())
                     Text("\(model.archivedSessions.fileCount.formatted()) files")
                         .font(.caption)
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                 }
             }
 
@@ -198,7 +198,7 @@ struct CleanView: View {
                 .controlSize(.large)
             }
         }
-        .agentSpaceRow()
+        .cleanMyAgentRow()
     }
 
     private var canCleanArchives: Bool {
@@ -215,15 +215,15 @@ struct CleanView: View {
                 .controlSize(.small)
             Text("Rechecking, then moving to Trash…")
                 .font(.callout)
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
         } else if eligibleCount == 0 {
             AgentLabel("Nothing eligible", symbol: "checkmark.circle")
                 .font(.callout)
-                .foregroundStyle(Color.agentSpaceGreen)
+                .foregroundStyle(Color.cleanMyAgentGreen)
         } else {
             AgentLabel("Allowlisted target ready", symbol: "checkmark.shield")
                 .font(.callout)
-                .foregroundStyle(Color.agentSpaceGreen)
+                .foregroundStyle(Color.cleanMyAgentGreen)
         }
     }
 
@@ -234,19 +234,19 @@ struct CleanView: View {
                 .controlSize(.small)
             Text("Moving archives…")
                 .font(.callout)
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
         } else if model.codexIsRunning {
             AgentLabel("Quit Codex to enable archive cleanup", symbol: "app.badge.checkmark")
                 .font(.callout)
-                .foregroundStyle(Color.agentSpaceAmber)
+                .foregroundStyle(Color.cleanMyAgentAmber)
         } else if model.archivedSessions.fileCount == 0 {
             AgentLabel("Nothing to clean", symbol: "checkmark.circle")
                 .font(.callout)
-                .foregroundStyle(Color.agentSpaceGreen)
+                .foregroundStyle(Color.cleanMyAgentGreen)
         } else {
             AgentLabel("Protected target ready", symbol: "checkmark.shield")
                 .font(.callout)
-                .foregroundStyle(Color.agentSpaceGreen)
+                .foregroundStyle(Color.cleanMyAgentGreen)
         }
     }
 
@@ -258,17 +258,17 @@ struct CleanView: View {
         case let .succeeded(count, bytes):
             notice(
                 "Moved \(count.formatted()) \(family.title.lowercased()) folders (about \(ByteFormat.string(bytes))) to the Trash.",
-                color: Color.agentSpaceGreen,
+                color: Color.cleanMyAgentGreen,
                 onDismiss: { model.resetRegenerableCleanupMessage(family) }
             )
         case let .partial(count, bytes, failures):
             notice(
                 "Moved \(count.formatted()) folders (about \(ByteFormat.string(bytes))). Protected \(failures.count.formatted()) that changed on revalidation.",
-                color: Color.agentSpaceAmber,
+                color: Color.cleanMyAgentAmber,
                 onDismiss: { model.resetRegenerableCleanupMessage(family) }
             )
         case let .failed(message):
-            notice(message, color: Color.agentSpaceAmber, onDismiss: { model.resetRegenerableCleanupMessage(family) })
+            notice(message, color: Color.cleanMyAgentAmber, onDismiss: { model.resetRegenerableCleanupMessage(family) })
         }
     }
 
@@ -278,14 +278,14 @@ struct CleanView: View {
         case .succeeded:
             HStack(spacing: 12) {
                 AgentLabel("Archives moved to the Trash. Empty it when you are ready to reclaim the space.", symbol: "checkmark.circle.fill")
-                    .foregroundStyle(Color.agentSpaceGreen)
+                    .foregroundStyle(Color.cleanMyAgentGreen)
                 Spacer()
                 Button("Open Trash") { openTrash() }
             }
             .padding(14)
-            .background(Color.agentSpaceGreen.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .background(Color.cleanMyAgentGreen.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         case let .failed(message):
-            notice(message, color: Color.agentSpaceAmber, onDismiss: { model.resetCleanupMessage() })
+            notice(message, color: Color.cleanMyAgentAmber, onDismiss: { model.resetCleanupMessage() })
         case .idle, .movingToTrash:
             EmptyView()
         }
@@ -293,7 +293,7 @@ struct CleanView: View {
 
     private func notice(_ message: String, color: Color, onDismiss: @escaping () -> Void) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            AgentLabel(message, symbol: color == Color.agentSpaceGreen ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+            AgentLabel(message, symbol: color == Color.cleanMyAgentGreen ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
                 .foregroundStyle(color)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer()

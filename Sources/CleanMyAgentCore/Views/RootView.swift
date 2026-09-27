@@ -28,12 +28,12 @@ struct RootView: View {
                     .animation(motionEnabled ? AgentMotion.navigation : nil, value: currentSection)
 
                 Rectangle()
-                    .fill(Color.agentSpaceSeparator)
+                    .fill(Color.cleanMyAgentSeparator)
                     .frame(width: 1)
             }
 
             ZStack {
-                AgentSpaceBackground()
+                AppBackground()
                 detail(for: currentSection)
                     .id(currentSection)
                     .transition(.asymmetric(insertion: .opacity.combined(with: .offset(y: 6)), removal: .opacity))
@@ -43,8 +43,8 @@ struct RootView: View {
         .environment(\.agentMotionEnabled, motionEnabled)
         .onAppear { inputMethod.start() }
         .onDisappear { inputMethod.stop() }
-        .foregroundStyle(Color.agentSpaceText)
-        .tint(.agentSpaceAccent)
+        .foregroundStyle(Color.cleanMyAgentText)
+        .tint(.cleanMyAgentAccent)
         .symbolRenderingMode(.hierarchical)
         .toolbar {
             ToolbarItem(placement: .navigation) {
@@ -108,13 +108,13 @@ struct RootView: View {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 7) {
                     PhosphorIcon(symbol: "checkmark.shield")
-                        .foregroundStyle(Color.agentSpaceBlue)
+                        .foregroundStyle(Color.cleanMyAgentBlue)
                     Text("You're in control")
                         .font(.caption.weight(.medium))
                 }
                 Text(model.isDemo && !model.isScreenshotMode ? "Demo data · cleanup disabled" : "Review first. Confirm each cleanup.")
                     .font(.caption)
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -129,7 +129,7 @@ struct RootView: View {
                 if !reduceTransparency {
                     Rectangle().fill(.regularMaterial)
                 }
-                Color.agentSpaceSidebar.opacity(reduceTransparency ? 1 : 0.92)
+                Color.cleanMyAgentSidebar.opacity(reduceTransparency ? 1 : 0.92)
             }
         }
     }
@@ -159,7 +159,7 @@ private struct SidebarGroup: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
                 .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
                 .padding(.horizontal, 10)
 
             ForEach(sections) { section in
@@ -187,23 +187,23 @@ private struct SidebarItem: View {
             HStack(spacing: 10) {
                 PhosphorIcon(symbol: section.symbol, size: 22)
                     .font(.system(size: 17, weight: .medium))
-                    .foregroundStyle(isSelected ? Color.agentSpaceAccent : Color.agentSpaceSecondary)
+                    .foregroundStyle(isSelected ? Color.cleanMyAgentAccent : Color.cleanMyAgentSecondary)
                     .frame(width: 24)
                     .accessibilityHidden(true)
 
                 Text(section.rawValue)
                     .font(.system(size: 13, weight: isSelected ? .semibold : .medium))
-                    .foregroundStyle(isSelected ? Color.agentSpaceAccent : Color.agentSpaceSecondary)
+                    .foregroundStyle(isSelected ? Color.cleanMyAgentAccent : Color.cleanMyAgentSecondary)
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 12)
             .frame(height: 40)
             .background {
                 RoundedRectangle(cornerRadius: 11, style: .continuous)
-                    .fill(Color.agentSpaceHover.opacity(isHovered && !isSelected ? 1 : 0))
+                    .fill(Color.cleanMyAgentHover.opacity(isHovered && !isSelected ? 1 : 0))
                 if isSelected {
                     RoundedRectangle(cornerRadius: 11, style: .continuous)
-                        .fill(Color.agentSpaceSelection)
+                        .fill(Color.cleanMyAgentSelection)
                         .matchedGeometryEffect(id: "navigation-selection", in: namespace)
                 }
             }
@@ -228,7 +228,7 @@ struct PageHeader: View {
                     .tracking(-0.55)
                 Text(subtitle)
                     .font(.callout)
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -254,7 +254,7 @@ struct SectionTitle: View {
             if let detail {
                 Text(detail)
                     .font(.caption)
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
             }
         }
     }

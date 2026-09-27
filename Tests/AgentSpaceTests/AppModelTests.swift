@@ -9,8 +9,9 @@ struct AppModelTests {
             gate.scan()
             return .empty(range: range)
         })
+        defer { gate.proceed.signal() }
         let first = Task { await model.refreshUsage() }
-        #expect(await Task.detached { gate.waitForStart() }.value)
+        await gate.waitForStart()
         #expect(model.isUsageScanning)
         model.usageRange = .sevenDays
         await model.refreshUsage()
@@ -22,16 +23,30 @@ struct AppModelTests {
 }
 
 private final class UsageScanGate: @unchecked Sendable {
-    let started = DispatchSemaphore(value: 0)
     let proceed = DispatchSemaphore(value: 0)
     private let lock = NSLock()
     private var first = true
-    func waitForStart() -> Bool { started.wait(timeout: .now() + 5) == .success }
+    private var started = false
+    private var startObserver: CheckedContinuation<Void, Never>?
+    func waitForStart() async {
+        await withCheckedContinuation { continuation in
+            lock.lock()
+            if started {
+                lock.unlock()
+                continuation.resume()
+            } else {
+                startObserver = continuation
+                lock.unlock()
+            }
+        }
+    }
     func scan() {
         lock.lock()
         let mustWait = first
         first = false
+        let observer = mustWait ? startObserver : nil
+        if mustWait { started = true; startObserver = nil }
         lock.unlock()
-        if mustWait { started.signal(); _ = proceed.wait(timeout: .now() + 5) }
+        if mustWait { observer?.resume(); proceed.wait() }
     }
 }

@@ -29,7 +29,7 @@ The light palette uses a white-canvas maintenance desk with warm neutral surface
 | Protected / warning | #8d580c | #f2c579 |
 | Destructive | #aa3438 | #ff9699 |
 
-AgentPalette owns all appearances and chart categories. Text, action and semantic status labels are checked at 4.5:1 on their actual surfaces, including selection. Colors accompany readable labels and exact evidence. Progress tracks, selection, hover and scrollbar appearance also adapt; no white-on-white fallback is used.
+AgentPalette owns all appearances and chart categories. Provider marks keep their dominant hue; monochrome marks use distinct neutral tones. The same agent color follows each label through charts and agent rows. Text, action and semantic status labels are checked at 4.5:1 on their actual surfaces, including selection. Colors accompany readable labels and exact evidence. Progress tracks, selection, hover and scrollbar appearance also adapt; no white-on-white fallback is used.
 
 ## Icons and illustrations
 

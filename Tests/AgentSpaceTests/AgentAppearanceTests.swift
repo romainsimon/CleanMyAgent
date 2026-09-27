@@ -34,6 +34,16 @@ final class AgentAppearanceTests: XCTestCase {
         }
     }
 
+    func testAgentSeriesColorsAreDistinctAndReadableInBothAppearances() {
+        for dark in [false, true] {
+            let colors = AgentKind.allCases.map { AgentPalette.agentHex($0, dark: dark) }
+            XCTAssertEqual(Set(colors).count, AgentKind.allCases.count)
+            for color in colors {
+                XCTAssertGreaterThanOrEqual(contrast(color, AgentPalette.hex(.surface, dark: dark)), 3.0)
+            }
+        }
+    }
+
     func testNativeColorsResolveAgainstAppearance() {
         let color = NSColor(name: nil) { appearance in
             NSColor(rgb: AgentPalette.hex(.background, dark: appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua))

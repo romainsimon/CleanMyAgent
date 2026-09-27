@@ -121,8 +121,9 @@ struct UsageView: View {
             Chart {
                 ForEach(model.usage.buckets) { bucket in
                     BarMark(
-                    x: .value("Day", bucket.date, unit: .day),
-                    y: .value("Tokens", bucket.totalTokens)
+                        x: .value("Day", bucket.date, unit: .day),
+                        y: .value("Tokens", bucket.totalTokens),
+                        stacking: .standard
                     )
                     .foregroundStyle(by: .value("Agent", bucket.agent.rawValue))
                 }

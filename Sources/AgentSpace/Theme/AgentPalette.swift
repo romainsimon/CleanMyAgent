@@ -4,10 +4,11 @@ import SwiftUI
 enum AgentColorRole: CaseIterable {
     case background, sidebar, surface, raised, text, secondary, separator, track, hover, selection
     case accent, blue, green, amber, red, violet, magenta, teal, gold, clay, gray, indigo
+    case codexAgent, claudeAgent, grokAgent, cursorAgent, hermesAgent, openCodeAgent, oriAgent, kiloCodeAgent
 }
 
 enum AgentPalette {
-    // Each appearance is composed independently. Status colors always accompany a written reason.
+    // Each appearance is composed independently. Provider marks keep their dominant hue; monochrome marks use distinct neutral tones.
     static func hex(_ role: AgentColorRole, dark: Bool) -> UInt32 {
         switch (role, dark) {
         case (.background, false): 0xf7f7f5
@@ -54,7 +55,40 @@ enum AgentPalette {
         case (.gray, true): 0xc0c7d1
         case (.indigo, false): 0x535db5
         case (.indigo, true): 0xaaaef3
+        case (.codexAgent, false): 0x625bea
+        case (.codexAgent, true): 0xa29aff
+        case (.claudeAgent, false): 0xb95b3c
+        case (.claudeAgent, true): 0xf2a17e
+        case (.grokAgent, false): 0x242424
+        case (.grokAgent, true): 0xf1f1f1
+        case (.cursorAgent, false): 0x586574
+        case (.cursorAgent, true): 0xbdc7d2
+        case (.hermesAgent, false): 0x746357
+        case (.hermesAgent, true): 0xd7c7b8
+        case (.openCodeAgent, false): 0x7a8086
+        case (.openCodeAgent, true): 0xbdc3ca
+        case (.oriAgent, false): 0x535db5
+        case (.oriAgent, true): 0xaaaef3
+        case (.kiloCodeAgent, false): 0x424242
+        case (.kiloCodeAgent, true): 0xe3e3e3
         }
+    }
+
+    static func agentRole(for agent: AgentKind) -> AgentColorRole {
+        switch agent {
+        case .codex: .codexAgent
+        case .claude: .claudeAgent
+        case .grok: .grokAgent
+        case .cursor: .cursorAgent
+        case .hermes: .hermesAgent
+        case .openCode: .openCodeAgent
+        case .ori: .oriAgent
+        case .kiloCode: .kiloCodeAgent
+        }
+    }
+
+    static func agentHex(_ agent: AgentKind, dark: Bool) -> UInt32 {
+        hex(agentRole(for: agent), dark: dark)
     }
 
     static func color(_ role: AgentColorRole) -> Color {

@@ -21,17 +21,7 @@ extension Color {
     static let agentSpaceMagenta = AgentPalette.color(.magenta)
 
     static func agentAccent(_ agent: AgentKind) -> Color {
-        let role: AgentColorRole = switch agent {
-        case .codex: .blue
-        case .claude: .clay
-        case .grok: .violet
-        case .cursor: .gray
-        case .hermes: .teal
-        case .openCode: .gold
-        case .ori: .indigo
-        case .kiloCode: .magenta
-        }
-        return AgentPalette.color(role)
+        AgentPalette.color(AgentPalette.agentRole(for: agent))
     }
 }
 

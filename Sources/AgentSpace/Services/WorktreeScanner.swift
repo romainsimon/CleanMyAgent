@@ -29,16 +29,18 @@ enum WorktreeScanner {
     static func scan(
         repositoryPaths suppliedRepositoryPaths: [String]? = nil,
         includeSizes: Bool = true,
+        targetPaths: Set<String>? = nil,
         activeWorkingDirectories suppliedActiveWorkingDirectories: Set<String>? = nil,
+        activityLookup: @Sendable () -> Set<String>? = loadActiveWorkingDirectories,
         pullRequestLookup: PullRequestLookup = loadPullRequests
     ) -> [WorktreeRecord] {
         let repositoryPaths = suppliedRepositoryPaths ?? discoverRepositories()
-        let activeWorkingDirectories = suppliedActiveWorkingDirectories ?? loadActiveWorkingDirectories()
+        let activeWorkingDirectories = suppliedActiveWorkingDirectories ?? activityLookup()
         var records: [String: WorktreeRecord] = [:]
 
         for discoveredRepositoryPath in Set(repositoryPaths).sorted() {
             let repositoryPath = URL(fileURLWithPath: discoveredRepositoryPath).resolvingSymlinksInPath().path
-            let listing = Shell.run("/usr/bin/git", ["-C", repositoryPath, "worktree", "list", "--porcelain"], timeout: 5)
+            let listing = Shell.run("/usr/bin/git", ["-C", repositoryPath, "worktree", "list", "--porcelain", "-z"], timeout: 5)
             guard listing.status == 0 else { continue }
 
             let defaultReference = defaultBranchReference(repositoryPath: repositoryPath)
@@ -48,7 +50,8 @@ enum WorktreeScanner {
                 let worktreePath = URL(fileURLWithPath: partial.path).resolvingSymlinksInPath().path
                 guard !worktreePath.isEmpty,
                       worktreePath != repositoryPath,
-                      records[worktreePath] == nil else { continue }
+                      records[worktreePath] == nil,
+                      targetPaths == nil || targetPaths!.contains(worktreePath) else { continue }
 
                 let status = Shell.run(
                     "/usr/bin/git",
@@ -59,9 +62,9 @@ enum WorktreeScanner {
                 let statusLines = status.stdout.split(separator: "\n").map(String.init)
                 let hasUntrackedFiles = statusLines.contains { $0.hasPrefix("??") }
                 let isDirty = statusKnown && !statusLines.isEmpty
-                let hasActiveProcesses = activeWorkingDirectories.contains {
+                let hasActiveProcesses = activeWorkingDirectories?.contains {
                     $0 == worktreePath || $0.hasPrefix(worktreePath + "/")
-                }
+                } ?? true
                 let branch = partial.branch.replacingOccurrences(of: "refs/heads/", with: "")
                 let pullRequest: WorktreePullRequest
                 if branch == "Detached HEAD" {
@@ -82,9 +85,12 @@ enum WorktreeScanner {
                     isIntegrated: isIntegrated,
                     pullRequest: pullRequest
                 )
+                let ignoredFilesProtected = hasUniqueIgnoredContent(worktreePath: worktreePath, repositoryPath: repositoryPath)
                 let safety = safetyAssessment(
                     partial: partial,
                     statusKnown: statusKnown,
+                    processStatusKnown: activeWorkingDirectories != nil,
+                    ignoredFilesProtected: ignoredFilesProtected,
                     isDirty: isDirty,
                     hasUntrackedFiles: hasUntrackedFiles,
                     hasUnpushedCommits: hasUnpushedCommits,
@@ -122,7 +128,7 @@ enum WorktreeScanner {
     }
 
     private static func discoverRepositories() -> [String] {
-        let devRoot = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("dev", isDirectory: true).path
+        let devRoot = ScanConfiguration.developmentRoot
         guard FileManager.default.fileExists(atPath: devRoot) else { return [] }
 
         let find = Shell.run(
@@ -146,7 +152,7 @@ enum WorktreeScanner {
             partial = Partial()
         }
 
-        for line in output.split(separator: "\n", omittingEmptySubsequences: false).map(String.init) {
+        for line in output.split(separator: "\0", omittingEmptySubsequences: false).map(String.init) {
             if line.isEmpty {
                 commit()
             } else if line.hasPrefix("worktree ") {
@@ -177,7 +183,7 @@ enum WorktreeScanner {
             if !reference.isEmpty { return reference }
         }
 
-        for reference in ["refs/remotes/origin/main", "refs/remotes/origin/master", "refs/heads/main", "refs/heads/master"] {
+        for reference in ["refs/remotes/origin/main", "refs/remotes/origin/master"] {
             let exists = Shell.run(
                 "/usr/bin/git",
                 ["-C", repositoryPath, "rev-parse", "--verify", "--quiet", reference],
@@ -242,6 +248,8 @@ enum WorktreeScanner {
     private static func safetyAssessment(
         partial: Partial,
         statusKnown: Bool,
+        processStatusKnown: Bool,
+        ignoredFilesProtected: Bool,
         isDirty: Bool,
         hasUntrackedFiles: Bool,
         hasUnpushedCommits: Bool,
@@ -251,6 +259,8 @@ enum WorktreeScanner {
     ) -> (status: WorktreeSafety, reason: String) {
         if partial.isBare { return (.protected, "Bare repository metadata is never removed") }
         if partial.isLocked { return (.protected, "Git marked this worktree as locked") }
+        if !processStatusKnown { return (.protected, "Process activity could not be verified") }
+        if ignoredFilesProtected { return (.protected, "Contains ignored files or folders without a verified copy in the primary checkout") }
         if hasActiveProcesses { return (.protected, "A running process is using this worktree") }
         if !statusKnown { return (.protected, "Working-tree status could not be verified") }
         if hasUntrackedFiles { return (.protected, "Contains untracked files") }
@@ -259,14 +269,14 @@ enum WorktreeScanner {
         if pullRequest.state == .open { return (.protected, "Its pull request is still open") }
         if pullRequest.state == .unknown { return (.protected, "Pull-request state could not be verified") }
         if isIntegrated { return (.removable, "HEAD is already contained in the default branch") }
-        if pullRequest.state == .merged { return (.removable, "Its pull request is merged and the audited HEAD is remote-backed") }
+        if pullRequest.state == .merged && pullRequest.headOID == partial.head { return (.removable, "This exact HEAD belongs to a merged pull request") }
         if pullRequest.state == .closed { return (.protected, "Its pull request was closed without a verified merge") }
         return (.protected, "The branch is not verified as merged")
     }
 
-    private static func loadActiveWorkingDirectories() -> Set<String> {
+    static func loadActiveWorkingDirectories() -> Set<String>? {
         let result = Shell.run("/usr/sbin/lsof", ["-a", "-d", "cwd", "-Fn"], timeout: 8)
-        guard result.status == 0 else { return [] }
+        guard result.status == 0 else { return nil }
         return Set(result.stdout.split(separator: "\n").compactMap { line in
             guard line.first == "n" else { return nil }
             let path = String(line.dropFirst())
@@ -275,46 +285,57 @@ enum WorktreeScanner {
         })
     }
 
-    private static func loadPullRequests(repositoryPath: String) -> PullRequestIndex {
-        guard let slug = githubSlug(repositoryPath: repositoryPath) else { return .unavailable }
-        let result = Shell.run(
-            "/usr/bin/env",
-            [
-                "gh", "pr", "list",
-                "--repo", slug,
-                "--state", "all",
-                "--limit", "200",
-                "--json", "headRefName,headRefOid,state,mergedAt,url"
-            ],
-            environment: ["GH_PROMPT_DISABLED": "1"],
-            timeout: 8
-        )
-        guard result.status == 0,
-              let data = result.stdout.data(using: .utf8),
-              let pullRequests = try? JSONDecoder().decode([GitHubPullRequest].self, from: data) else {
-            return .unavailable
+    // Ignored files are invisible to normal git status. Protect every unique ignored item.
+    // Directories stay protected; dependencies can be reviewed and trashed separately.
+    private static func hasUniqueIgnoredContent(worktreePath: String, repositoryPath: String) -> Bool {
+        let result = Shell.run("/usr/bin/git", ["-C", worktreePath, "ls-files", "--others", "--ignored", "--exclude-standard", "--directory", "-z"], timeout: 5)
+        guard result.status == 0 else { return true }
+        for relative in result.stdout.split(separator: "\0").map(String.init) {
+            let source = URL(fileURLWithPath: worktreePath).appendingPathComponent(relative).standardizedFileURL
+            let copy = URL(fileURLWithPath: repositoryPath).appendingPathComponent(relative).standardizedFileURL
+            guard source.path.hasPrefix(worktreePath + "/"), copy.path.hasPrefix(repositoryPath + "/"),
+                  let values = try? source.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey]),
+                  values.isRegularFile == true, values.isSymbolicLink != true,
+                  FileManager.default.contentsEqual(atPath: source.path, andPath: copy.path) else { return true }
         }
+        return false
+    }
 
+    private struct Connection: Decodable { let nodes: [GitHubPullRequest] }
+    private struct GraphQLData: Decodable { let repository: [String: Connection]? }
+    private struct GraphQLResponse: Decodable { let data: GraphQLData? }
+
+    private static func loadPullRequests(repositoryPath: String) -> PullRequestIndex {
+        guard let slug = githubSlug(repositoryPath: repositoryPath), let gh = githubExecutable() else { return .unavailable }
+        let listing = Shell.run("/usr/bin/git", ["-C", repositoryPath, "worktree", "list", "--porcelain", "-z"], timeout: 5)
+        guard listing.status == 0 else { return .unavailable }
+        let branches = Array(Set(parse(listing.stdout).filter { $0.path != repositoryPath && $0.branch != "Detached HEAD" }
+            .map { $0.branch.replacingOccurrences(of: "refs/heads/", with: "") })).sorted()
+        guard branches.count <= 100 else { return .unavailable }
+        if branches.isEmpty { return PullRequestIndex(isAvailable: true, byBranch: [:]) }
+        func quoted(_ value: String) -> String { String(data: try! JSONEncoder().encode(value), encoding: .utf8)! }
+        let parts = slug.split(separator: "/").map(String.init)
+        let fields = "nodes { headRefName headRefOid state mergedAt url }"
+        let queries = branches.enumerated().map { index, branch in
+            "open\(index): pullRequests(headRefName: \(quoted(branch)), first: 1, states: [OPEN]) { \(fields) } latest\(index): pullRequests(headRefName: \(quoted(branch)), first: 1, orderBy: {field: CREATED_AT, direction: DESC}) { \(fields) }"
+        }.joined(separator: " ")
+        let query = "query { repository(owner: \(quoted(parts[0])), name: \(quoted(parts[1]))) { \(queries) } }"
+        let result = Shell.run(gh, ["api", "graphql", "-f", "query=\(query)"], environment: ["GH_PROMPT_DISABLED": "1"], timeout: 15)
+        guard result.status == 0, let data = result.stdout.data(using: .utf8),
+              let connections = try? JSONDecoder().decode(GraphQLResponse.self, from: data).data?.repository else { return .unavailable }
         var byBranch: [String: WorktreePullRequest] = [:]
-        for pullRequest in pullRequests {
-            let state: WorktreePullRequestState
-            if pullRequest.mergedAt != nil || pullRequest.state.uppercased() == "MERGED" {
-                state = .merged
-            } else if pullRequest.state.uppercased() == "OPEN" {
-                state = .open
-            } else {
-                state = .closed
-            }
-            let candidate = WorktreePullRequest(
-                state: state,
-                url: pullRequest.url,
-                headOID: pullRequest.headRefOid
-            )
-            if byBranch[pullRequest.headRefName]?.state != .open {
-                byBranch[pullRequest.headRefName] = candidate
-            }
+        for (index, branch) in branches.enumerated() {
+            guard let open = connections["open\(index)"], let latest = connections["latest\(index)"] else { return .unavailable }
+            guard let pr = open.nodes.first ?? latest.nodes.first else { continue }
+            let state: WorktreePullRequestState = pr.state == "OPEN" ? .open : ((pr.mergedAt != nil || pr.state == "MERGED") ? .merged : .closed)
+            byBranch[branch] = WorktreePullRequest(state: state, url: pr.url, headOID: pr.headRefOid)
         }
         return PullRequestIndex(isAvailable: true, byBranch: byBranch)
+    }
+
+    static func githubExecutable() -> String? {
+        let candidates = ["/opt/homebrew/bin/gh", "/usr/local/bin/gh"] + (ProcessInfo.processInfo.environment["PATH"] ?? "").split(separator: ":").filter { $0.hasPrefix("/") }.map { String($0) + "/gh" }
+        return candidates.first { FileManager.default.isExecutableFile(atPath: $0) }
     }
 
     private static func githubSlug(repositoryPath: String) -> String? {

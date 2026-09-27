@@ -135,6 +135,68 @@ struct WorktreeCleanupServiceTests {
         #expect(!record.hasUnpushedCommits)
     }
 
+    @Test func protectsUniqueIgnoredEnvironmentAndRevalidatesItAfterAudit() throws {
+        let fixture = try makeRepositoryFixture()
+        defer { try? FileManager.default.removeItem(at: fixture.root) }
+        try Data(".env\n".utf8).write(to: fixture.repository.appendingPathComponent(".gitignore"))
+        try git(fixture.repository, ["add", ".gitignore"])
+        try git(fixture.repository, ["commit", "-m", "ignore environment"])
+        try git(fixture.repository, ["update-ref", "refs/remotes/origin/main", "HEAD"])
+        let worktree = fixture.root.appendingPathComponent("ignored-worktree")
+        try git(fixture.repository, ["worktree", "add", "-b", "codex/ignored", worktree.path, "main"])
+        let record = try #require(scan(fixture.repository).first)
+        #expect(record.safety == .removable)
+        try Data("TEST_ONLY=preserve-me".utf8).write(to: worktree.appendingPathComponent(".env"))
+        #expect(try git(worktree, ["status", "--porcelain"]).isEmpty)
+        let protected = try #require(scan(fixture.repository).first)
+        #expect(protected.safety == .protected)
+        let result = WorktreeCleanupService.remove([record], pullRequestLookup: noPullRequests)
+        #expect(result.removedPaths.isEmpty)
+        #expect(FileManager.default.fileExists(atPath: worktree.appendingPathComponent(".env").path))
+    }
+
+    @Test func protectsUnknownProcessActivity() throws {
+        let fixture = try makeRepositoryFixture()
+        defer { try? FileManager.default.removeItem(at: fixture.root) }
+        let worktree = fixture.root.appendingPathComponent("unknown-activity")
+        try git(fixture.repository, ["worktree", "add", "-b", "codex/unknown", worktree.path, "main"])
+        let record = try #require(WorktreeScanner.scan(repositoryPaths: [fixture.repository.path], includeSizes: false, activityLookup: { nil }, pullRequestLookup: noPullRequests).first)
+        #expect(record.safety == .protected)
+        #expect(record.safetyReason.contains("could not be verified"))
+    }
+
+    @Test func protectsReusedMergedBranchWithNewerPushedHead() throws {
+        let fixture = try makeRepositoryFixture()
+        defer { try? FileManager.default.removeItem(at: fixture.root) }
+        let worktree = fixture.root.appendingPathComponent("reused-branch")
+        try git(fixture.repository, ["worktree", "add", "-b", "codex/reused", worktree.path, "main"])
+        let mergedHead = try git(worktree, ["rev-parse", "HEAD"]).trimmingCharacters(in: .whitespacesAndNewlines)
+        try Data("later feature".utf8).write(to: worktree.appendingPathComponent("README.md"))
+        try git(worktree, ["add", "README.md"])
+        try git(worktree, ["commit", "-m", "reuse merged branch"])
+        try git(fixture.repository, ["remote", "add", "origin", "https://example.test/repository.git"])
+        try git(worktree, ["update-ref", "refs/remotes/origin/codex/reused", "HEAD"])
+        try git(worktree, ["branch", "--set-upstream-to=origin/codex/reused"])
+        let record = try #require(WorktreeScanner.scan(repositoryPaths: [fixture.repository.path], includeSizes: false, activeWorkingDirectories: [], pullRequestLookup: { _ in
+            WorktreeScanner.PullRequestIndex(isAvailable: true, byBranch: ["codex/reused": WorktreePullRequest(state: .merged, url: nil, headOID: mergedHead)])
+        }).first)
+        #expect(!record.hasUnpushedCommits)
+        #expect(record.safety == .protected)
+    }
+
+    @Test func aLocalDefaultBranchDoesNotProveRemoteIntegration() throws {
+        let fixture = try makeRepositoryFixture()
+        defer { try? FileManager.default.removeItem(at: fixture.root) }
+        try Data("not pushed".utf8).write(to: fixture.repository.appendingPathComponent("README.md"))
+        try git(fixture.repository, ["add", "README.md"])
+        try git(fixture.repository, ["commit", "-m", "local main change"])
+        let worktree = fixture.root.appendingPathComponent("local-default")
+        try git(fixture.repository, ["worktree", "add", "-b", "codex/local-default", worktree.path, "main"])
+        let record = try #require(scan(fixture.repository).first)
+        #expect(record.safety == .protected)
+        #expect(record.hasUnpushedCommits)
+    }
+
     private func scan(_ repository: URL) -> [WorktreeRecord] {
         WorktreeScanner.scan(
             repositoryPaths: [repository.path],
@@ -158,6 +220,7 @@ struct WorktreeCleanupServiceTests {
         try Data("initial".utf8).write(to: repository.appendingPathComponent("README.md"))
         try git(repository, ["add", "README.md"])
         try git(repository, ["commit", "-m", "initial"])
+        try git(repository, ["update-ref", "refs/remotes/origin/main", "HEAD"])
         return (root, repository)
     }
 

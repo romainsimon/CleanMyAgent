@@ -23,6 +23,8 @@ enum RegenerableCleanupError: LocalizedError, Equatable {
 enum RegenerableCleanupService {
     typealias TrashOperation = @Sendable (URL) throws -> URL?
     typealias CodexRunningCheck = @Sendable () -> Bool
+    typealias ActivityCheck = @Sendable () -> Set<String>?
+    typealias PathUsageCheck = @Sendable (String) -> Bool?
 
     private struct CacheDefinition {
         let id: String
@@ -97,7 +99,9 @@ enum RegenerableCleanupService {
         _ family: RegenerableCleanupFamily,
         homeURL: URL = FileManager.default.homeDirectoryForCurrentUser,
         worktrees: [WorktreeRecord],
-        isCodexRunning: CodexRunningCheck = { false },
+        isCodexRunning: CodexRunningCheck = ArchiveCleanupService.systemCodexRunningCheck,
+        activeDirectories: ActivityCheck = WorktreeScanner.loadActiveWorkingDirectories,
+        pathInUse: PathUsageCheck = systemPathInUse,
         trash: TrashOperation = systemTrash
     ) -> RegenerableCleanupResult {
         let running = isCodexRunning()
@@ -117,7 +121,7 @@ enum RegenerableCleanupService {
 
         for item in eligible {
             do {
-                try validate(item, family: family, homeURL: homeURL, worktrees: worktrees, isCodexRunning: running)
+                try validate(item, family: family, homeURL: homeURL, worktrees: worktrees, isCodexRunning: isCodexRunning(), activeDirectories: activeDirectories(), pathInUse: pathInUse)
                 let url = URL(fileURLWithPath: item.path, isDirectory: true)
                 _ = try trash(url)
                 trashedPaths.append(item.path)
@@ -139,7 +143,9 @@ enum RegenerableCleanupService {
         family: RegenerableCleanupFamily,
         homeURL: URL,
         worktrees: [WorktreeRecord],
-        isCodexRunning: Bool
+        isCodexRunning: Bool,
+        activeDirectories: Set<String>?,
+        pathInUse: PathUsageCheck
     ) throws {
         let url = URL(fileURLWithPath: item.path).standardizedFileURL
         let values = try? url.resourceValues(forKeys: [.isSymbolicLinkKey, .isDirectoryKey])
@@ -150,12 +156,27 @@ enum RegenerableCleanupService {
             throw RegenerableCleanupError.noLongerSafe("the folder is no longer a directory")
         }
 
+        guard let activeDirectories else {
+            throw RegenerableCleanupError.noLongerSafe("process activity could not be verified")
+        }
+        let protectedRoot = family == .worktreeDependencies
+            ? worktrees.first(where: { url.path.hasPrefix($0.path + "/") })?.path : url.path
+        guard let protectedRoot else { throw RegenerableCleanupError.invalidTarget(item.path) }
+        let canonicalRoot = URL(fileURLWithPath: protectedRoot).resolvingSymlinksInPath().path
+        guard !activeDirectories.contains(where: { $0 == canonicalRoot || $0.hasPrefix(canonicalRoot + "/") }) else {
+            throw RegenerableCleanupError.noLongerSafe("a running process started using this target")
+        }
+        guard let inUse = pathInUse(url.path), !inUse else {
+            throw RegenerableCleanupError.noLongerSafe("the folder is in use or its open files could not be verified")
+        }
+
         switch family {
         case .developerCaches:
             let allowed = cacheDefinitions.map {
                 homeURL.appendingPathComponent($0.relativePath, isDirectory: true).standardizedFileURL.path
             }
-            guard allowed.contains(url.path) else {
+            guard allowed.contains(url.path),
+                  url.resolvingSymlinksInPath().path == homeURL.resolvingSymlinksInPath().appendingPathComponent(String(url.path.dropFirst(homeURL.standardizedFileURL.path.count + 1))).path else {
                 throw RegenerableCleanupError.invalidTarget(item.path)
             }
             if let definition = cacheDefinitions.first(where: {
@@ -172,7 +193,8 @@ enum RegenerableCleanupService {
             }) else {
                 throw RegenerableCleanupError.invalidTarget(item.path)
             }
-            guard !worktree.hasActiveProcesses else {
+            guard !worktree.isLocked, !worktree.isBare, !worktree.hasActiveProcesses,
+                  url.resolvingSymlinksInPath().path == URL(fileURLWithPath: worktree.path).resolvingSymlinksInPath().appendingPathComponent(String(url.path.dropFirst(worktree.path.count + 1))).path else {
                 throw RegenerableCleanupError.noLongerSafe("a running process is using this worktree")
             }
             guard isGitIgnored(path: url.path, worktreePath: worktree.path) else {
@@ -241,6 +263,13 @@ enum RegenerableCleanupService {
 
     private static func isSymbolicLink(_ url: URL) -> Bool {
         (try? url.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) == true
+    }
+
+    private static func systemPathInUse(_ path: String) -> Bool? {
+        let result = Shell.run("/usr/sbin/lsof", ["-nP", "+D", path, "-Fp"], timeout: 8)
+        if result.status == 0 { return true }
+        if result.status == 1 && result.stderr.isEmpty { return false }
+        return nil
     }
 
     private static func systemTrash(_ url: URL) throws -> URL? {

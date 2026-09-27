@@ -58,23 +58,8 @@ struct AgentBadge: View {
         .accessibilityHidden(true)
     }
 
-    private var iconImage: NSImage? {
-        let fileName = "\(agent.iconResourceName).png"
-        let bundleNames = ["CleanMyAgent_AgentSpace.bundle", "AgentSpace_AgentSpace.bundle"]
-        if let resourceURL = Bundle.main.resourceURL {
-            for bundleName in bundleNames {
-                let packagedURL = resourceURL
-                    .appendingPathComponent(bundleName, isDirectory: true)
-                    .appendingPathComponent(fileName)
-                if let image = NSImage(contentsOf: packagedURL) { return image }
-            }
-        }
-        let sibling = URL(fileURLWithPath: Bundle.main.bundlePath)
-            .deletingLastPathComponent()
-            .appendingPathComponent("CleanMyAgent_AgentSpace.bundle", isDirectory: true)
-            .appendingPathComponent(fileName)
-        return NSImage(contentsOf: sibling)
-    }
+    private var iconImage: NSImage? { AppResources.icon(for: agent) }
+
 }
 
 struct StatusDot: View {

@@ -2,6 +2,11 @@ import AppKit
 import Foundation
 
 enum AppResources {
+    static func image(named name: String) -> NSImage? {
+        guard let url = Bundle.module.url(forResource: name, withExtension: "png") else { return nil }
+        return NSImage(contentsOf: url)
+    }
+
     static func icon(for agent: AgentKind) -> NSImage? {
         let name = agent.iconResourceName
         let roots = [Bundle.main.resourceURL, Bundle.main.executableURL?.deletingLastPathComponent()].compactMap { $0 }

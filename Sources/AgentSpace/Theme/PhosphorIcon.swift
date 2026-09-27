@@ -9,11 +9,15 @@ struct PhosphorIcon: View {
     init(symbol: String, size: CGFloat = 18) { self.init(Self.glyph(for: symbol), size: size) }
 
     var body: some View {
-        Image("ph-\(name)", bundle: .module)
-            .renderingMode(.template)
-            .resizable().interpolation(.high).scaledToFit()
-            .frame(width: size, height: size)
-            .accessibilityHidden(true)
+        Group {
+            if let image = AppResources.image(named: "ph-\(name)") {
+                Image(nsImage: image)
+                    .renderingMode(.template)
+                    .resizable().interpolation(.high).scaledToFit()
+            }
+        }
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
     }
 
     nonisolated static func glyph(for symbol: String) -> String {
@@ -62,10 +66,14 @@ struct AgentIllustration: View {
     var size: CGFloat = 80
 
     var body: some View {
-        Image(name, bundle: .module)
-            .resizable().interpolation(.high).scaledToFit()
-            .frame(width: size, height: size)
-            .accessibilityHidden(true)
-            .allowsHitTesting(false)
+        Group {
+            if let image = AppResources.image(named: name) {
+                Image(nsImage: image)
+                    .resizable().interpolation(.high).scaledToFit()
+            }
+        }
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
+        .allowsHitTesting(false)
     }
 }

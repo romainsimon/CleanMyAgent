@@ -12,12 +12,12 @@ enum ReleaseSmoke {
             }
             for section in AppSection.allCases {
                 let glyph = "ph-\(PhosphorIcon.glyph(for: section.symbol))"
-                guard let url = Bundle.module.url(forResource: glyph, withExtension: "png"), NSImage(contentsOf: url) != nil else {
+                guard AppResources.image(named: glyph) != nil else {
                     throw SmokeError.failed("Packaged navigation glyph missing: \(section.rawValue)")
                 }
             }
             for name in ["hero-mascot", "protected-folder", "bento-storage", "bento-usage", "bento-performance", "bento-mac", "bento-dependencies", "bento-caches", "bento-archives"] {
-                guard let url = Bundle.module.url(forResource: name, withExtension: "png"), NSImage(contentsOf: url) != nil else {
+                guard AppResources.image(named: name) != nil else {
                     throw SmokeError.failed("Packaged illustration missing: \(name)")
                 }
             }

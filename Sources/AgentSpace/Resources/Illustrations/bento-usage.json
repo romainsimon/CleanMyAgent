@@ -1,0 +1,14 @@
+{
+  "prompt": "Create one original transparent raster illustration for a CleanMyAgent feature bento card. The supplied images are STYLE REFERENCES ONLY, not edit targets. Match their friendly chunky 3D shapes, soft matte enamel, rounded edges, warm ivory cream and coral red palette, dark charcoal accents, gentle upper-left highlights, nearly frontal three-quarter perspective. One clearly readable object group, centered and large on a square canvas with about 12% transparent breathing room. Full subject visible. Genuine transparent RGBA background, crisp antialiased alpha, no background tile, no floor or external shadow, no lettering or numbers, no logo, no watermark, no charts, no screenshot or app UI. Keep it visually quiet enough to read at 140px. Subject: three chunky coral and warm ivory round token discs in a small overlapping stack, with one small molded ivory speech bubble resting against them and another coral speech bubble above. The speech bubbles are blank except for three tiny charcoal dots. Clearly communicate coding conversations and token usage, with no currency marks, no amounts, no metrics or chart. Tokens resemble clean tactile counters, not gold coins.",
+  "createdAt": "2026-09-27",
+  "generator": "built-in image_gen",
+  "references": [
+    "clutter-pile.webp",
+    "protected-folder.webp"
+  ],
+  "source": "exec-97e58a90-61fd-417c-a597-695acae71452.png",
+  "export": "cwebp q86 alpha_q100 600x600; generated alpha preserved",
+  "role": "decorative feature illustration; not product UI",
+  "bytes": 24574,
+  "sha256": "6bfcf2101ac55ad53fc8c55598518c6154effbd49ff12b2ad2e4e18c4c2b9321"
+}

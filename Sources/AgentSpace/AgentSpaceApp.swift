@@ -5,6 +5,7 @@ import SwiftUI
 @MainActor
 struct AgentSpaceApp: App {
     @StateObject private var model: AppModel
+    @AppStorage(AgentAppearance.preferenceKey) private var appearance = AgentAppearance.system
 
     init() {
         if ProcessInfo.processInfo.arguments.contains("--smoke-test") { exit(ReleaseSmoke.run()) }
@@ -18,7 +19,7 @@ struct AgentSpaceApp: App {
     var body: some Scene {
         WindowGroup("CleanMyAgent", id: "main") {
             RootView(model: model)
-                .preferredColorScheme(.dark)
+                .preferredColorScheme(appearance.colorScheme)
                 .frame(minWidth: 940, minHeight: 620)
         }
         .windowStyle(.titleBar)

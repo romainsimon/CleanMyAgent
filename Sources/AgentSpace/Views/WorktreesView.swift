@@ -12,7 +12,8 @@ struct WorktreesView: View {
                 LazyVStack(alignment: .leading, spacing: 18) {
                     PageHeader(
                         title: "Worktrees",
-                        subtitle: "Forgotten checkouts, with the evidence that tells you what should stay."
+                        subtitle: "Forgotten checkouts, with the evidence that tells you what should stay.",
+                        illustration: "protected-folder"
                     )
 
                     auditSummary
@@ -81,11 +82,11 @@ struct WorktreesView: View {
         VStack(alignment: .leading, spacing: 16) {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), alignment: .leading)], alignment: .leading, spacing: 16) {
             summaryItem(value: model.worktrees.count.formatted(), label: "Audited", color: .primary)
-            summaryItem(value: removableWorktrees.count.formatted(), label: "Ready for review", color: .green)
-            summaryItem(value: ByteFormat.string(removableBytes), label: "Verified space", color: .green)
-            summaryItem(value: protectedWorktrees.count.formatted(), label: "Protected", color: .orange)
+            summaryItem(value: removableWorktrees.count.formatted(), label: "Ready for review", color: Color.agentSpaceGreen)
+            summaryItem(value: ByteFormat.string(removableBytes), label: "Verified space", color: Color.agentSpaceGreen)
+            summaryItem(value: protectedWorktrees.count.formatted(), label: "Protected", color: Color.agentSpaceAmber)
             }
-            Label("Clean, inactive and verified merged. Rechecked before Git removes a checkout.", systemImage: "checkmark.shield")
+            AgentLabel("Clean, inactive and verified merged. Rechecked before Git removes a checkout.", symbol: "checkmark.shield")
                 .font(.caption.weight(.medium))
                 .foregroundStyle(Color.agentSpaceSecondary)
         }
@@ -162,9 +163,8 @@ struct WorktreesView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
-                    Label(item.safety == .removable ? "Ready for review" : item.safety.label,
-                          systemImage: item.safety == .removable ? "checkmark.shield" : "lock")
-                        .foregroundStyle(item.safety == .removable ? .green : .orange)
+                    AgentLabel(item.safety == .removable ? "Ready for review" : item.safety.label, symbol: item.safety == .removable ? "checkmark.shield" : "lock")
+                        .foregroundStyle(item.safety == .removable ? Color.agentSpaceGreen : Color.agentSpaceAmber)
                         .fontWeight(.medium)
                 }
                 Text(item.safetyReason)
@@ -219,10 +219,9 @@ struct WorktreesView: View {
                             Spacer(minLength: 4)
                             Text(item.bytes > 0 ? ByteFormat.string(item.bytes) : "—").monospacedDigit()
                         }
-                        Label(item.safety == .removable ? "Ready for review" : item.safety.label,
-                              systemImage: item.safety == .removable ? "checkmark.shield" : "lock")
+                        AgentLabel(item.safety == .removable ? "Ready for review" : item.safety.label, symbol: item.safety == .removable ? "checkmark.shield" : "lock")
                             .font(.caption.weight(.semibold))
-                            .foregroundStyle(item.safety == .removable ? .green : .orange)
+                            .foregroundStyle(item.safety == .removable ? Color.agentSpaceGreen : Color.agentSpaceAmber)
                         Text(item.safetyReason)
                             .font(.caption).foregroundStyle(Color.agentSpaceSecondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -256,14 +255,13 @@ struct WorktreesView: View {
     }
 
     private var selectionLabel: some View {
-        Label(
+        AgentLabel(
                 selectedRecords.isEmpty
                     ? "Select verified worktrees to remove"
-                    : "\(selectedRecords.count) selected · \(ByteFormat.string(selectedBytes))",
-                systemImage: "checkmark.shield"
+                    : "\(selectedRecords.count) selected · \(ByteFormat.string(selectedBytes))", symbol: "checkmark.shield"
             )
             .font(.callout)
-            .foregroundStyle(selectedRecords.isEmpty ? Color.agentSpaceSecondary : .green)
+            .foregroundStyle(selectedRecords.isEmpty ? Color.agentSpaceSecondary : Color.agentSpaceGreen)
 
     }
 
@@ -283,7 +281,7 @@ struct WorktreesView: View {
             }
             .disabled(selectedRecords.isEmpty || model.worktreeCleanupState == .removing)
             .buttonStyle(.borderedProminent)
-            .tint(.red)
+            .tint(Color.agentSpaceRed)
         }
     }
 
@@ -293,29 +291,29 @@ struct WorktreesView: View {
         case .idle:
             EmptyView()
         case .removing:
-            Label("Rechecking every selected worktree before Git removes it…", systemImage: "arrow.triangle.2.circlepath")
+            AgentLabel("Rechecking every selected worktree before Git removes it…", symbol: "arrow.triangle.2.circlepath")
                 .font(.callout)
                 .foregroundStyle(Color.agentSpaceSecondary)
         case let .succeeded(removedCount, reclaimedBytes):
             notice(
                 "Removed \(removedCount) worktrees and reclaimed about \(ByteFormat.string(reclaimedBytes)). Branches and remote pull requests were not deleted.",
-                color: .green,
+                color: Color.agentSpaceGreen,
                 symbol: "checkmark.circle.fill"
             )
         case let .partial(removedCount, reclaimedBytes, failures):
             notice(
                 "Removed \(removedCount) worktrees (about \(ByteFormat.string(reclaimedBytes))). Protected \(failures.count) that changed or failed revalidation.",
-                color: .orange,
+                color: Color.agentSpaceAmber,
                 symbol: "exclamationmark.triangle.fill"
             )
         case let .failed(message):
-            notice(message, color: .orange, symbol: "exclamationmark.triangle.fill")
+            notice(message, color: Color.agentSpaceAmber, symbol: "exclamationmark.triangle.fill")
         }
     }
 
     private func notice(_ message: String, color: Color, symbol: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            Label(message, systemImage: symbol)
+            AgentLabel(message, symbol: symbol)
                 .foregroundStyle(color)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer()
@@ -387,9 +385,9 @@ private struct WorktreeCleanupConfirmationView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             HStack(alignment: .top, spacing: 14) {
-                Image(systemName: "externaldrive.badge.checkmark")
+                PhosphorIcon(symbol: "externaldrive.badge.checkmark")
                     .font(.system(size: 28, weight: .medium))
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(Color.agentSpaceAmber)
                 VStack(alignment: .leading, spacing: 5) {
                     Text("Remove \(records.count) verified worktrees?")
                         .font(.title2.weight(.semibold))
@@ -399,13 +397,13 @@ private struct WorktreeCleanupConfirmationView: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                Label("No uncommitted or untracked files", systemImage: "checkmark.circle.fill")
-                Label("No unpushed commits", systemImage: "checkmark.circle.fill")
-                Label("Merged into the default branch or through a merged PR", systemImage: "checkmark.circle.fill")
-                Label("Branches and pull requests remain intact", systemImage: "checkmark.circle.fill")
+                AgentLabel("No uncommitted or untracked files", symbol: "checkmark.circle.fill")
+                AgentLabel("No unpushed commits", symbol: "checkmark.circle.fill")
+                AgentLabel("Merged into the default branch or through a merged PR", symbol: "checkmark.circle.fill")
+                AgentLabel("Branches and pull requests remain intact", symbol: "checkmark.circle.fill")
             }
             .font(.callout)
-            .foregroundStyle(.green)
+            .foregroundStyle(Color.agentSpaceGreen)
 
             List(records) { record in
                 VStack(alignment: .leading, spacing: 3) {

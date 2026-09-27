@@ -43,7 +43,8 @@ struct RootView: View {
         .environment(\.agentMotionEnabled, motionEnabled)
         .onAppear { inputMethod.start() }
         .onDisappear { inputMethod.stop() }
-        .tint(.agentSpaceBlue)
+        .foregroundStyle(Color.agentSpaceText)
+        .tint(.agentSpaceAccent)
         .symbolRenderingMode(.hierarchical)
         .toolbar {
             ToolbarItem(placement: .navigation) {
@@ -80,25 +81,6 @@ struct RootView: View {
 
     private var sidebar: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 10) {
-                Image(nsImage: NSApplication.shared.applicationIconImage)
-                    .resizable()
-                    .interpolation(.high)
-                    .scaledToFit()
-                    .frame(width: 38, height: 38)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("CleanMyAgent")
-                        .font(.system(size: 14, weight: .semibold))
-                    Text(model.isDemo && !model.isScreenshotMode ? "Demo data · cleanup disabled" : "Local agent care")
-                        .font(.caption)
-                        .foregroundStyle(Color.agentSpaceSecondary)
-                }
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 22)
-            .padding(.bottom, 28)
-
             ScrollView {
                 VStack(alignment: .leading, spacing: 26) {
                     SidebarGroup(
@@ -118,31 +100,36 @@ struct RootView: View {
                     )
                 }
                 .padding(.horizontal, 10)
+                .padding(.top, 22)
                 .padding(.bottom, 16)
             }
             .minimalMacScrollbars()
 
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 7) {
-                    Image(systemName: "checkmark.shield")
+                    PhosphorIcon(symbol: "checkmark.shield")
                         .foregroundStyle(Color.agentSpaceBlue)
                     Text("You're in control")
                         .font(.caption.weight(.medium))
                 }
-                Text("Review first. Confirm each cleanup.")
+                Text(model.isDemo && !model.isScreenshotMode ? "Demo data · cleanup disabled" : "Review first. Confirm each cleanup.")
                     .font(.caption)
                     .foregroundStyle(Color.agentSpaceSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
+
+            AppearanceSwitcher()
+                .padding(.horizontal, 16)
+                .padding(.bottom, 18)
         }
         .background {
             ZStack {
                 if !reduceTransparency {
                     Rectangle().fill(.regularMaterial)
                 }
-                Color.agentSpaceBackground.opacity(reduceTransparency ? 1 : 0.72)
+                Color.agentSpaceSidebar.opacity(reduceTransparency ? 1 : 0.92)
             }
         }
     }
@@ -198,25 +185,25 @@ private struct SidebarItem: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
-                Image(systemName: section.symbol)
+                PhosphorIcon(symbol: section.symbol, size: 22)
                     .font(.system(size: 17, weight: .medium))
-                    .foregroundStyle(isSelected ? Color.agentSpaceBlue : Color.agentSpaceSecondary)
+                    .foregroundStyle(isSelected ? Color.agentSpaceAccent : Color.agentSpaceSecondary)
                     .frame(width: 24)
                     .accessibilityHidden(true)
 
                 Text(section.rawValue)
                     .font(.system(size: 13, weight: isSelected ? .semibold : .medium))
-                    .foregroundStyle(isSelected ? Color.white : Color.agentSpaceSecondary)
+                    .foregroundStyle(isSelected ? Color.agentSpaceAccent : Color.agentSpaceSecondary)
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 12)
             .frame(height: 40)
             .background {
                 RoundedRectangle(cornerRadius: 11, style: .continuous)
-                    .fill(Color.white.opacity(isHovered && !isSelected ? 0.045 : 0))
+                    .fill(Color.agentSpaceHover.opacity(isHovered && !isSelected ? 1 : 0))
                 if isSelected {
                     RoundedRectangle(cornerRadius: 11, style: .continuous)
-                        .fill(Color.agentSpaceBlue.opacity(0.14))
+                        .fill(Color.agentSpaceSelection)
                         .matchedGeometryEffect(id: "navigation-selection", in: namespace)
                 }
             }
@@ -231,18 +218,22 @@ private struct SidebarItem: View {
 struct PageHeader: View {
     let title: String
     let subtitle: String
+    var illustration: String? = nil
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.system(size: 32, weight: .semibold))
-                .tracking(-0.55)
-            Text(subtitle)
-                .font(.callout)
-                .foregroundStyle(Color.agentSpaceSecondary)
-                .fixedSize(horizontal: false, vertical: true)
+        HStack(alignment: .center, spacing: 20) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(title)
+                    .font(.system(size: 32, weight: .semibold))
+                    .tracking(-0.55)
+                Text(subtitle)
+                    .font(.callout)
+                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            if let illustration { AgentIllustration(name: illustration) }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

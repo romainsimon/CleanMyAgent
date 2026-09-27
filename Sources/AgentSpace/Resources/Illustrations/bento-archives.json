@@ -1,0 +1,14 @@
+{
+  "prompt": "Create one original transparent raster illustration for a CleanMyAgent feature bento card. The supplied images are STYLE REFERENCES ONLY, not edit targets. Match their friendly chunky 3D shapes, soft matte enamel, rounded edges, warm ivory cream and coral red palette, dark charcoal accents, gentle upper-left highlights, nearly frontal three-quarter perspective. One clearly readable object group, centered and large on a square canvas with about 12% transparent breathing room. Full subject visible. Genuine transparent RGBA background, crisp antialiased alpha, no background tile, no floor or external shadow, no lettering or numbers, no logo, no watermark, no charts, no screenshot or app UI. Keep it visually quiet enough to read at 140px. Subject: one chunky coral archive box, with its ivory lid tilted slightly open and two blank cream file cards tucked inside. A small warm ivory analog clock with dark simple hands and no numerals leans on the front-right corner, indicating old archived sessions. No trash can, no faces. Keep the box and clock a single compact group.",
+  "createdAt": "2026-09-27",
+  "generator": "built-in image_gen",
+  "references": [
+    "clutter-pile.webp",
+    "protected-folder.webp"
+  ],
+  "source": "exec-64a08e76-ac1e-49e9-9aa8-bdd83c9d49ed.png",
+  "export": "cwebp q86 alpha_q100 600x600; generated alpha preserved",
+  "role": "decorative feature illustration; not product UI",
+  "bytes": 24990,
+  "sha256": "a699400d4398f4a8398fd829489726d5b0e5d5b5bee5cb9ae317173e4fdea6c3"
+}

@@ -1,0 +1,14 @@
+{
+  "prompt": "Create one original transparent raster illustration for a CleanMyAgent feature bento card. The supplied images are STYLE REFERENCES ONLY, not edit targets. Match their friendly chunky 3D shapes, soft matte enamel, rounded edges, warm ivory cream and coral red palette, dark charcoal accents, gentle upper-left highlights, nearly frontal three-quarter perspective. One clearly readable object group, centered and large on a square canvas with about 12% transparent breathing room. Full subject visible. Genuine transparent RGBA background, crisp antialiased alpha, no background tile, no floor or external shadow, no lettering or numbers, no logo, no watermark, no charts, no screenshot or app UI. Keep it visually quiet enough to read at 140px. Subject: one tactile warm ivory circular speed gauge with a thick coral rim, simple charcoal needle pointing around the middle, and a few subtle dark tick marks without numbers. One small coral RAM/memory chip rests beside the gauge. A freestanding instrument group illustrating observed speed and memory measurements, not a promise of acceleration. No rocket, lightning, trophy, motion trails or chart.",
+  "createdAt": "2026-09-27",
+  "generator": "built-in image_gen",
+  "references": [
+    "clutter-pile.webp",
+    "protected-folder.webp"
+  ],
+  "source": "exec-a9d18685-61f1-409c-87ef-1bd6d3a10e11.png",
+  "export": "cwebp q86 alpha_q100 600x600; generated alpha preserved",
+  "role": "decorative feature illustration; not product UI",
+  "bytes": 29952,
+  "sha256": "d049ee482b94dca177dfde1f1c6fbba2e4c92e042a5fb0181459ad54059f25e2"
+}

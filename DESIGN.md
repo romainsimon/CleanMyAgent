@@ -2,22 +2,40 @@
 
 ## Mode and purpose
 
-Operate. A calm midnight maintenance desk for the Mac that runs your coding agents. The first decision is what to review; exact evidence stays close to each cleanup action. The 2026-09-27 redesign keeps the native macOS structure, coral bin, San Francisco, real agent identities and every cleanup guard.
+Operate. A warm, readable maintenance desk for the Mac that runs your coding agents. The first decision is what to review; exact evidence stays close to each cleanup action. The 2026-09-27 redesign keeps the native macOS structure, coral bin, San Francisco, real agent identities and every cleanup guard.
 
 ## Visual world
 
-A lighter midnight canvas separates from neutral raised surfaces. Quiet edges replace colored outlines. Navigation uses one clear selection, native hierarchical SF Symbols and readable labels, without a tile behind every symbol. The app feels warm through its existing coral bin; safety colors carry evidence rather than personality.
+A lighter midnight canvas separates from neutral raised surfaces. Quiet edges replace colored outlines. Navigation uses one clear selection, official Phosphor Duotone glyphs and readable labels, without a tile behind every symbol. The app feels warm through its existing coral bin; safety colors carry evidence rather than personality.
 
-## Color
+## Color and appearance
 
-- Canvas: RGB 0.051 / 0.063 / 0.090.
-- Surface: RGB 0.086 / 0.102 / 0.137.
-- Raised: RGB 0.125 / 0.145 / 0.184.
-- Secondary text: RGB 0.65 / 0.69 / 0.76, opaque for reliable contrast.
-- Neutral edges: white at 6.5% opacity.
-- Action/navigation blue: RGB 0.48 / 0.69 / 1.00.
-- System green, orange and red retain healthy, protected/warning and destructive meanings. Status labels always accompany color.
-- Violet/magenta and agent colors identify measurements or sources, never cleanup eligibility.
+The user requested light/dark palettes, matching Phosphor Duotone icons and illustrations on 2026-09-27; this supersedes the forced midnight and SF Symbols direction. System is the default; Light and Dark are explicit persistent choices, available in the sidebar and Settings. System follows the Mac appearance. A theme change is immediate, including under Reduce Motion.
+
+The light palette uses a white-canvas maintenance desk with warm neutral surfaces. The dark palette uses charcoal with neutral raised surfaces; neither is a mechanical inversion. The coral selection links both to the existing smiling bin. Native system controls retain their expected structure and San Francisco typography.
+
+| Role | Light | Dark |
+|---|---|---|
+| Canvas | #f7f7f5 | #151619 |
+| Sidebar | #eeefed | #191b1f |
+| Surface | #ffffff | #1e2024 |
+| Raised | #eceeea | #292c31 |
+| Text | #252832 | #f0f1f3 |
+| Secondary text | #5b616a | #b0b4bc |
+| Selection | #f4e3dc | #3b2b29 |
+| Coral action | #a83d2c | #ff927a |
+| Information / charts | #2565ac | #88b8f3 |
+| Ready | #24734d | #79d8a5 |
+| Protected / warning | #8d580c | #f2c579 |
+| Destructive | #aa3438 | #ff9699 |
+
+AgentPalette owns all appearances and chart categories. Provider marks keep their dominant hue; monochrome marks use distinct neutral tones. The same agent color follows each label through charts and agent rows. Text, action and semantic status labels are checked at 4.5:1 on their actual surfaces, including selection. Colors accompany readable labels and exact evidence. Progress tracks, selection, hover and scrollbar appearance also adapt; no white-on-white fallback is used.
+
+## Icons and illustrations
+
+Bundle the official Phosphor Core 2.1.1 Duotone SVG sources, MIT license and 128px native template exports. Original glyph paths and 20% secondary alpha remain intact, including both appearances. Authored page, navigation and evidence icons use this set; OS toolbar controls and checkboxes retain their native affordances. Actual agent identities stay their original logos; Ori uses the shared branch glyph as its fallback.
+
+Existing transparent coral/ivory image_gen illustrations from cleanmyagent-web accompany page headers, the three cleanup families and the empty usage state. They are decorative, do not imply measurements or safety, and are hidden from accessibility. Charts, exact paths and safety reasons retain priority. Images are bundled locally, never fetched by the app.
 
 ## Typography and spacing
 
@@ -39,7 +57,7 @@ The 212pt sidebar uses 40pt rows and 12pt sentence-case group labels. Main conte
 
 ## Native behavior and accessibility
 
-The minimum window remains 940×620pt. Use native toolbar controls, pickers, alerts, sheets and focus behavior. Pointer navigation uses a short transition; sidebar toggles and keyboard actions resolve immediately. Symbols use native hierarchical rendering; captured native icons are not replaced with web glyphs.
+The minimum window remains 940×620pt. Use native toolbar controls, pickers, alerts, sheets and focus behavior. Pointer navigation uses a short transition; sidebar toggles and keyboard actions resolve immediately. Authored navigation and evidence icons use official Phosphor Core 2.1.1 Duotone, matching the interactive preview. Native window toolbar and checkbox affordances stay platform standard.
 
 Respect Reduce Transparency with an opaque sidebar. Reduce Motion disables custom movement and settles measurements immediately. Loading retains native ProgressView feedback. Selected/disabled controls retain their semantic traits. Body text and labels remain above normal-text contrast requirements; system-disabled styling is not used as a general text color.
 
@@ -49,7 +67,7 @@ The user requested more delightful app transitions and charts on 2026-09-27, sup
 
 The input-method monitor records only mouse-versus-keyboard, never key contents or coordinates. Keyboard actions and Reduce Motion have no custom animation. Pending chart tasks cancel when their view disappears and settle when motion is disabled. Sidebar resizing, live speed updates, cleanup selection and safety checks stay immediate; confirmation retains native macOS presentation. No loop or animation library is added.
 
-The website simulation follows these same eight destinations, hierarchy, midnight tokens, native metric definitions and 7/30/90-day public fixtures. Product typography stays system-native. Usage summaries reflow at narrow window sizes; graphs stack when their labels would become cramped. Website-only adaptations include a horizontal phone navigation rail and explicit simulation disclosures.
+The website simulation follows these same eight destinations, hierarchy, shared light/dark tokens, native metric definitions and 7/30/90-day public fixtures. Product typography stays system-native. Usage summaries reflow at narrow window sizes; graphs stack when their labels would become cramped. Website-only adaptations include a horizontal phone navigation rail and explicit simulation disclosures.
 
 ## References and provenance
 
@@ -62,3 +80,7 @@ The coral-bin asset and original native resource provenance stay in docs/app-ico
 ## Verification
 
 Inspect a copied native bundle at normal and minimum window sizes. Check all eight pages, keyboard navigation, sidebar toggles, Overview review links, worktree filters/selection/cancel, Usage ranges, refresh and window reopen. Use --screenshots public fixtures with all live scans and cleanup disabled; public captions disclose example data. Native code is reviewed against the craft floor directly: the HTML/CSS detector has no verdict on SwiftUI.
+
+The appearance refinement compares CleanMyMac (https://cleanmymac.com/fr) for approachable maintenance imagery with Raycast (https://www.raycast.com/) for restrained, readable operation and immediate keyboard behavior. Apple's Dark Mode guidance (https://developer.apple.com/design/human-interface-guidelines/dark-mode) informs independently composed appearances and a system default. We borrow those principles, not their screens or assets. Existing Fey/Cursor references remain the density and navigation baseline.
+
+The sidebar begins with the grouped navigation and 22pt top inset. Per the user's request, remove its app logo, name and tagline; the app identity remains in the native window title. The --demo cleanup warning remains in the sidebar footer.

@@ -10,6 +10,18 @@ enum ReleaseSmoke {
             for agent in AgentKind.allCases where agent != .ori {
                 guard AppResources.icon(for: agent) != nil else { throw SmokeError.failed("Packaged icon missing: \(agent.rawValue)") }
             }
+            let glyphs = AppSection.allCases.map { PhosphorIcon.glyph(for: $0.symbol) } + ["desktop", "sun", "moon"]
+            for glyph in glyphs {
+                guard let image = AppResources.duotoneIcon(named: glyph, pointSize: 18),
+                      image.isTemplate, image.size == NSSize(width: 18, height: 18) else {
+                    throw SmokeError.failed("Packaged template glyph has missing or invalid native size: \(glyph)")
+                }
+            }
+            for name in ["hero-mascot", "protected-folder", "bento-storage", "bento-usage", "bento-performance", "bento-mac", "bento-dependencies", "bento-caches", "bento-archives"] {
+                guard AppResources.image(named: name) != nil else {
+                    throw SmokeError.failed("Packaged illustration missing: \(name)")
+                }
+            }
             let repository = root.appendingPathComponent("repository")
             let worktree = root.appendingPathComponent("worktree")
             try FileManager.default.createDirectory(at: repository, withIntermediateDirectories: true)

@@ -32,10 +32,15 @@ enum DemoData {
         var buckets: [UsageBucket] = []
         for day in 0..<range.rawValue {
             let date = Calendar.current.startOfDay(for: Date().addingTimeInterval(Double(-day) * 86_400))
-            let agent: AgentKind = day % 2 == 0 ? .codex : .claude
             let input = Int64(40_000 + (day * 7919) % 60_000)
             let output = Int64(9_000 + (day * 3571) % 18_000)
-            buckets.append(UsageBucket(date: date, agent: agent, inputTokens: input, outputTokens: output, cacheReadTokens: 24_000, cacheWriteTokens: 4_000, reasoningTokens: 2_000, reportedCostUSD: 0, sessions: 4))
+            let codexInput = input * 68 / 100
+            let codexOutput = output * 68 / 100
+            let codexCacheRead = Int64(24_000) * 68 / 100
+            let codexCacheWrite = Int64(4_000) * 68 / 100
+            let codexReasoning = Int64(2_000) * 68 / 100
+            buckets.append(UsageBucket(date: date, agent: .codex, inputTokens: codexInput, outputTokens: codexOutput, cacheReadTokens: codexCacheRead, cacheWriteTokens: codexCacheWrite, reasoningTokens: codexReasoning, reportedCostUSD: 0, sessions: 3))
+            buckets.append(UsageBucket(date: date, agent: .claude, inputTokens: input - codexInput, outputTokens: output - codexOutput, cacheReadTokens: 24_000 - codexCacheRead, cacheWriteTokens: 4_000 - codexCacheWrite, reasoningTokens: 2_000 - codexReasoning, reportedCostUSD: 0, sessions: 1))
         }
         return UsageSnapshot(range: range, buckets: buckets, models: [ModelUsage(agent: .codex, model: "Codex model", inputTokens: 1_280_000, outputTokens: 410_000, cacheReadTokens: 780_000, cacheWriteTokens: 110_000, reasoningTokens: 46_000, reportedCostUSD: 0, sessions: 64)], coverage: AgentKind.allCases.map { UsageCoverage(agent: $0, filesDiscovered: 28, filesScanned: 28, truncatedFiles: 0, status: .measured, note: (annotateDemo ? "Demo data. " : "") + "Provider cost is only shown when present in local records.") }, sessionCount: range.rawValue * 4, capturedAt: Date())
     }

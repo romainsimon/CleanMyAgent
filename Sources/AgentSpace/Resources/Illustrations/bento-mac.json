@@ -1,0 +1,14 @@
+{
+  "prompt": "Create one original transparent raster illustration for a CleanMyAgent feature bento card. The supplied images are STYLE REFERENCES ONLY, not edit targets. Match their friendly chunky 3D shapes, soft matte enamel, rounded edges, warm ivory cream and coral red palette, dark charcoal accents, gentle upper-left highlights, nearly frontal three-quarter perspective. One clearly readable object group, centered and large on a square canvas with about 12% transparent breathing room. Full subject visible. Genuine transparent RGBA background, crisp antialiased alpha, no background tile, no floor or external shadow, no lettering or numbers, no logo, no watermark, no charts, no screenshot or app UI. Keep it visually quiet enough to read at 140px. Subject: Everyday Mac controls. A small group of two thick, rounded warm ivory keyboard keycaps: the larger keycap has a simple coral red circular refresh arrow embossed on its top, and the smaller keycap has a dark charcoal command-symbol-like four-loop knot embossed on its top. Beside them stands one tiny coral red utility trash bin with an ivory lid. Three objects total, neatly clustered, readable silhouettes, playful but restrained, no computer screen.",
+  "createdAt": "2026-09-27",
+  "generator": "built-in image_gen",
+  "references": [
+    "clutter-pile.webp",
+    "protected-folder.webp"
+  ],
+  "source": "exec-4dbbfc88-350c-423f-944a-7e38e887b08e.png",
+  "export": "cwebp q86 alpha_q100 600x600; generated alpha preserved",
+  "role": "decorative feature illustration; not product UI",
+  "bytes": 24000,
+  "sha256": "d733fed66f5a4c5b3977a048e0ff42a005333c964144737dd56bcec123490fad"
+}

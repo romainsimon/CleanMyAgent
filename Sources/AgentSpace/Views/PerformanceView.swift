@@ -8,7 +8,8 @@ struct PerformanceView: View {
             VStack(alignment: .leading, spacing: 24) {
                 PageHeader(
                     title: "Performance",
-                    subtitle: "See the pace your agents report, and where the numbers come from."
+                    subtitle: "See the pace your agents report, and where the numbers come from.",
+                    illustration: "bento-performance"
                 )
 
                 LiveSpeedMeterView(snapshot: model.liveSpeed)
@@ -30,7 +31,7 @@ struct PerformanceView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Label("How to read these numbers", systemImage: "info.circle")
+                    AgentLabel("How to read these numbers", symbol: "info.circle")
                         .font(.headline)
                     Text("Observed output tok/s is not provider-side decoding speed. Tool execution, multiple model calls, local logging coverage, and each agent’s event format can affect the result.")
                         .font(.callout)

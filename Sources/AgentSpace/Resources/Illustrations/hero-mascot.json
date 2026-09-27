@@ -1,0 +1,9 @@
+{
+  "prompt": "Use case: background-extraction. Asset type: transparent landing-page mascot. Edit target: the attached CleanMyAgent app icon. Extract ONLY the existing cheerful coral trash can from the ivory app tile. Preserve its exact broad tilted lid, chunky handle, tapered ribbed body, two dark oval eyes with tiny white highlights, small smile, matte enamel shading, original coral color and nearly frontal perspective. Remove the entire ivory tile and all background. Keep the character complete with smooth clean antialiased alpha edges, no white fringe, no fragments, no ground plane, no cast shadow outside its silhouette. Center the bin with generous transparent breathing room, about 80 percent of the square canvas height. Finished high-resolution raster illustration on a genuinely transparent background. No lettering, no new objects, no badge, no watermark.",
+  "createdAt": "2026-09-27",
+  "generator": "built-in image_gen",
+  "reference": "CleanMyAgent coral trash app icon from the native repository",
+  "source": "exec-681cc1d3-3f74-446d-82ba-0ce239c39f18.png",
+  "export": "cwebp q86 alpha_q100 800x800; generated alpha preserved",
+  "role": "brand mascot"
+}

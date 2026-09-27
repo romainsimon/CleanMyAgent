@@ -1,0 +1,9 @@
+{
+  "prompt": "Use case: stylized-concept. Asset type: transparent editorial illustration for CleanMyAgent’s section explaining that uncertain work stays protected. Reference image is STYLE AND PALETTE ONLY, not an edit target. Create one thick warm-ivory file folder, standing slightly angled, with a large cheerful coral padlock in front and one small dark-ink key resting beside it. Use the same sophisticated playful industrial-design toy style as the reference trash can: smooth chunky clean forms, matte enamel, subtle dimensional shading, crisp silhouette, nearly frontal slight perspective. Warm ivory #f8f5ee, coral #ce4936, dark warm ink #272b24 only. Simple balanced compact composition with generous transparent padding, legible at 180px. Genuine transparent background with clean antialiased alpha edges, no ground plane, no app tile, no white fringe, no shadow outside the objects. No face, no trash can, no letters, no logos, no checkmark, no shield, no UI, no watermark, no decorative sparkles. Original finished illustration.",
+  "createdAt": "2026-09-27",
+  "generator": "built-in image_gen",
+  "reference": "CleanMyAgent coral trash app icon from the native repository",
+  "source": "exec-272a1a0f-1b93-4670-9d8a-c7f7a777a784.png",
+  "export": "cwebp q86 alpha_q100 600x600; generated alpha preserved",
+  "role": "decorative editorial illustration; not product UI"
+}

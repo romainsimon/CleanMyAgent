@@ -17,7 +17,7 @@ struct LiveSpeedMeterView: View {
     private var compactMeter: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 10) {
-                Image(systemName: "gauge.with.dots.needle.50percent")
+                PhosphorIcon(symbol: "gauge.with.dots.needle.50percent")
                     .font(.title3).foregroundStyle(meterColor)
                 Text(snapshot.active ? "Codex is working" : "No active Codex turn")
                     .font(.callout.weight(.medium))
@@ -47,7 +47,7 @@ struct LiveSpeedMeterView: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
                         .fill(meterColor.opacity(0.14))
-                    Image(systemName: "gauge.with.dots.needle.50percent")
+                    PhosphorIcon(symbol: "gauge.with.dots.needle.50percent")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(meterColor)
                 }
@@ -87,7 +87,7 @@ struct LiveSpeedMeterView: View {
 
             HStack(spacing: 22) {
                 MetricLegendItem(color: meterColor, label: "Observed", value: "\(formattedSpeed) tok/s")
-                MetricLegendItem(color: Color.white.opacity(0.28), label: "Scale", value: "\(scaleMaximum.formatted()) tok/s")
+                MetricLegendItem(color: Color.agentSpaceTrack, label: "Scale", value: "\(scaleMaximum.formatted()) tok/s")
                 Spacer()
                 Text(snapshot.active
                      ? "\(snapshot.outputTokens.formatted()) output tokens reported"
@@ -97,7 +97,7 @@ struct LiveSpeedMeterView: View {
             }
         }
         .padding(20)
-        .agentSpacePanel(accent: snapshot.active ? .green : .agentSpaceViolet)
+        .agentSpacePanel(accent: snapshot.active ? Color.agentSpaceGreen : .agentSpaceViolet)
     }
 
     private var meterFraction: Double {
@@ -105,7 +105,7 @@ struct LiveSpeedMeterView: View {
     }
 
     private var meterColor: Color {
-        snapshot.active ? .green : Color.agentSpaceSecondary
+        snapshot.active ? Color.agentSpaceGreen : Color.agentSpaceSecondary
     }
 
     private var formattedSpeed: String {

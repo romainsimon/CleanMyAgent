@@ -2,14 +2,14 @@ import AppKit
 import SwiftUI
 
 extension Color {
-    static let agentSpaceBackground = Color(red: 0.025, green: 0.032, blue: 0.070)
-    static let agentSpaceSurface = Color(red: 0.060, green: 0.070, blue: 0.125)
-    static let agentSpaceRaised = Color(red: 0.095, green: 0.105, blue: 0.175)
-    static let agentSpaceSeparator = Color.white.opacity(0.105)
-    static let agentSpaceSecondary = Color.white.opacity(0.64)
-    static let agentSpaceBlue = Color(red: 0.30, green: 0.58, blue: 1.00)
-    static let agentSpaceViolet = Color(red: 0.57, green: 0.42, blue: 1.00)
-    static let agentSpaceMagenta = Color(red: 0.94, green: 0.36, blue: 0.73)
+    static let cleanMyAgentBackground = Color(red: 0.025, green: 0.032, blue: 0.070)
+    static let cleanMyAgentSurface = Color(red: 0.060, green: 0.070, blue: 0.125)
+    static let cleanMyAgentRaised = Color(red: 0.095, green: 0.105, blue: 0.175)
+    static let cleanMyAgentSeparator = Color.white.opacity(0.105)
+    static let cleanMyAgentSecondary = Color.white.opacity(0.64)
+    static let cleanMyAgentBlue = Color(red: 0.30, green: 0.58, blue: 1.00)
+    static let cleanMyAgentViolet = Color(red: 0.57, green: 0.42, blue: 1.00)
+    static let cleanMyAgentMagenta = Color(red: 0.94, green: 0.36, blue: 0.73)
 
     static func agentAccent(_ agent: AgentKind) -> Color {
         switch agent {
@@ -25,9 +25,9 @@ extension Color {
     }
 }
 
-struct AgentSpaceBackground: View {
+struct AppBackground: View {
     var body: some View {
-        Color.agentSpaceBackground
+        Color.cleanMyAgentBackground
         .ignoresSafeArea()
         .accessibilityHidden(true)
     }
@@ -119,7 +119,7 @@ struct MetricLegendItem: View {
                 .frame(width: 7, height: 7)
                 .accessibilityHidden(true)
             Text(label)
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
             Text(value)
                 .foregroundStyle(.primary)
                 .monospacedDigit()
@@ -173,16 +173,16 @@ private final class MinimalMacScrollbarProbe: NSView {
 }
 
 extension View {
-    func agentSpacePanel(accent: Color = .agentSpaceBlue, cornerRadius: CGFloat = 18) -> some View {
+    func cleanMyAgentPanel(accent: Color = .cleanMyAgentBlue, cornerRadius: CGFloat = 18) -> some View {
         self
-            .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .background(Color.cleanMyAgentSurface, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .stroke(accent.opacity(0.13), lineWidth: 1)
             }
     }
 
-    func agentSpaceRow() -> some View {
+    func cleanMyAgentRow() -> some View {
         self
             .padding(.horizontal, 14)
             .padding(.vertical, 11)

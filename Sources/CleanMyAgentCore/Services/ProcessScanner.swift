@@ -36,7 +36,7 @@ enum ProcessScanner {
 
     static func agent(for command: String) -> AgentKind? {
         let lowercased = command.lowercased()
-        if lowercased.contains("/agent space.app/") || lowercased.contains("/agentspace") { return nil }
+        if lowercased.contains("/cleanmyagent.app/") { return nil }
         if lowercased.contains("/codex limits.app/") || lowercased.contains("/codex-router/") { return nil }
         if lowercased.contains("/cursor.app/") { return .cursor }
         if lowercased.contains("/opencode.app/") || executable(lowercased, isNamed: "opencode") { return .openCode }

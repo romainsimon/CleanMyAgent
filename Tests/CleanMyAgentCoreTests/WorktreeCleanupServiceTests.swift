@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import AgentSpace
+@testable import CleanMyAgentCore
 
 struct WorktreeCleanupServiceTests {
     @Test func removesOnlyARevalidatedIntegratedWorktreeAndKeepsItsBranch() throws {
@@ -211,7 +211,7 @@ struct WorktreeCleanupServiceTests {
 
     private func makeRepositoryFixture() throws -> (root: URL, repository: URL) {
         let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("AgentSpaceWorktreeTests-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("CleanMyAgentCoreWorktreeTests-\(UUID().uuidString)", isDirectory: true)
         let repository = root.appendingPathComponent("repository", isDirectory: true)
         try FileManager.default.createDirectory(at: repository, withIntermediateDirectories: true)
         try git(repository, ["init", "-b", "main"])

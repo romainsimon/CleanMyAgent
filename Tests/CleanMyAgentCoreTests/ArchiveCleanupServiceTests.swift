@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import AgentSpace
+@testable import CleanMyAgentCore
 
 struct ArchiveCleanupServiceTests {
     @Test func movesOnlyArchivedSessionsAndRecreatesTheirDirectory() throws {
@@ -56,7 +56,7 @@ struct ArchiveCleanupServiceTests {
 
     private func temporaryDirectory() throws -> URL {
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("AgentSpaceCleanupTests-\(UUID().uuidString)", isDirectory: true)
+            .appendingPathComponent("CleanMyAgentCoreCleanupTests-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }

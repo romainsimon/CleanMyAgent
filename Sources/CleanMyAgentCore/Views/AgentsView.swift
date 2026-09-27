@@ -33,16 +33,16 @@ struct AgentsView: View {
                         if let version = storage.version {
                             Text(version)
                                 .font(.caption.monospacedDigit())
-                                .foregroundStyle(Color.agentSpaceSecondary)
+                                .foregroundStyle(Color.cleanMyAgentSecondary)
                         }
                     }
                     Text(storage.isInstalled ? storage.rootPath.replacingOccurrences(of: NSHomeDirectory(), with: "~") : "Not installed")
                         .font(.caption)
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                         .lineLimit(1)
                     Text(storage.agent.capabilitySummary)
                         .font(.caption2)
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                 }
                 Spacer()
                 VStack(alignment: .trailing, spacing: 3) {
@@ -53,33 +53,33 @@ struct AgentsView: View {
                          ? "\(ByteFormat.string(runtime.residentBytes)) RAM · \(runtime.processCount) processes"
                          : "No active process")
                         .font(.caption2)
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                         .monospacedDigit()
                 }
             }
             .padding(14)
 
             if storage.categories.isEmpty {
-                Divider().overlay(Color.agentSpaceSeparator)
+                Divider().overlay(Color.cleanMyAgentSeparator)
                 Text(storage.isInstalled ? "No known categories were found." : "Install the agent to enable this adapter.")
                     .font(.callout)
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(14)
             } else {
-                Divider().overlay(Color.agentSpaceSeparator)
+                Divider().overlay(Color.cleanMyAgentSeparator)
                 ForEach(Array(storage.categories.enumerated()), id: \.element.id) { index, category in
                     StorageCategoryRow(category: category, showAgent: false)
                     if index < storage.categories.count - 1 {
-                        Divider().overlay(Color.agentSpaceSeparator).padding(.leading, 14)
+                        Divider().overlay(Color.cleanMyAgentSeparator).padding(.leading, 14)
                     }
                 }
             }
         }
-        .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(Color.cleanMyAgentSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color.agentSpaceSeparator, lineWidth: 1)
+                .stroke(Color.cleanMyAgentSeparator, lineWidth: 1)
         }
     }
 }

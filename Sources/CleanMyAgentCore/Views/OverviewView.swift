@@ -49,7 +49,7 @@ struct OverviewView: View {
                         .monospacedDigit()
                     Text("used")
                         .font(.callout)
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                 }
                 Spacer()
                 HStack(alignment: .firstTextBaseline, spacing: 7) {
@@ -59,7 +59,7 @@ struct OverviewView: View {
                     if model.disk.totalBytes > 0 {
                         Text("free")
                             .font(.callout)
-                            .foregroundStyle(Color.agentSpaceSecondary)
+                            .foregroundStyle(Color.cleanMyAgentSecondary)
                     }
                 }
             }
@@ -87,11 +87,11 @@ struct OverviewView: View {
                      ? "Checked \(model.disk.capturedAt.formatted(date: .omitted, time: .shortened))"
                      : "Audit in progress")
                     .font(.caption)
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
             }
         }
         .padding(24)
-        .agentSpacePanel(accent: pressureColor, cornerRadius: 22)
+        .cleanMyAgentPanel(accent: pressureColor, cornerRadius: 22)
     }
 
     private var agentStorage: some View {
@@ -104,11 +104,11 @@ struct OverviewView: View {
                 ForEach(Array(model.disk.agents.enumerated()), id: \.element.id) { index, storage in
                     AgentStorageRow(storage: storage, isScanning: model.isScanning && model.disk.totalBytes == 0)
                     if index < model.disk.agents.count - 1 {
-                        Divider().overlay(Color.agentSpaceSeparator).padding(.leading, 56)
+                        Divider().overlay(Color.cleanMyAgentSeparator).padding(.leading, 56)
                     }
                 }
             }
-            .agentSpacePanel(accent: .agentSpaceBlue)
+            .cleanMyAgentPanel(accent: .cleanMyAgentBlue)
         }
     }
 
@@ -119,11 +119,11 @@ struct OverviewView: View {
                 ForEach(Array(model.performance.metrics.enumerated()), id: \.element.id) { index, metric in
                     PerformanceRow(metric: metric, compact: true)
                     if index < model.performance.metrics.count - 1 {
-                        Divider().overlay(Color.agentSpaceSeparator).padding(.leading, 56)
+                        Divider().overlay(Color.cleanMyAgentSeparator).padding(.leading, 56)
                     }
                 }
             }
-            .agentSpacePanel(accent: .agentSpaceViolet)
+            .cleanMyAgentPanel(accent: .cleanMyAgentViolet)
         }
     }
 
@@ -167,7 +167,7 @@ struct AgentStorageRow: View {
                     .font(.body.weight(.medium))
                 Text(isScanning ? "Measuring local data…" : storage.isInstalled ? storage.rootPath.replacingOccurrences(of: NSHomeDirectory(), with: "~") : "Not installed")
                     .font(.caption)
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
                     .lineLimit(1)
             }
             Spacer()
@@ -175,6 +175,6 @@ struct AgentStorageRow: View {
                 .font(.body.weight(.medium))
                 .monospacedDigit()
         }
-        .agentSpaceRow()
+        .cleanMyAgentRow()
     }
 }

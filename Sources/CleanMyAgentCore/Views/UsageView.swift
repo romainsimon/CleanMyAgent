@@ -71,10 +71,10 @@ struct UsageView: View {
             summaryMetric("Sessions", value: model.usage.sessionCount.formatted())
         }
         .padding(.vertical, 16)
-        .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(Color.cleanMyAgentSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color.agentSpaceSeparator, lineWidth: 1)
+                .stroke(Color.cleanMyAgentSeparator, lineWidth: 1)
         }
     }
 
@@ -85,7 +85,7 @@ struct UsageView: View {
                 .monospacedDigit()
             Text(label)
                 .font(.caption)
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 18)
@@ -93,7 +93,7 @@ struct UsageView: View {
 
     private var metricDivider: some View {
         Rectangle()
-            .fill(Color.agentSpaceSeparator)
+            .fill(Color.cleanMyAgentSeparator)
             .frame(width: 1, height: 40)
     }
 
@@ -109,18 +109,18 @@ struct UsageView: View {
             .chartForegroundStyleScale(agentStyleScale)
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount: model.usageRange == .sevenDays ? 7 : 8)) { value in
-                    AxisGridLine().foregroundStyle(Color.agentSpaceSeparator)
+                    AxisGridLine().foregroundStyle(Color.cleanMyAgentSeparator)
                     AxisValueLabel(format: .dateTime.day().month(.abbreviated))
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                 }
             }
             .chartYAxis {
                 AxisMarks(position: .leading) { value in
-                    AxisGridLine().foregroundStyle(Color.agentSpaceSeparator)
+                    AxisGridLine().foregroundStyle(Color.cleanMyAgentSeparator)
                     AxisValueLabel {
                         if let tokens = value.as(Int64.self) { Text(compact(tokens)) }
                     }
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
                 }
             }
             .chartLegend(position: .top, alignment: .leading, spacing: 16)
@@ -153,16 +153,16 @@ struct UsageView: View {
                             Text(label).lineLimit(2)
                         }
                     }
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
                 }
             }
             .chartYAxis {
                 AxisMarks(position: .leading) { value in
-                    AxisGridLine().foregroundStyle(Color.agentSpaceSeparator)
+                    AxisGridLine().foregroundStyle(Color.cleanMyAgentSeparator)
                     AxisValueLabel {
                         if let tokens = value.as(Int64.self) { Text(compact(tokens)) }
                     }
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
                 }
             }
             .chartLegend(.hidden)
@@ -184,11 +184,11 @@ struct UsageView: View {
             }
             .chartXAxis {
                 AxisMarks { value in
-                    AxisGridLine().foregroundStyle(Color.agentSpaceSeparator)
+                    AxisGridLine().foregroundStyle(Color.cleanMyAgentSeparator)
                     AxisValueLabel {
                         if let tokens = value.as(Int64.self) { Text(compact(tokens)) }
                     }
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
                 }
             }
             .chartYAxis {
@@ -198,7 +198,7 @@ struct UsageView: View {
                             Text(label).lineLimit(1)
                         }
                     }
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
                 }
             }
             .frame(height: 230)
@@ -212,18 +212,18 @@ struct UsageView: View {
             SectionTitle("Daily report", detail: "Newest first")
             VStack(spacing: 0) {
                 dailyHeader
-                Divider().overlay(Color.agentSpaceSeparator)
+                Divider().overlay(Color.cleanMyAgentSeparator)
                 ForEach(Array(dayRows.prefix(14).enumerated()), id: \.element.id) { index, day in
                     dayRow(day)
                     if index < min(dayRows.count, 14) - 1 {
-                        Divider().overlay(Color.agentSpaceSeparator).padding(.leading, 14)
+                        Divider().overlay(Color.cleanMyAgentSeparator).padding(.leading, 14)
                     }
                 }
             }
-            .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(Color.cleanMyAgentSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(Color.agentSpaceSeparator, lineWidth: 1)
+                    .stroke(Color.cleanMyAgentSeparator, lineWidth: 1)
             }
         }
     }
@@ -237,7 +237,7 @@ struct UsageView: View {
             Text("Total").frame(width: 110, alignment: .trailing)
         }
         .font(.caption.weight(.semibold))
-        .foregroundStyle(Color.agentSpaceSecondary)
+        .foregroundStyle(Color.cleanMyAgentSecondary)
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
     }
@@ -259,7 +259,7 @@ struct UsageView: View {
             tableNumber(day.cacheRead).frame(width: 110, alignment: .trailing)
             tableNumber(day.total).frame(width: 110, alignment: .trailing)
         }
-        .agentSpaceRow()
+        .cleanMyAgentRow()
     }
 
     private func tableNumber(_ value: Int64) -> some View {
@@ -283,7 +283,7 @@ struct UsageView: View {
                         .frame(width: 104, alignment: .leading)
                     Text(coverage.status.label)
                         .font(.caption.weight(.medium))
-                        .foregroundStyle(coverage.status == .measured ? Color.agentSpaceSecondary : .orange)
+                        .foregroundStyle(coverage.status == .measured ? Color.cleanMyAgentSecondary : .orange)
                         .frame(width: 80, alignment: .leading)
                     Text(coverage.filesDiscovered > 0 ? "\(coverage.filesScanned) of \(coverage.filesDiscovered) files" : "—")
                         .font(.caption.monospacedDigit())
@@ -296,16 +296,16 @@ struct UsageView: View {
                     }
                     Text(coverage.note)
                         .font(.caption)
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                 }
             }
             Text("Only numeric usage, timestamps, model identifiers, and opaque session boundaries are aggregated. Provider-reported cost is included where available; CleanMyAgent does not estimate prices.")
                 .font(.caption)
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
                 .padding(.top, 2)
         }
         .padding(16)
-        .background(Color.agentSpaceRaised, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(Color.cleanMyAgentRaised, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 
     private var loadingState: some View {
@@ -313,7 +313,7 @@ struct UsageView: View {
             ProgressView()
                 .controlSize(.small)
             Text("Scanning local numeric usage metadata…")
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
         }
         .frame(maxWidth: .infinity, minHeight: 260)
     }
@@ -322,15 +322,15 @@ struct UsageView: View {
         VStack(spacing: 10) {
             Image(systemName: "chart.xyaxis.line")
                 .font(.system(size: 32, weight: .medium))
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
             Text("No usage found for this period")
                 .font(.headline)
             Text("Refresh after a supported agent produces local numeric metadata.")
                 .font(.callout)
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
         }
         .frame(maxWidth: .infinity, minHeight: 280)
-        .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(Color.cleanMyAgentSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 
     private func chartSurface<Content: View>(
@@ -343,10 +343,10 @@ struct UsageView: View {
             content()
         }
         .padding(16)
-        .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .background(Color.cleanMyAgentSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color.agentSpaceSeparator, lineWidth: 1)
+                .stroke(Color.cleanMyAgentSeparator, lineWidth: 1)
         }
     }
 

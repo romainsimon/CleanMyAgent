@@ -15,18 +15,18 @@ struct PerformanceView: View {
 
                 VStack(spacing: 0) {
                     performanceHeader
-                    Divider().overlay(Color.agentSpaceSeparator)
+                    Divider().overlay(Color.cleanMyAgentSeparator)
                     ForEach(Array(model.performance.metrics.enumerated()), id: \.element.id) { index, metric in
                         PerformanceRow(metric: metric, compact: false)
                         if index < model.performance.metrics.count - 1 {
-                            Divider().overlay(Color.agentSpaceSeparator).padding(.leading, 56)
+                            Divider().overlay(Color.cleanMyAgentSeparator).padding(.leading, 56)
                         }
                     }
                 }
-                .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .background(Color.cleanMyAgentSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .overlay {
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(Color.agentSpaceSeparator, lineWidth: 1)
+                        .stroke(Color.cleanMyAgentSeparator, lineWidth: 1)
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -34,7 +34,7 @@ struct PerformanceView: View {
                         .font(.headline)
                     Text("Observed output tok/s is not provider-side decoding speed. Tool execution, multiple model calls, local logging coverage, and each agent’s event format can affect the result.")
                         .font(.callout)
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                         .frame(maxWidth: 720, alignment: .leading)
                 }
                 .padding(.top, 2)
@@ -53,7 +53,7 @@ struct PerformanceView: View {
             Text("Output tokens").frame(width: 125, alignment: .trailing)
         }
         .font(.caption.weight(.semibold))
-        .foregroundStyle(Color.agentSpaceSecondary)
+        .foregroundStyle(Color.cleanMyAgentSecondary)
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
     }
@@ -72,12 +72,12 @@ struct PerformanceRow: View {
                         .font(.body.weight(.medium))
                     Text(metric.model)
                         .font(.caption)
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                         .lineLimit(1)
                 }
                 Text(metric.coverage)
                     .font(.caption2)
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
                     .lineLimit(compact ? 1 : 2)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -92,7 +92,7 @@ struct PerformanceRow: View {
                     .frame(width: 125, alignment: .trailing)
             }
         }
-        .agentSpaceRow()
+        .cleanMyAgentRow()
     }
 
     private func metricValue(_ value: String?, suffix: String?) -> some View {
@@ -103,7 +103,7 @@ struct PerformanceRow: View {
             if let suffix, value != nil {
                 Text(suffix)
                     .font(.caption2)
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
             }
         }
     }

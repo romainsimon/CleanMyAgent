@@ -18,13 +18,13 @@ struct RootView: View {
                     .transition(.move(edge: .leading).combined(with: .opacity))
 
                 Rectangle()
-                    .fill(Color.agentSpaceSeparator)
+                    .fill(Color.cleanMyAgentSeparator)
                     .frame(width: 1)
                     .transition(.opacity)
             }
 
             ZStack {
-                AgentSpaceBackground()
+                AppBackground()
                 detail(for: currentSection)
                     .id(currentSection)
                     .transition(
@@ -88,7 +88,7 @@ struct RootView: View {
                         .font(.headline.weight(.semibold))
                     Text(model.isDemo && !model.isScreenshotMode ? "Demo data · cleanup disabled" : "Local agent care")
                         .font(.caption2)
-                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .foregroundStyle(Color.cleanMyAgentSecondary)
                 }
                 Spacer(minLength: 0)
             }
@@ -133,13 +133,13 @@ struct RootView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(14)
             .overlay(alignment: .top) {
-                Rectangle().fill(Color.agentSpaceSeparator).frame(height: 1)
+                Rectangle().fill(Color.cleanMyAgentSeparator).frame(height: 1)
             }
         }
         .background {
             ZStack {
                 Rectangle().fill(.ultraThinMaterial)
-                Color.agentSpaceBackground.opacity(0.72)
+                Color.cleanMyAgentBackground.opacity(0.72)
             }
         }
     }
@@ -169,7 +169,7 @@ private struct SidebarGroup: View {
             Text(title.uppercased())
                 .font(.system(size: 10, weight: .semibold))
                 .tracking(0.8)
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
                 .padding(.horizontal, 10)
 
             ForEach(sections) { section in
@@ -197,16 +197,16 @@ private struct SidebarItem: View {
             HStack(spacing: 10) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(isSelected ? Color.agentSpaceBlue.opacity(0.22) : Color.white.opacity(0.055))
+                        .fill(isSelected ? Color.cleanMyAgentBlue.opacity(0.22) : Color.white.opacity(0.055))
                     Image(systemName: section.symbol)
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(isSelected ? Color.agentSpaceBlue : Color.agentSpaceSecondary)
+                        .foregroundStyle(isSelected ? Color.cleanMyAgentBlue : Color.cleanMyAgentSecondary)
                 }
                 .frame(width: 27, height: 27)
 
                 Text(section.rawValue)
                     .font(.callout.weight(isSelected ? .semibold : .regular))
-                    .foregroundStyle(isSelected ? Color.white : Color.agentSpaceSecondary)
+                    .foregroundStyle(isSelected ? Color.white : Color.cleanMyAgentSecondary)
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 8)
@@ -215,14 +215,14 @@ private struct SidebarItem: View {
                 RoundedRectangle(cornerRadius: 11, style: .continuous)
                     .fill(
                         isSelected
-                        ? Color.agentSpaceBlue.opacity(0.13)
+                        ? Color.cleanMyAgentBlue.opacity(0.13)
                         : Color.white.opacity(isHovered ? 0.045 : 0)
                     )
             }
             .overlay {
                 if isSelected {
                     RoundedRectangle(cornerRadius: 11, style: .continuous)
-                        .stroke(Color.agentSpaceBlue.opacity(0.22), lineWidth: 1)
+                        .stroke(Color.cleanMyAgentBlue.opacity(0.22), lineWidth: 1)
                 }
             }
             .contentShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
@@ -246,7 +246,7 @@ struct PageHeader: View {
                 .tracking(-0.55)
             Text(subtitle)
                 .font(.callout)
-                .foregroundStyle(Color.agentSpaceSecondary)
+                .foregroundStyle(Color.cleanMyAgentSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -269,7 +269,7 @@ struct SectionTitle: View {
             if let detail {
                 Text(detail)
                     .font(.caption)
-                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .foregroundStyle(Color.cleanMyAgentSecondary)
             }
         }
     }

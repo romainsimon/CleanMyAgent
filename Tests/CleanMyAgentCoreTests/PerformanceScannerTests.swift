@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import AgentSpace
+@testable import CleanMyAgentCore
 
 struct PerformanceScannerTests {
     @Test func parsesCodexObservedThroughputWithoutContent() throws {

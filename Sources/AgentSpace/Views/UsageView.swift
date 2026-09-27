@@ -12,7 +12,8 @@ struct UsageView: View {
                 HStack(alignment: .top) {
                     PageHeader(
                         title: "Usage",
-                    subtitle: "Where your tokens went, from the activity recorded on this Mac."
+                    subtitle: "Where your tokens went, from the activity recorded on this Mac.",
+                    illustration: "bento-usage"
                     )
                     rangePicker
                 }
@@ -173,11 +174,11 @@ struct UsageView: View {
                 .foregroundStyle(by: .value("Category", part.name))
             }
             .chartForegroundStyleScale([
-                "Uncached input": Color(red: 0.38, green: 0.70, blue: 1.00),
-                "Cache read": Color(red: 0.32, green: 0.78, blue: 0.65),
-                "Cache write": Color(red: 0.76, green: 0.64, blue: 0.28),
-                "Visible output": Color(red: 0.69, green: 0.58, blue: 1.00),
-                "Reasoning": Color(red: 0.91, green: 0.56, blue: 0.37)
+                "Uncached input": Color.agentAccent(.codex),
+                "Cache read": Color.agentAccent(.hermes),
+                "Cache write": Color.agentAccent(.openCode),
+                "Visible output": Color.agentAccent(.grok),
+                "Reasoning": Color.agentAccent(.claude)
             ])
             .chartPlotStyle { $0.agentChartReveal(axis: .vertical) }
             .animation(motionEnabled ? AgentMotion.chart : nil, value: model.usage.buckets)
@@ -308,7 +309,7 @@ struct UsageView: View {
     private var coveragePanel: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
-                StatusDot(color: model.usage.hasPartialCoverage ? .orange : .green)
+                StatusDot(color: model.usage.hasPartialCoverage ? Color.agentSpaceAmber : Color.agentSpaceGreen)
                 Text(model.usage.hasPartialCoverage ? "Coverage varies by agent" : "Local coverage complete within the selected bounds")
                     .font(.headline)
             }
@@ -320,7 +321,7 @@ struct UsageView: View {
                         .frame(width: 104, alignment: .leading)
                     Text(coverage.status.label)
                         .font(.caption.weight(.medium))
-                        .foregroundStyle(coverage.status == .measured ? Color.agentSpaceSecondary : .orange)
+                        .foregroundStyle(coverage.status == .measured ? Color.agentSpaceSecondary : Color.agentSpaceAmber)
                         .frame(width: 80, alignment: .leading)
                     Text(coverage.filesDiscovered > 0 ? "\(coverage.filesScanned) of \(coverage.filesDiscovered) files" : "—")
                         .font(.caption.monospacedDigit())
@@ -328,7 +329,7 @@ struct UsageView: View {
                     if coverage.truncatedFiles > 0 {
                         Text("\(coverage.truncatedFiles) tail-sampled")
                             .font(.caption)
-                            .foregroundStyle(.orange)
+                            .foregroundStyle(Color.agentSpaceAmber)
                             .frame(width: 110, alignment: .leading)
                     }
                     Text(coverage.note)
@@ -357,9 +358,7 @@ struct UsageView: View {
 
     private var emptyState: some View {
         VStack(spacing: 10) {
-            Image(systemName: "chart.xyaxis.line")
-                .font(.system(size: 32, weight: .medium))
-                .foregroundStyle(Color.agentSpaceSecondary)
+            AgentIllustration(name: "bento-usage", size: 104)
             Text("No usage found for this period")
                 .font(.headline)
             Text("Refresh after a supported agent produces local numeric metadata.")

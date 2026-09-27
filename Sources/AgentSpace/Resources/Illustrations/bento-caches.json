@@ -1,0 +1,14 @@
+{
+  "prompt": "Create one original transparent raster illustration for a CleanMyAgent feature bento card. The supplied images are STYLE REFERENCES ONLY, not edit targets. Match their friendly chunky 3D shapes, soft matte enamel, rounded edges, warm ivory cream and coral red palette, dark charcoal accents, gentle upper-left highlights, nearly frontal three-quarter perspective. One clearly readable object group, centered and large on a square canvas with about 12% transparent breathing room. Full subject visible. Genuine transparent RGBA background, crisp antialiased alpha, no background tile, no floor or external shadow, no lettering or numbers, no logo, no watermark, no charts, no screenshot or app UI. Keep it visually quiet enough to read at 140px. Subject: two short warm ivory stacks of cache discs, encircled by one chunky coral circular-arrow ribbon that loops around them. A small coral memory-chip tile rests against the front stack. Clearly communicate stored caches that can be rebuilt. The arrow is a physical smooth molded object, not a flat chart or UI icon; keep the composition compact.",
+  "createdAt": "2026-09-27",
+  "generator": "built-in image_gen",
+  "references": [
+    "clutter-pile.webp",
+    "protected-folder.webp"
+  ],
+  "source": "exec-2410980e-192a-47b9-bcbd-dc758f1f875b.png",
+  "export": "cwebp q86 alpha_q100 600x600; generated alpha preserved",
+  "role": "decorative feature illustration; not product UI",
+  "bytes": 35944,
+  "sha256": "b614c2b4932cf9a5ce616bfe9443c007e53a4f216db3d3388648ff8749bda92e"
+}

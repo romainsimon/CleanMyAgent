@@ -10,6 +10,17 @@ enum ReleaseSmoke {
             for agent in AgentKind.allCases where agent != .ori {
                 guard AppResources.icon(for: agent) != nil else { throw SmokeError.failed("Packaged icon missing: \(agent.rawValue)") }
             }
+            for section in AppSection.allCases {
+                let glyph = "ph-\(PhosphorIcon.glyph(for: section.symbol))"
+                guard let url = Bundle.module.url(forResource: glyph, withExtension: "png"), NSImage(contentsOf: url) != nil else {
+                    throw SmokeError.failed("Packaged navigation glyph missing: \(section.rawValue)")
+                }
+            }
+            for name in ["hero-mascot", "protected-folder", "bento-storage", "bento-usage", "bento-performance", "bento-mac", "bento-dependencies", "bento-caches", "bento-archives"] {
+                guard let url = Bundle.module.url(forResource: name, withExtension: "png"), NSImage(contentsOf: url) != nil else {
+                    throw SmokeError.failed("Packaged illustration missing: \(name)")
+                }
+            }
             let repository = root.appendingPathComponent("repository")
             let worktree = root.appendingPathComponent("worktree")
             try FileManager.default.createDirectory(at: repository, withIntermediateDirectories: true)

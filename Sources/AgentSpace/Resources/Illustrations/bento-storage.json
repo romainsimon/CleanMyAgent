@@ -1,0 +1,14 @@
+{
+  "prompt": "Create one original transparent raster illustration for a CleanMyAgent feature bento card. The supplied images are STYLE REFERENCES ONLY, not edit targets. Match their friendly chunky 3D shapes, soft matte enamel, rounded edges, warm ivory cream and coral red palette, dark charcoal accents, gentle upper-left highlights, nearly frontal three-quarter perspective. One clearly readable object group, centered and large on a square canvas with about 12% transparent breathing room. Full subject visible. Genuine transparent RGBA background, crisp antialiased alpha, no background tile, no floor or external shadow, no lettering or numbers, no logo, no watermark, no charts, no screenshot or app UI. Keep it visually quiet enough to read at 140px. Subject: a chunky compact ivory hard-drive enclosure, with a coral side panel and one small charcoal connector. Two small blank coral and ivory folder tabs stand neatly beside it, and a single ivory locator pin with a coral center rests at the front. Communicate local disk storage and finding the folder behind it. Physical objects only, no progress bar, no pie chart, no screen, no numerals or letters.",
+  "createdAt": "2026-09-27",
+  "generator": "built-in image_gen",
+  "references": [
+    "clutter-pile.webp",
+    "protected-folder.webp"
+  ],
+  "source": "exec-a9f979c3-f6c3-433a-a019-52b9fd9dd127.png",
+  "export": "cwebp q86 alpha_q100 600x600; generated alpha preserved",
+  "role": "decorative feature illustration; not product UI",
+  "bytes": 25630,
+  "sha256": "4c11cbd5b264b5af9833c6b50366c707e7aec287dac1893f905d4de7a39dac03"
+}

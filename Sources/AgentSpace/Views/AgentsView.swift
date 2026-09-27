@@ -8,7 +8,8 @@ struct AgentsView: View {
             VStack(alignment: .leading, spacing: 24) {
                 PageHeader(
                     title: "Agents",
-                    subtitle: "What each agent stores here, and what it's doing now."
+                    subtitle: "What each agent stores here, and what it's doing now.",
+                    illustration: "bento-mac"
                 )
 
                 ForEach(model.disk.agents) { storage in

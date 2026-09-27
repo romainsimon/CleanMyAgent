@@ -10,8 +10,11 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 24) {
                 PageHeader(
                     title: "Settings",
-                    subtitle: "Current scan scope, privacy contract, and safety mode."
+                    subtitle: "Current scan scope, privacy contract, and safety mode.",
+                    illustration: "bento-mac"
                 )
+
+                AppearanceSettings()
 
                 settingsGroup("Scan scope") {
                     settingRow(symbol: "person.crop.circle", title: "Agent homes", value: "Codex · Claude · Grok · Cursor · Hermes · OpenCode · Ori · Kilo")
@@ -29,7 +32,7 @@ struct SettingsView: View {
                         }
                         .disabled(model.isScanning || model.isDemo)
                     }.agentSpaceRow()
-                    if let scopeError { Text(scopeError).foregroundStyle(.red).padding(.horizontal, 16) }
+                    if let scopeError { Text(scopeError).foregroundStyle(Color.agentSpaceRed).padding(.horizontal, 16) }
                     Divider().overlay(Color.agentSpaceSeparator)
                     settingRow(symbol: "clock", title: "Refresh", value: "Manual · ⌘R")
                 }
@@ -67,7 +70,7 @@ struct SettingsView: View {
 
     private func settingRow(symbol: String, title: String, value: String) -> some View {
         HStack(spacing: 12) {
-            Image(systemName: symbol)
+            PhosphorIcon(symbol: symbol)
                 .foregroundStyle(.secondary)
                 .frame(width: 18)
             Text(title)

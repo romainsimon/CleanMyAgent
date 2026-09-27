@@ -8,7 +8,8 @@ struct OverviewView: View {
             VStack(alignment: .leading, spacing: 28) {
                 PageHeader(
                     title: "A little room to breathe.",
-                    subtitle: "Your disk, your agents, and the leftovers worth a look."
+                    subtitle: "Your disk, your agents, and the leftovers worth a look.",
+                    illustration: "hero-mascot"
                 )
                 diskStatus
                 nextSteps
@@ -32,10 +33,10 @@ struct OverviewView: View {
     private var diskStatus: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack {
-                Label("Macintosh HD", systemImage: "internaldrive")
+                AgentLabel("Macintosh HD", symbol: "internaldrive")
                     .font(.callout.weight(.medium))
                 Spacer()
-                Label(diskTitle, systemImage: model.disk.pressure == .healthy ? "checkmark.circle" : "info.circle")
+                AgentLabel(diskTitle, symbol: model.disk.pressure == .healthy ? "checkmark.circle" : "info.circle")
                     .font(.caption.weight(.medium))
                     .foregroundStyle(pressureColor)
             }
@@ -71,7 +72,7 @@ struct OverviewView: View {
                     value: model.disk.totalBytes > 0 ? ByteFormat.string(model.disk.usedBytes) : "—"
                 )
                 MetricLegendItem(
-                    color: Color.white.opacity(0.28),
+                    color: Color.agentSpaceTrack,
                     label: "Free",
                     value: model.disk.totalBytes > 0 ? ByteFormat.string(model.disk.freeBytes) : "—"
                 )
@@ -99,13 +100,13 @@ struct OverviewView: View {
             model.selectedSection = section
         } label: {
             HStack(spacing: 12) {
-                Image(systemName: symbol).font(.system(size: 20)).foregroundStyle(Color.agentSpaceBlue)
+                PhosphorIcon(symbol: symbol, size: 22).font(.system(size: 20)).foregroundStyle(Color.agentSpaceBlue)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title).font(.callout.weight(.semibold)).foregroundStyle(.primary)
                     Text(detail).font(.caption).foregroundStyle(Color.agentSpaceSecondary)
                 }
                 Spacer(minLength: 0)
-                Image(systemName: "chevron.right").font(.caption).foregroundStyle(Color.agentSpaceSecondary)
+                PhosphorIcon(symbol: "chevron.right", size: 16).font(.caption).foregroundStyle(Color.agentSpaceSecondary)
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -187,9 +188,9 @@ struct OverviewView: View {
     private var pressureColor: Color {
         switch model.disk.pressure {
         case .unknown: .secondary
-        case .healthy: .green
-        case .warning: .orange
-        case .critical: .red
+        case .healthy: Color.agentSpaceGreen
+        case .warning: Color.agentSpaceAmber
+        case .critical: Color.agentSpaceRed
         }
     }
 }

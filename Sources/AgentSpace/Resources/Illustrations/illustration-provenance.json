@@ -1,0 +1,16 @@
+{
+  "sourceRepository": "romainsimon/cleanmyagent-web",
+  "sourceCommit": "930ea5cbdbf40659aaa5bd3ac285e1d34140fe8f",
+  "assets": [
+    "hero-mascot",
+    "protected-folder",
+    "bento-storage",
+    "bento-usage",
+    "bento-performance",
+    "bento-mac",
+    "bento-dependencies",
+    "bento-caches",
+    "bento-archives"
+  ],
+  "processing": "Existing CleanMyAgent image_gen artwork decoded from WebP to PNG without resizing, recoloring or altering alpha. Decorative native illustrations, never safety evidence."
+}

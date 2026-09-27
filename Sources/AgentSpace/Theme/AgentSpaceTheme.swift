@@ -2,26 +2,36 @@ import AppKit
 import SwiftUI
 
 extension Color {
-    static let agentSpaceBackground = Color(red: 0.051, green: 0.063, blue: 0.090)
-    static let agentSpaceSurface = Color(red: 0.086, green: 0.102, blue: 0.137)
-    static let agentSpaceRaised = Color(red: 0.125, green: 0.145, blue: 0.184)
-    static let agentSpaceSeparator = Color.white.opacity(0.065)
-    static let agentSpaceSecondary = Color(red: 0.65, green: 0.69, blue: 0.76)
-    static let agentSpaceBlue = Color(red: 0.48, green: 0.69, blue: 1.00)
-    static let agentSpaceViolet = Color(red: 0.57, green: 0.42, blue: 1.00)
-    static let agentSpaceMagenta = Color(red: 0.94, green: 0.36, blue: 0.73)
+    static let agentSpaceBackground = AgentPalette.color(.background)
+    static let agentSpaceSidebar = AgentPalette.color(.sidebar)
+    static let agentSpaceSurface = AgentPalette.color(.surface)
+    static let agentSpaceRaised = AgentPalette.color(.raised)
+    static let agentSpaceText = AgentPalette.color(.text)
+    static let agentSpaceSeparator = AgentPalette.color(.separator)
+    static let agentSpaceSecondary = AgentPalette.color(.secondary)
+    static let agentSpaceTrack = AgentPalette.color(.track)
+    static let agentSpaceHover = AgentPalette.color(.hover)
+    static let agentSpaceSelection = AgentPalette.color(.selection)
+    static let agentSpaceAccent = AgentPalette.color(.accent)
+    static let agentSpaceBlue = AgentPalette.color(.blue)
+    static let agentSpaceGreen = AgentPalette.color(.green)
+    static let agentSpaceAmber = AgentPalette.color(.amber)
+    static let agentSpaceRed = AgentPalette.color(.red)
+    static let agentSpaceViolet = AgentPalette.color(.violet)
+    static let agentSpaceMagenta = AgentPalette.color(.magenta)
 
     static func agentAccent(_ agent: AgentKind) -> Color {
-        switch agent {
-        case .codex: Color(red: 0.38, green: 0.70, blue: 1.00)
-        case .claude: Color(red: 0.91, green: 0.56, blue: 0.37)
-        case .grok: Color(red: 0.69, green: 0.58, blue: 1.00)
-        case .cursor: Color(red: 0.72, green: 0.75, blue: 0.82)
-        case .hermes: Color(red: 0.34, green: 0.78, blue: 0.67)
-        case .openCode: Color(red: 0.96, green: 0.78, blue: 0.28)
-        case .ori: Color(red: 0.59, green: 0.66, blue: 1.00)
-        case .kiloCode: Color(red: 0.92, green: 0.39, blue: 0.63)
+        let role: AgentColorRole = switch agent {
+        case .codex: .blue
+        case .claude: .clay
+        case .grok: .violet
+        case .cursor: .gray
+        case .hermes: .teal
+        case .openCode: .gold
+        case .ori: .indigo
+        case .kiloCode: .magenta
         }
+        return AgentPalette.color(role)
     }
 }
 
@@ -45,13 +55,8 @@ struct AgentBadge: View {
                     .interpolation(.high)
                     .scaledToFit()
             } else {
-                ZStack {
-                    RoundedRectangle(cornerRadius: size * 0.28, style: .continuous)
-                        .fill(Color.agentAccent(agent).opacity(0.16))
-                    Image(systemName: agent.symbol)
-                        .font(.system(size: size * 0.45, weight: .semibold))
-                        .foregroundStyle(Color.agentAccent(agent))
-                }
+                PhosphorIcon(symbol: agent.symbol, size: size * 0.8)
+                    .foregroundStyle(Color.agentAccent(agent))
             }
         }
         .frame(width: size, height: size)
@@ -95,7 +100,7 @@ struct MetricProgressTrack: View {
                 }
                 if hasTrailingSegment {
                     RoundedRectangle(cornerRadius: 7, style: .continuous)
-                        .fill(Color.white.opacity(0.10))
+                        .fill(Color.agentSpaceTrack)
                         .frame(maxWidth: .infinity)
                 }
             }
@@ -163,9 +168,9 @@ private final class MinimalMacScrollbarProbe: NSView {
         scrollView.scrollerStyle = .overlay
         scrollView.autohidesScrollers = true
         scrollView.usesPredominantAxisScrolling = true
-        scrollView.verticalScroller?.knobStyle = .light
+        scrollView.verticalScroller?.knobStyle = .default
         scrollView.verticalScroller?.controlSize = .small
-        scrollView.horizontalScroller?.knobStyle = .light
+        scrollView.horizontalScroller?.knobStyle = .default
         scrollView.horizontalScroller?.controlSize = .small
     }
 }

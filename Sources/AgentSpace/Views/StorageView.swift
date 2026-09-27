@@ -13,7 +13,8 @@ struct StorageView: View {
             LazyVStack(alignment: .leading, spacing: 22) {
                 PageHeader(
                     title: "Storage",
-                    subtitle: "The biggest folders first. Every number leads back to a local path."
+                    subtitle: "The biggest folders first. Every number leads back to a local path.",
+                    illustration: "bento-storage"
                 )
 
                 VStack(spacing: 0) {
@@ -45,7 +46,7 @@ struct StorageView: View {
                 }
 
                 HStack(spacing: 7) {
-                    Image(systemName: "lock.shield")
+                    PhosphorIcon(symbol: "lock.shield")
                     Text("Review cleanup options in Clean and Worktrees. Every target is checked again before removal.")
                 }
                 .font(.caption)
@@ -64,7 +65,7 @@ struct StorageCategoryRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: symbol)
+            PhosphorIcon(symbol: symbol)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(category.agent.map(Color.agentAccent) ?? .secondary)
                 .frame(width: 16)

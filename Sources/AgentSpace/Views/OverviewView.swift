@@ -112,7 +112,7 @@ struct OverviewView: View {
             .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: 12))
             .contentShape(RoundedRectangle(cornerRadius: 12))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(AgentPressStyle())
     }
 
     private var activity: some View {

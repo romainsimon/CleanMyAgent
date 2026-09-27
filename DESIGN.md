@@ -39,13 +39,17 @@ The 212pt sidebar uses 40pt rows and 12pt sentence-case group labels. Main conte
 
 ## Native behavior and accessibility
 
-The minimum window remains 940×620pt. Use native toolbar controls, pickers, alerts, sheets and focus behavior. Navigation, sidebar toggles and keyboard actions resolve immediately. Symbols use native hierarchical rendering; captured native icons are not replaced with web glyphs.
+The minimum window remains 940×620pt. Use native toolbar controls, pickers, alerts, sheets and focus behavior. Pointer navigation uses a short transition; sidebar toggles and keyboard actions resolve immediately. Symbols use native hierarchical rendering; captured native icons are not replaced with web glyphs.
 
-Respect Reduce Transparency with an opaque sidebar. App-wide movement is absent for routine actions, so Reduce Motion gets the same stable navigation and measurements. Loading retains native ProgressView feedback. Selected/disabled controls retain their semantic traits. Body text and labels remain above normal-text contrast requirements; system-disabled styling is not used as a general text color.
+Respect Reduce Transparency with an opaque sidebar. Reduce Motion disables custom movement and settles measurements immediately. Loading retains native ProgressView feedback. Selected/disabled controls retain their semantic traits. Body text and labels remain above normal-text contrast requirements; system-disabled styling is not used as a general text color.
 
 ## Motion
 
-Emil's frequency and input rules govern this milestone. No animated page fade/scale, sidebar resizing or live measurement interpolation. Frequent operations remain instant. System progress and native presentation transitions provide meaningful status/focus. The marketing surface owns the playful mascot; native safety flows stay deliberate.
+The user requested more delightful app transitions and charts on 2026-09-27, superseding the earlier instant pointer-navigation direction. Pointer navigation now uses a 180ms, 6pt entry offset with opacity; a shared selection surface carries continuity between sidebar rows. Charts reveal from their baseline over 260ms, and range changes use native numeric transitions. Press feedback is 120ms with an 80ms release. The shared ease-out curve is (0.23, 1, 0.32, 1).
+
+The input-method monitor records only mouse-versus-keyboard, never key contents or coordinates. Keyboard actions and Reduce Motion have no custom animation. Pending chart tasks cancel when their view disappears and settle when motion is disabled. Sidebar resizing, live speed updates, cleanup selection and safety checks stay immediate; confirmation retains native macOS presentation. No loop or animation library is added.
+
+The website simulation follows these same eight destinations, hierarchy, midnight tokens, native metric definitions and 7/30/90-day public fixtures. Product typography stays system-native. Usage summaries reflow at narrow window sizes; graphs stack when their labels would become cramped. Website-only adaptations include a horizontal phone navigation rail and explicit simulation disclosures.
 
 ## References and provenance
 

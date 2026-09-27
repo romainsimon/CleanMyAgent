@@ -3,6 +3,8 @@ import SwiftUI
 
 struct UsageView: View {
     @ObservedObject var model: AppModel
+    @Environment(\.agentMotionEnabled) private var motionEnabled
+    @State private var selectedDate: Date?
 
     var body: some View {
         ScrollView {
@@ -48,6 +50,7 @@ struct UsageView: View {
             }
         }
         .onChange(of: model.usageRange) {
+            selectedDate = nil
             Task { await model.refreshUsage() }
         }
     }
@@ -65,12 +68,12 @@ struct UsageView: View {
     }
 
     private var summaryStrip: some View {
-        HStack(spacing: 0) {
-            summaryMetric("Total tokens", value: compact(model.usage.totalTokens))
-            summaryMetric("Output", value: compact(model.usage.outputTokens))
-            summaryMetric("Cache read", value: compact(model.usage.cacheReadTokens))
-            summaryMetric("Reported cost", value: currency(model.usage.reportedCostUSD))
-            summaryMetric("Sessions", value: model.usage.sessionCount.formatted())
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 0) { summaryMetrics }
+                .frame(minWidth: 660)
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 170), spacing: 0)], spacing: 16) {
+                summaryMetrics
+            }
         }
         .padding(.vertical, 16)
         .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -80,11 +83,24 @@ struct UsageView: View {
         }
     }
 
+    @ViewBuilder
+    private var summaryMetrics: some View {
+        summaryMetric("Total tokens", value: compact(model.usage.totalTokens))
+        summaryMetric("Output", value: compact(model.usage.outputTokens))
+        summaryMetric("Cache read", value: compact(model.usage.cacheReadTokens))
+        summaryMetric("Reported cost", value: currency(model.usage.reportedCostUSD))
+        summaryMetric("Sessions", value: model.usage.sessionCount.formatted())
+    }
+
     private func summaryMetric(_ label: String, value: String) -> some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(value)
                 .font(.system(size: 23, weight: .semibold, design: .rounded))
                 .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .contentTransition(.numericText())
+                .animation(motionEnabled ? AgentMotion.chart : nil, value: value)
             Text(label)
                 .font(.caption)
                 .foregroundStyle(Color.agentSpaceSecondary)
@@ -101,13 +117,28 @@ struct UsageView: View {
 
     private var activityChart: some View {
         chartSurface(title: "Token activity", detail: model.usage.range.title) {
-            Chart(model.usage.buckets) { bucket in
-                BarMark(
+            Chart {
+                ForEach(model.usage.buckets) { bucket in
+                    BarMark(
                     x: .value("Day", bucket.date, unit: .day),
                     y: .value("Tokens", bucket.totalTokens)
-                )
-                .foregroundStyle(by: .value("Agent", bucket.agent.rawValue))
+                    )
+                    .foregroundStyle(by: .value("Agent", bucket.agent.rawValue))
+                }
+                if let day = selectedDay {
+                    RuleMark(x: .value("Selected day", day.date))
+                        .foregroundStyle(Color.agentSpaceSecondary)
+                        .annotation(position: .top, alignment: .leading) {
+                            Text("\(day.date.formatted(.dateTime.day().month(.abbreviated))) · \(compact(day.total)) tokens")
+                                .font(.caption.weight(.medium))
+                                .padding(8)
+                                .background(Color.agentSpaceRaised, in: RoundedRectangle(cornerRadius: 8))
+                        }
+                }
             }
+            .chartXSelection(value: $selectedDate)
+            .chartPlotStyle { $0.agentChartReveal(axis: .vertical) }
+            .animation(motionEnabled ? AgentMotion.chart : nil, value: model.usage.buckets)
             .chartForegroundStyleScale(agentStyleScale)
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount: model.usageRange == .sevenDays ? 7 : 8)) { value in
@@ -148,6 +179,8 @@ struct UsageView: View {
                 "Visible output": Color(red: 0.69, green: 0.58, blue: 1.00),
                 "Reasoning": Color(red: 0.91, green: 0.56, blue: 0.37)
             ])
+            .chartPlotStyle { $0.agentChartReveal(axis: .vertical) }
+            .animation(motionEnabled ? AgentMotion.chart : nil, value: model.usage.buckets)
             .chartXAxis {
                 AxisMarks { value in
                     AxisValueLabel {
@@ -205,6 +238,8 @@ struct UsageView: View {
             }
             .frame(height: 230)
             .accessibilityLabel("Top models by token usage")
+            .chartPlotStyle { $0.agentChartReveal(axis: .horizontal) }
+            .animation(motionEnabled ? AgentMotion.chart : nil, value: model.usage.buckets)
         }
         .frame(maxWidth: .infinity)
     }
@@ -382,6 +417,11 @@ struct UsageView: View {
                 )
             }
             .sorted { $0.date > $1.date }
+    }
+
+    private var selectedDay: DayUsage? {
+        guard let selectedDate else { return nil }
+        return dayRows.first { Calendar.current.isDate($0.date, inSameDayAs: selectedDate) }
     }
 
     private func shortModelLabel(_ usage: ModelUsage) -> String {

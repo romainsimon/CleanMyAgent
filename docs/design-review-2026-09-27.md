@@ -1,5 +1,7 @@
 # Native design and motion review
 
+Historical redesign pass. The later user-requested pointer/chart motion is documented in [motion-parity-review-2026-09-27.md](motion-parity-review-2026-09-27.md) and supersedes the instant pointer-navigation decision below.
+
 User mandate: apply https://github.com/emilkowalski/skills to the website and native app, and substantially improve the app. Official source pinned to d16ebe60d09a5ba2afcb7054ede9d0a10c9f6128. Skills used: emil-design-eng, apple-design, write-swift and review-animations, with the established Impeccable native Operate context.
 
 | Before | After | Why |

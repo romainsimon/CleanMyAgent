@@ -90,6 +90,7 @@ struct MetricProgressTrack: View {
                 if hasLeadingSegment {
                     RoundedRectangle(cornerRadius: 7, style: .continuous)
                         .fill(color)
+                        .agentChartReveal(axis: .horizontal)
                         .frame(width: min(availableWidth, max(4, availableWidth * clampedFraction)))
                 }
                 if hasTrailingSegment {

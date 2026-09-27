@@ -4,10 +4,20 @@ import SwiftUI
 struct RootView: View {
     @ObservedObject var model: AppModel
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @StateObject private var inputMethod = AgentInputMethod()
+    @Namespace private var navigationSelection
     @State private var isSidebarVisible = true
 
     private var currentSection: AppSection {
         model.selectedSection ?? .overview
+    }
+
+    private var motionEnabled: Bool {
+        AgentMotion.allowsAnimation(
+            reduceMotion: reduceMotion || ProcessInfo.processInfo.arguments.contains("--reduce-motion"),
+            keyboardInput: inputMethod.keyboardInput
+        )
     }
 
     var body: some View {
@@ -15,6 +25,7 @@ struct RootView: View {
             if isSidebarVisible {
                 sidebar
                     .frame(width: 212)
+                    .animation(motionEnabled ? AgentMotion.navigation : nil, value: currentSection)
 
                 Rectangle()
                     .fill(Color.agentSpaceSeparator)
@@ -25,8 +36,13 @@ struct RootView: View {
                 AgentSpaceBackground()
                 detail(for: currentSection)
                     .id(currentSection)
+                    .transition(.asymmetric(insertion: .opacity.combined(with: .offset(y: 6)), removal: .opacity))
             }
+            .animation(motionEnabled ? AgentMotion.navigation : nil, value: currentSection)
         }
+        .environment(\.agentMotionEnabled, motionEnabled)
+        .onAppear { inputMethod.start() }
+        .onDisappear { inputMethod.stop() }
         .tint(.agentSpaceBlue)
         .symbolRenderingMode(.hierarchical)
         .toolbar {
@@ -88,17 +104,17 @@ struct RootView: View {
                     SidebarGroup(
                         title: "Your Mac",
                         sections: [.overview, .cleanup, .worktrees, .storage],
-                        selection: $model.selectedSection
+                        selection: $model.selectedSection, namespace: navigationSelection
                     )
                     SidebarGroup(
                         title: "Your agents",
                         sections: [.agents, .usage, .performance],
-                        selection: $model.selectedSection
+                        selection: $model.selectedSection, namespace: navigationSelection
                     )
                     SidebarGroup(
                         title: "System",
                         sections: [.settings],
-                        selection: $model.selectedSection
+                        selection: $model.selectedSection, namespace: navigationSelection
                     )
                 }
                 .padding(.horizontal, 10)
@@ -150,6 +166,7 @@ private struct SidebarGroup: View {
     let title: String
     let sections: [AppSection]
     @Binding var selection: AppSection?
+    let namespace: Namespace.ID
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -161,7 +178,7 @@ private struct SidebarGroup: View {
             ForEach(sections) { section in
                 SidebarItem(
                     section: section,
-                    isSelected: selection == section
+                    isSelected: selection == section, namespace: namespace
                 ) {
                     selection = section
                 }
@@ -175,6 +192,7 @@ private struct SidebarItem: View {
 
     let section: AppSection
     let isSelected: Bool
+    let namespace: Namespace.ID
     let action: () -> Void
 
     var body: some View {
@@ -195,23 +213,18 @@ private struct SidebarItem: View {
             .frame(height: 40)
             .background {
                 RoundedRectangle(cornerRadius: 11, style: .continuous)
-                    .fill(
-                        isSelected
-                        ? Color.agentSpaceBlue.opacity(0.14)
-                        : Color.white.opacity(isHovered ? 0.045 : 0)
-                    )
+                    .fill(Color.white.opacity(isHovered && !isSelected ? 0.045 : 0))
+                if isSelected {
+                    RoundedRectangle(cornerRadius: 11, style: .continuous)
+                        .fill(Color.agentSpaceBlue.opacity(0.14))
+                        .matchedGeometryEffect(id: "navigation-selection", in: namespace)
+                }
             }
             .contentShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
         }
-        .buttonStyle(SidebarPressStyle())
+        .buttonStyle(AgentPressStyle())
         .onHover { isHovered = $0 }
         .accessibilityAddTraits(isSelected ? .isSelected : [])
-    }
-}
-
-private struct SidebarPressStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label.opacity(configuration.isPressed ? 0.65 : 1)
     }
 }
 

@@ -16,7 +16,7 @@ struct PhosphorIcon: View {
             .accessibilityHidden(true)
     }
 
-    static func glyph(for symbol: String) -> String {
+    nonisolated static func glyph(for symbol: String) -> String {
         switch symbol {
         case "square.grid.2x2": "squares-four"
         case "cpu", "terminal": "robot"

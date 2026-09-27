@@ -1,62 +1,64 @@
 # CleanMyAgent Design Direction
 
-## Mode
+## Mode and purpose
 
-Operate. CleanMyAgent is a calm maintenance console for local AI tools: understand pressure quickly, inspect the evidence, and clean only after validation.
+Operate. A calm midnight maintenance desk for the Mac that runs your coding agents. The first decision is what to review; exact evidence stays close to each cleanup action. The 2026-09-27 redesign keeps the native macOS structure, coral bin, San Francisco, real agent identities and every cleanup guard.
 
 ## Visual world
 
-The product uses a refined macOS utility language rather than a terminal or admin-dashboard aesthetic. A deep midnight canvas and flat raised surfaces keep the evidence calm and legible. Color appears only where it explains health, source, or action.
+A lighter midnight canvas separates from neutral raised surfaces. Quiet edges replace colored outlines. Navigation uses one clear selection, native hierarchical SF Symbols and readable labels, without a tile behind every symbol. The app feels warm through its existing coral bin; safety colors carry evidence rather than personality.
 
-The interface should feel reassuring under pressure. It can be friendly and dimensional without becoming playful, glossy everywhere, or visually detached from macOS.
+## Color
 
-## App icon
+- Canvas: RGB 0.051 / 0.063 / 0.090.
+- Surface: RGB 0.086 / 0.102 / 0.137.
+- Raised: RGB 0.125 / 0.145 / 0.184.
+- Secondary text: RGB 0.65 / 0.69 / 0.76, opaque for reliable contrast.
+- Neutral edges: white at 6.5% opacity.
+- Action/navigation blue: RGB 0.48 / 0.69 / 1.00.
+- System green, orange and red retain healthy, protected/warning and destructive meanings. Status labels always accompany color.
+- Violet/magenta and agent colors identify measurements or sources, never cleanup eligibility.
 
-The app identity is a cheerful coral trash can on a warm ivory macOS tile, with dark oval eyes and a slightly tilted lid. The user requested a cleaner, more readable, fun icon on 2026-09-27. One strong object replaces the earlier lens-and-files composition. The raster artwork has a standardized rounded export and transparent outer padding; it must remain identifiable at Dock and sidebar sizes. This warmth belongs to the brand asset; interface controls and safety colors retain their existing meanings. The menu-bar pressure symbols remain functional native symbols.
+## Typography and spacing
 
-## Reference synthesis
+Use the system face. Page titles are 32pt semibold with -0.55pt tracking; secondary lines use native callout/caption with natural wrapping. Measurements use rounded system numerals and monospaced digits; free disk space is the dominant 48pt measurement. Paths use normal text except where code-shaped content earns monospace.
 
-- CleanMyMac: borrow warmth, approachable system-health language, and the idea that maintenance can feel calm. Do not copy its artwork, characters, icons, or screen composition.
-- DaisyDisk: borrow the immediate readability of used versus available storage and purposeful spectral color.
-- Raycast and Apple utilities: borrow compact navigation, native window behavior, keyboard access, and information density.
-- Existing CleanMyAgent product truth: preserve exact local evidence, agent identity, cleanup gates, and one-page scrolling for long tables.
+The 212pt sidebar uses 40pt rows and 12pt sentence-case group labels. Main content keeps 28pt outer spacing, tight related groups and 24–28pt separation between jobs. Rows use 16pt horizontal and 14pt vertical padding. Panels use continuous 14–18pt corners with one neutral edge; no decorative gradient, glow or border-plus-shadow frame.
 
-## Structure
+## Information architecture
 
-- The sidebar groups Monitor, Maintain, and System tasks. Selection is obvious but never louder than the current system state.
-- Overview begins with one dominant system-health surface, followed by live throughput and evidence lists.
-- Storage, worktrees, and usage retain one document-level scroll surface. Tables do not become nested scrolling islands.
-- A menu-bar summary provides free space and current throughput without duplicating the app.
+- Your Mac: Overview, Clean, Worktrees, Storage.
+- Your agents: Agents, Usage, Performance.
+- System: Settings.
+- Overview leads with free disk space and pressure, then separate review links for worktrees and caches. They navigate; they never clean. Four largest agents and three performance observations lead to the complete dedicated screens.
+- Live throughput has a compact idle state on Overview instead of a large zero-speed gauge. Full performance measurements and coverage remain on Performance.
+- Worktree evidence uses a wide table when at least 700pt is available and readable stacked rows below that. Each layout retains selection, branch, path, size, state and the exact reason. The action bar wraps instead of clipping.
+- Usage charts form two columns only when each chart has at least 340pt; otherwise they stack. Range controls remain native segmented pickers.
+- Cleanup actions are grouped with their own sizes, eligibility and explanation. Native confirmation, target revalidation and explicit Git-versus-Trash language remain.
+- One document scroll surface for long pages; the persistent Worktrees action bar stays outside it.
 
-## Color and material
+## Native behavior and accessibility
 
-- Canvas: flat near-black indigo.
-- Panels: flat deep blue-gray with one subtle edge; no decorative gradients, stacked borders, or shadows.
-- Electric blue: navigation, healthy informational emphasis, and primary audit actions.
-- Green: verified healthy or live state only.
-- Amber and red: warning and critical states only.
-- Violet and magenta: performance and agent identity, never cleanup safety.
-- Agent colors identify source; they do not imply whether deletion is allowed.
+The minimum window remains 940×620pt. Use native toolbar controls, pickers, alerts, sheets and focus behavior. Pointer navigation uses a short transition; sidebar toggles and keyboard actions resolve immediately. Symbols use native hierarchical rendering; captured native icons are not replaced with web glyphs.
 
-## Typography
+Respect Reduce Transparency with an opaque sidebar. Reduce Motion disables custom movement and settles measurements immediately. Loading retains native ProgressView feedback. Selected/disabled controls retain their semantic traits. Body text and labels remain above normal-text contrast requirements; system-disabled styling is not used as a general text color.
 
-Use San Francisco through SwiftUI system styles. Page titles are 29 pt semibold with tight tracking. Measurements use rounded system numerals and monospaced digits. Supporting text stays compact and high-contrast enough to read without competing with evidence.
+## Motion
 
-## Shape and spacing
+The user requested more delightful app transitions and charts on 2026-09-27, superseding the earlier instant pointer-navigation direction. Pointer navigation now uses a 180ms, 6pt entry offset with opacity; a shared selection surface carries continuity between sidebar rows. Charts reveal from their baseline over 260ms, and range changes use native numeric transitions. Press feedback is 120ms with an 80ms release. The shared ease-out curve is (0.23, 1, 0.32, 1).
 
-Panels use 18–22 pt continuous corners. Sidebar items use 10–12 pt corners and compact 34 pt rows. The main content follows a 28 pt rhythm and remains readable from an 820 pt window to wide desktop layouts.
+The input-method monitor records only mouse-versus-keyboard, never key contents or coordinates. Keyboard actions and Reduce Motion have no custom animation. Pending chart tasks cancel when their view disappears and settle when motion is disabled. Sidebar resizing, live speed updates, cleanup selection and safety checks stay immediate; confirmation retains native macOS presentation. No loop or animation library is added.
 
-## Motion thesis
+The website simulation follows these same eight destinations, hierarchy, midnight tokens, native metric definitions and 7/30/90-day public fixtures. Product typography stays system-native. Usage summaries reflow at narrow window sizes; graphs stack when their labels would become cramped. Website-only adaptations include a horizontal phone navigation rail and explicit simulation disclosures.
 
-Motion explains change rather than decorating idle screens.
+## References and provenance
 
-- Focal moment: an audit resolves into updated disk and agent measurements.
-- Continuity: section changes use a short fade and 1% scale transition.
-- Feedback: progress tracks ease to new values and the refresh control shows active work.
-- Routine transitions run for 120–250 ms; metric resolution may take 350–500 ms.
-- No bounce, perpetual glow, or ambient looping animation.
-- Reduce Motion removes section transforms and metric interpolation while retaining status feedback.
+Applied official emilkowalski/skills at d16ebe60d09a5ba2afcb7054ede9d0a10c9f6128: emil-design-eng, apple-design, write-swift and review-animations. Swift changes remain compatible with the project's Swift 6.1 package baseline; no toolchain or concurrency migration is included.
 
-## Safety language
+CleanMyMac informs approachable maintenance language and clear scope; Raycast informs immediate keyboard response. Local INDEX 102 (Fey) informs quiet, aligned data rows; 144 (Cursor) informs navigation without per-icon tiles and source/review context close to the task. These principles are adapted to a local cleanup utility. No proprietary artwork or full screen is copied. Mobbin's current screen search required a paid plan; these verified local and official references supply the comparison.
 
-Name the source, scope, last refresh time, and coverage. Do not call observed throughput provider speed. Cleaning surfaces must name the exact target, expected size, file count, reversibility, blocked states, and the point at which space is actually reclaimed. Never describe a destructive action as unconditionally safe.
+The coral-bin asset and original native resource provenance stay in docs/app-icon-prompt.txt and the existing resource metadata. PRODUCT.md remains the authority for actual capabilities, metric coverage and cleanup protections.
+
+## Verification
+
+Inspect a copied native bundle at normal and minimum window sizes. Check all eight pages, keyboard navigation, sidebar toggles, Overview review links, worktree filters/selection/cancel, Usage ranges, refresh and window reopen. Use --screenshots public fixtures with all live scans and cleanup disabled; public captions disclose example data. Native code is reviewed against the craft floor directly: the HTML/CSS detector has no verdict on SwiftUI.

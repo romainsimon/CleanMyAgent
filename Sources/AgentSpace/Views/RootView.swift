@@ -3,39 +3,48 @@ import SwiftUI
 
 struct RootView: View {
     @ObservedObject var model: AppModel
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @StateObject private var inputMethod = AgentInputMethod()
+    @Namespace private var navigationSelection
     @State private var isSidebarVisible = true
 
     private var currentSection: AppSection {
         model.selectedSection ?? .overview
     }
 
+    private var motionEnabled: Bool {
+        AgentMotion.allowsAnimation(
+            reduceMotion: reduceMotion || ProcessInfo.processInfo.arguments.contains("--reduce-motion"),
+            keyboardInput: inputMethod.keyboardInput
+        )
+    }
+
     var body: some View {
         HStack(spacing: 0) {
             if isSidebarVisible {
                 sidebar
-                    .frame(width: 222)
-                    .transition(.move(edge: .leading).combined(with: .opacity))
+                    .frame(width: 212)
+                    .animation(motionEnabled ? AgentMotion.navigation : nil, value: currentSection)
 
                 Rectangle()
                     .fill(Color.agentSpaceSeparator)
                     .frame(width: 1)
-                    .transition(.opacity)
             }
 
             ZStack {
                 AgentSpaceBackground()
                 detail(for: currentSection)
                     .id(currentSection)
-                    .transition(
-                        reduceMotion
-                        ? .opacity
-                        : .opacity.combined(with: .scale(scale: 0.99, anchor: .topLeading))
-                    )
+                    .transition(.asymmetric(insertion: .opacity.combined(with: .offset(y: 6)), removal: .opacity))
             }
-            .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: currentSection)
+            .animation(motionEnabled ? AgentMotion.navigation : nil, value: currentSection)
         }
-        .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: isSidebarVisible)
+        .environment(\.agentMotionEnabled, motionEnabled)
+        .onAppear { inputMethod.start() }
+        .onDisappear { inputMethod.stop() }
+        .tint(.agentSpaceBlue)
+        .symbolRenderingMode(.hierarchical)
         .toolbar {
             ToolbarItem(placement: .navigation) {
                 Button {
@@ -66,13 +75,7 @@ struct RootView: View {
     }
 
     private func toggleSidebar() {
-        if reduceMotion {
-            isSidebarVisible.toggle()
-        } else {
-            withAnimation(.easeInOut(duration: 0.18)) {
-                isSidebarVisible.toggle()
-            }
-        }
+        isSidebarVisible.toggle()
     }
 
     private var sidebar: some View {
@@ -82,36 +85,36 @@ struct RootView: View {
                     .resizable()
                     .interpolation(.high)
                     .scaledToFit()
-                    .frame(width: 34, height: 34)
+                    .frame(width: 38, height: 38)
                 VStack(alignment: .leading, spacing: 1) {
                     Text("CleanMyAgent")
-                        .font(.headline.weight(.semibold))
+                        .font(.system(size: 14, weight: .semibold))
                     Text(model.isDemo && !model.isScreenshotMode ? "Demo data · cleanup disabled" : "Local agent care")
-                        .font(.caption2)
+                        .font(.caption)
                         .foregroundStyle(Color.agentSpaceSecondary)
                 }
                 Spacer(minLength: 0)
             }
-            .padding(.horizontal, 14)
-            .padding(.top, 16)
-            .padding(.bottom, 14)
+            .padding(.horizontal, 16)
+            .padding(.top, 22)
+            .padding(.bottom, 28)
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 17) {
+                VStack(alignment: .leading, spacing: 26) {
                     SidebarGroup(
-                        title: "Monitor",
-                        sections: [.overview, .agents, .performance, .usage],
-                        selection: $model.selectedSection
+                        title: "Your Mac",
+                        sections: [.overview, .cleanup, .worktrees, .storage],
+                        selection: $model.selectedSection, namespace: navigationSelection
                     )
                     SidebarGroup(
-                        title: "Maintain",
-                        sections: [.storage, .worktrees, .cleanup],
-                        selection: $model.selectedSection
+                        title: "Your agents",
+                        sections: [.agents, .usage, .performance],
+                        selection: $model.selectedSection, namespace: navigationSelection
                     )
                     SidebarGroup(
                         title: "System",
                         sections: [.settings],
-                        selection: $model.selectedSection
+                        selection: $model.selectedSection, namespace: navigationSelection
                     )
                 }
                 .padding(.horizontal, 10)
@@ -121,25 +124,25 @@ struct RootView: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 7) {
-                    StatusDot(color: .green)
-                    Text("Protected cleanup")
+                    Image(systemName: "checkmark.shield")
+                        .foregroundStyle(Color.agentSpaceBlue)
+                    Text("You're in control")
                         .font(.caption.weight(.medium))
                 }
-                Text("Only revalidated targets can be cleaned.")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                Text("Review first. Confirm each cleanup.")
+                    .font(.caption)
+                    .foregroundStyle(Color.agentSpaceSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(14)
-            .overlay(alignment: .top) {
-                Rectangle().fill(Color.agentSpaceSeparator).frame(height: 1)
-            }
+            .padding(16)
         }
         .background {
             ZStack {
-                Rectangle().fill(.ultraThinMaterial)
-                Color.agentSpaceBackground.opacity(0.72)
+                if !reduceTransparency {
+                    Rectangle().fill(.regularMaterial)
+                }
+                Color.agentSpaceBackground.opacity(reduceTransparency ? 1 : 0.72)
             }
         }
     }
@@ -163,19 +166,19 @@ private struct SidebarGroup: View {
     let title: String
     let sections: [AppSection]
     @Binding var selection: AppSection?
+    let namespace: Namespace.ID
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(title.uppercased())
-                .font(.system(size: 10, weight: .semibold))
-                .tracking(0.8)
+            Text(title)
+                .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(Color.agentSpaceSecondary)
                 .padding(.horizontal, 10)
 
             ForEach(sections) { section in
                 SidebarItem(
                     section: section,
-                    isSelected: selection == section
+                    isSelected: selection == section, namespace: namespace
                 ) {
                     selection = section
                 }
@@ -185,52 +188,42 @@ private struct SidebarGroup: View {
 }
 
 private struct SidebarItem: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isHovered = false
 
     let section: AppSection
     let isSelected: Bool
+    let namespace: Namespace.ID
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 10) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(isSelected ? Color.agentSpaceBlue.opacity(0.22) : Color.white.opacity(0.055))
-                    Image(systemName: section.symbol)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(isSelected ? Color.agentSpaceBlue : Color.agentSpaceSecondary)
-                }
-                .frame(width: 27, height: 27)
+                Image(systemName: section.symbol)
+                    .font(.system(size: 17, weight: .medium))
+                    .foregroundStyle(isSelected ? Color.agentSpaceBlue : Color.agentSpaceSecondary)
+                    .frame(width: 24)
+                    .accessibilityHidden(true)
 
                 Text(section.rawValue)
-                    .font(.callout.weight(isSelected ? .semibold : .regular))
+                    .font(.system(size: 13, weight: isSelected ? .semibold : .medium))
                     .foregroundStyle(isSelected ? Color.white : Color.agentSpaceSecondary)
                 Spacer(minLength: 0)
             }
-            .padding(.horizontal, 8)
-            .frame(height: 38)
+            .padding(.horizontal, 12)
+            .frame(height: 40)
             .background {
                 RoundedRectangle(cornerRadius: 11, style: .continuous)
-                    .fill(
-                        isSelected
-                        ? Color.agentSpaceBlue.opacity(0.13)
-                        : Color.white.opacity(isHovered ? 0.045 : 0)
-                    )
-            }
-            .overlay {
+                    .fill(Color.white.opacity(isHovered && !isSelected ? 0.045 : 0))
                 if isSelected {
                     RoundedRectangle(cornerRadius: 11, style: .continuous)
-                        .stroke(Color.agentSpaceBlue.opacity(0.22), lineWidth: 1)
+                        .fill(Color.agentSpaceBlue.opacity(0.14))
+                        .matchedGeometryEffect(id: "navigation-selection", in: namespace)
                 }
             }
             .contentShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(AgentPressStyle())
         .onHover { isHovered = $0 }
-        .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: isHovered)
-        .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: isSelected)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
@@ -240,13 +233,14 @@ struct PageHeader: View {
     let subtitle: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(title)
-                .font(.system(size: 29, weight: .semibold))
+                .font(.system(size: 32, weight: .semibold))
                 .tracking(-0.55)
             Text(subtitle)
                 .font(.callout)
                 .foregroundStyle(Color.agentSpaceSecondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

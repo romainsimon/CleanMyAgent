@@ -5,15 +5,23 @@ struct OverviewView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: 28) {
                 PageHeader(
-                    title: "System overview",
-                    subtitle: "Disk health, agent storage, and performance — measured locally."
+                    title: "A little room to breathe.",
+                    subtitle: "Your disk, your agents, and the leftovers worth a look."
                 )
                 diskStatus
-                LiveSpeedMeterView(snapshot: model.liveSpeed)
-                agentStorage
-                performanceSummary
+                nextSteps
+                ViewThatFits(in: .horizontal) {
+                    HStack(alignment: .top, spacing: 24) {
+                        agentStorage.frame(minWidth: 340, maxWidth: .infinity)
+                        activity.frame(minWidth: 320, maxWidth: .infinity)
+                    }
+                    VStack(alignment: .leading, spacing: 28) {
+                        agentStorage
+                        activity
+                    }
+                }
             }
             .padding(28)
             .frame(maxWidth: 1120, alignment: .leading)
@@ -22,49 +30,34 @@ struct OverviewView: View {
     }
 
     private var diskStatus: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            HStack(spacing: 10) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(pressureColor.opacity(0.14))
-                    Image(systemName: "internaldrive.fill")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(pressureColor)
-                }
-                .frame(width: 36, height: 36)
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Macintosh HD")
-                        .font(.headline)
-                    Text(diskTitle)
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(pressureColor)
-                }
+        VStack(alignment: .leading, spacing: 18) {
+            HStack {
+                Label("Macintosh HD", systemImage: "internaldrive")
+                    .font(.callout.weight(.medium))
+                Spacer()
+                Label(diskTitle, systemImage: model.disk.pressure == .healthy ? "checkmark.circle" : "info.circle")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(pressureColor)
             }
-
             HStack(alignment: .firstTextBaseline) {
                 HStack(alignment: .firstTextBaseline, spacing: 7) {
-                    Text(model.disk.totalBytes > 0 ? usedPercentage : "—")
-                        .font(.system(size: 34, weight: .semibold, design: .rounded))
+                    Text(model.disk.totalBytes > 0 ? ByteFormat.string(model.disk.freeBytes) : "—")
+                        .font(.system(size: 48, weight: .semibold, design: .rounded))
+                        .tracking(-1)
                         .monospacedDigit()
-                    Text("used")
+                    Text("free")
                         .font(.callout)
                         .foregroundStyle(Color.agentSpaceSecondary)
                 }
                 Spacer()
-                HStack(alignment: .firstTextBaseline, spacing: 7) {
-                    Text(model.disk.totalBytes > 0 ? ByteFormat.string(model.disk.freeBytes) : "Scanning…")
-                        .font(.title2.weight(.semibold))
-                        .monospacedDigit()
-                    if model.disk.totalBytes > 0 {
-                        Text("free")
-                            .font(.callout)
-                            .foregroundStyle(Color.agentSpaceSecondary)
-                    }
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(model.disk.totalBytes > 0 ? "\(usedPercentage) used" : "Measuring disk space…")
+                        .font(.callout.weight(.medium)).monospacedDigit()
+                    Text(model.disk.totalBytes > 0 ? "\(ByteFormat.string(model.disk.totalBytes)) capacity" : "Local audit")
+                        .font(.caption).foregroundStyle(Color.agentSpaceSecondary)
                 }
             }
-
-            MetricProgressTrack(fraction: usedFraction, color: pressureColor, height: 22)
+            MetricProgressTrack(fraction: usedFraction, color: pressureColor, height: 10)
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("Disk space used")
                 .accessibilityValue(model.disk.totalBytes > 0
@@ -90,8 +83,44 @@ struct OverviewView: View {
                     .foregroundStyle(Color.agentSpaceSecondary)
             }
         }
-        .padding(24)
-        .agentSpacePanel(accent: pressureColor, cornerRadius: 22)
+        .padding(22)
+        .agentSpacePanel(cornerRadius: 18)
+    }
+
+    private var nextSteps: some View {
+        HStack(spacing: 16) {
+            reviewLink("Review worktrees", detail: "\(model.worktrees.filter { $0.safety == .removable }.count) verified for review", symbol: "arrow.triangle.branch", section: .worktrees)
+            reviewLink("Review caches", detail: "Dependencies, caches & archives", symbol: "trash", section: .cleanup)
+        }
+    }
+
+    private func reviewLink(_ title: String, detail: String, symbol: String, section: AppSection) -> some View {
+        Button {
+            model.selectedSection = section
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: symbol).font(.system(size: 20)).foregroundStyle(Color.agentSpaceBlue)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title).font(.callout.weight(.semibold)).foregroundStyle(.primary)
+                    Text(detail).font(.caption).foregroundStyle(Color.agentSpaceSecondary)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right").font(.caption).foregroundStyle(Color.agentSpaceSecondary)
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: 12))
+            .contentShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(AgentPressStyle())
+    }
+
+    private var activity: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            SectionTitle("Right now", detail: "Local metadata")
+            LiveSpeedMeterView(snapshot: model.liveSpeed, compact: true)
+            performanceSummary
+        }
     }
 
     private var agentStorage: some View {
@@ -101,29 +130,39 @@ struct OverviewView: View {
                 detail: model.disk.totalBytes > 0 ? "\(ByteFormat.string(model.totalAgentBytes)) observed" : "Measuring"
             )
             VStack(spacing: 0) {
-                ForEach(Array(model.disk.agents.enumerated()), id: \.element.id) { index, storage in
+                ForEach(Array(displayedAgents.enumerated()), id: \.element.id) { index, storage in
                     AgentStorageRow(storage: storage, isScanning: model.isScanning && model.disk.totalBytes == 0)
-                    if index < model.disk.agents.count - 1 {
+                    if index < displayedAgents.count - 1 {
                         Divider().overlay(Color.agentSpaceSeparator).padding(.leading, 56)
                     }
                 }
             }
             .agentSpacePanel(accent: .agentSpaceBlue)
+            Button("View all \(model.disk.agents.count) agents") { model.selectedSection = .agents }
+                .buttonStyle(.link)
+                .font(.callout)
         }
+    }
+
+    private var displayedAgents: [AgentStorage] {
+        Array(model.disk.agents.sorted { $0.totalBytes > $1.totalBytes }.prefix(4))
     }
 
     private var performanceSummary: some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionTitle("Observed performance", detail: "Local metadata")
             VStack(spacing: 0) {
-                ForEach(Array(model.performance.metrics.enumerated()), id: \.element.id) { index, metric in
+                ForEach(Array(model.performance.metrics.prefix(3).enumerated()), id: \.element.id) { index, metric in
                     PerformanceRow(metric: metric, compact: true)
-                    if index < model.performance.metrics.count - 1 {
+                    if index < min(3, model.performance.metrics.count) - 1 {
                         Divider().overlay(Color.agentSpaceSeparator).padding(.leading, 56)
                     }
                 }
             }
             .agentSpacePanel(accent: .agentSpaceViolet)
+            Button("View performance & coverage") { model.selectedSection = .performance }
+                .buttonStyle(.link)
+                .font(.callout)
         }
     }
 

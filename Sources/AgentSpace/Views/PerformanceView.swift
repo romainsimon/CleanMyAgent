@@ -8,7 +8,7 @@ struct PerformanceView: View {
             VStack(alignment: .leading, spacing: 24) {
                 PageHeader(
                     title: "Performance",
-                    subtitle: "Comparable local observations with source-specific coverage."
+                    subtitle: "See the pace your agents report, and where the numbers come from."
                 )
 
                 LiveSpeedMeterView(snapshot: model.liveSpeed)
@@ -67,14 +67,12 @@ struct PerformanceRow: View {
         HStack(spacing: 12) {
             AgentBadge(agent: metric.agent, size: 32)
             VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 7) {
-                    Text(metric.agent.rawValue)
-                        .font(.body.weight(.medium))
-                    Text(metric.model)
-                        .font(.caption)
-                        .foregroundStyle(Color.agentSpaceSecondary)
-                        .lineLimit(1)
-                }
+                Text(metric.agent.rawValue)
+                    .font(.body.weight(.medium))
+                Text(metric.model)
+                    .font(.caption)
+                    .foregroundStyle(Color.agentSpaceSecondary)
+                    .lineLimit(1)
                 Text(metric.coverage)
                     .font(.caption2)
                     .foregroundStyle(Color.agentSpaceSecondary)
@@ -83,7 +81,7 @@ struct PerformanceRow: View {
             .frame(maxWidth: .infinity, alignment: .leading)
 
             metricValue(metric.observedTokensPerSecond.map { String(format: "%.1f", $0) }, suffix: "tok/s")
-                .frame(width: 130, alignment: .trailing)
+                .frame(width: compact ? 90 : 130, alignment: .trailing)
 
             if !compact {
                 metricValue(metric.timeToFirstTokenMs.map { formatMilliseconds($0) }, suffix: nil)

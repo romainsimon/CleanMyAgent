@@ -12,7 +12,7 @@ struct WorktreesView: View {
                 LazyVStack(alignment: .leading, spacing: 18) {
                     PageHeader(
                         title: "Worktrees",
-                        subtitle: "Remove only clean worktrees whose code is verified as merged and remote-backed."
+                        subtitle: "Forgotten checkouts, with the evidence that tells you what should stay."
                     )
 
                     auditSummary
@@ -78,32 +78,25 @@ struct WorktreesView: View {
     }
 
     private var auditSummary: some View {
-        HStack(spacing: 0) {
+        VStack(alignment: .leading, spacing: 16) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), alignment: .leading)], alignment: .leading, spacing: 16) {
             summaryItem(value: model.worktrees.count.formatted(), label: "Audited", color: .primary)
-            Divider().frame(height: 32).padding(.horizontal, 18)
-            summaryItem(value: removableWorktrees.count.formatted(), label: "Safe to remove", color: .green)
-            Divider().frame(height: 32).padding(.horizontal, 18)
+            summaryItem(value: removableWorktrees.count.formatted(), label: "Ready for review", color: .green)
             summaryItem(value: ByteFormat.string(removableBytes), label: "Verified space", color: .green)
-            Divider().frame(height: 32).padding(.horizontal, 18)
             summaryItem(value: protectedWorktrees.count.formatted(), label: "Protected", color: .orange)
-            Spacer()
-            Label("Rechecked before removal", systemImage: "checkmark.shield")
+            }
+            Label("Clean, inactive and verified merged. Rechecked before Git removes a checkout.", systemImage: "checkmark.shield")
                 .font(.caption.weight(.medium))
                 .foregroundStyle(Color.agentSpaceSecondary)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 13)
-        .background(Color.agentSpaceSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color.agentSpaceSeparator, lineWidth: 1)
-        }
+        .padding(18)
+        .agentSpacePanel(cornerRadius: 14)
     }
 
     private func summaryItem(value: String, label: String, color: Color) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(value)
-                .font(.headline.monospacedDigit())
+                .font(.system(size: 25, weight: .semibold, design: .rounded).monospacedDigit())
                 .foregroundStyle(color)
             Text(label)
                 .font(.caption)
@@ -112,6 +105,13 @@ struct WorktreesView: View {
     }
 
     private var worktreeTable: some View {
+        ViewThatFits(in: .horizontal) {
+            wideWorktreeTable.frame(minWidth: 700)
+            compactWorktreeList
+        }
+    }
+
+    private var wideWorktreeTable: some View {
         VStack(spacing: 0) {
             worktreeTableHeader
             Divider().overlay(Color.agentSpaceSeparator)
@@ -148,17 +148,7 @@ struct WorktreesView: View {
 
     private func worktreeRow(_ item: WorktreeRecord) -> some View {
         HStack(spacing: 12) {
-            Button {
-                toggleSelection(item)
-            } label: {
-                Image(systemName: selectedPaths.contains(item.path) ? "checkmark.square.fill" : "square")
-                    .foregroundStyle(item.safety == .removable ? Color.accentColor : Color.secondary.opacity(0.45))
-            }
-            .buttonStyle(.plain)
-            .frame(width: 28)
-            .disabled(item.safety != .removable || model.worktreeCleanupState == .removing)
-            .help(item.safety == .removable ? "Select for removal" : item.safetyReason)
-            .accessibilityLabel(selectedPaths.contains(item.path) ? "Deselect worktree" : "Select worktree")
+            selectionControl(item)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.repository).fontWeight(.medium)
@@ -172,8 +162,10 @@ struct WorktreesView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
-                    StatusDot(color: item.safety == .removable ? .green : .orange)
-                    Text(item.safety.label).fontWeight(.medium)
+                    Label(item.safety == .removable ? "Ready for review" : item.safety.label,
+                          systemImage: item.safety == .removable ? "checkmark.shield" : "lock")
+                        .foregroundStyle(item.safety == .removable ? .green : .orange)
+                        .fontWeight(.medium)
                 }
                 Text(item.safetyReason)
                     .font(.caption)
@@ -196,13 +188,75 @@ struct WorktreesView: View {
                 .frame(width: 88, alignment: .trailing)
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 11)
+        .padding(.vertical, 14)
         .contentShape(Rectangle())
     }
 
+    private func selectionControl(_ item: WorktreeRecord) -> some View {
+        Button {
+            toggleSelection(item)
+        } label: {
+            Image(systemName: selectedPaths.contains(item.path) ? "checkmark.square.fill" : "square")
+                .foregroundStyle(item.safety == .removable ? Color.agentSpaceBlue : Color.agentSpaceSecondary.opacity(0.45))
+                .font(.system(size: 18))
+                .frame(width: 28, height: 28)
+        }
+        .buttonStyle(.plain)
+        .disabled(item.safety != .removable || model.worktreeCleanupState == .removing)
+        .help(item.safety == .removable ? "Select for removal" : item.safetyReason)
+        .accessibilityLabel("\(selectedPaths.contains(item.path) ? "Deselect" : "Select") worktree \(item.repository), \(item.branch)")
+    }
+
+    private var compactWorktreeList: some View {
+        LazyVStack(spacing: 0) {
+            ForEach(filteredWorktrees) { item in
+                HStack(alignment: .top, spacing: 12) {
+                    selectionControl(item)
+                    VStack(alignment: .leading, spacing: 7) {
+                        HStack {
+                            Text(item.repository).font(.body.weight(.semibold))
+                            Text(item.branch).font(.caption).foregroundStyle(Color.agentSpaceSecondary).lineLimit(1)
+                            Spacer(minLength: 4)
+                            Text(item.bytes > 0 ? ByteFormat.string(item.bytes) : "—").monospacedDigit()
+                        }
+                        Label(item.safety == .removable ? "Ready for review" : item.safety.label,
+                              systemImage: item.safety == .removable ? "checkmark.shield" : "lock")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(item.safety == .removable ? .green : .orange)
+                        Text(item.safetyReason)
+                            .font(.caption).foregroundStyle(Color.agentSpaceSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Text(shortPath(item.path))
+                            .font(.caption).foregroundStyle(Color.agentSpaceSecondary)
+                            .lineLimit(1).truncationMode(.middle).help(item.path)
+                    }
+                }
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .agentSpacePanel(cornerRadius: 14)
+    }
+
     private var actionBar: some View {
-        HStack(spacing: 12) {
-            Label(
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) {
+                selectionLabel
+                Spacer()
+                selectionActions
+            }
+            VStack(alignment: .leading, spacing: 12) {
+                selectionLabel
+                HStack {
+                    Spacer()
+                    selectionActions
+                }
+            }
+        }
+    }
+
+    private var selectionLabel: some View {
+        Label(
                 selectedRecords.isEmpty
                     ? "Select verified worktrees to remove"
                     : "\(selectedRecords.count) selected · \(ByteFormat.string(selectedBytes))",
@@ -211,8 +265,10 @@ struct WorktreesView: View {
             .font(.callout)
             .foregroundStyle(selectedRecords.isEmpty ? Color.agentSpaceSecondary : .green)
 
-            Spacer()
+    }
 
+    private var selectionActions: some View {
+        HStack(spacing: 12) {
             Button(selectedPaths.count == removableWorktrees.count && !removableWorktrees.isEmpty ? "Clear selection" : "Select all safe") {
                 if selectedPaths.count == removableWorktrees.count && !removableWorktrees.isEmpty {
                     selectedPaths.removeAll()
@@ -379,6 +435,6 @@ private struct WorktreeCleanupConfirmationView: View {
             }
         }
         .padding(24)
-        .frame(width: 620)
+                .frame(width: 620)
     }
 }

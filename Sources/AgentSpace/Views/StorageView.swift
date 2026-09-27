@@ -13,7 +13,7 @@ struct StorageView: View {
             LazyVStack(alignment: .leading, spacing: 22) {
                 PageHeader(
                     title: "Storage",
-                    subtitle: "Measured local categories, largest first. Paths are never sent over the network."
+                    subtitle: "The biggest folders first. Every number leads back to a local path."
                 )
 
                 VStack(spacing: 0) {

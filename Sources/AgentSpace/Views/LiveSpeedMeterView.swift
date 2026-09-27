@@ -2,10 +2,46 @@ import SwiftUI
 
 struct LiveSpeedMeterView: View {
     let snapshot: LiveSpeedSnapshot
+    var compact = false
 
     private let scaleMaximum = 120.0
 
     var body: some View {
+        if compact {
+            compactMeter
+        } else {
+            fullMeter
+        }
+    }
+
+    private var compactMeter: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 10) {
+                Image(systemName: "gauge.with.dots.needle.50percent")
+                    .font(.title3).foregroundStyle(meterColor)
+                Text(snapshot.active ? "Codex is working" : "No active Codex turn")
+                    .font(.callout.weight(.medium))
+                Spacer(minLength: 0)
+            }
+            if snapshot.active {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(formattedSpeed).font(.system(size: 30, weight: .semibold, design: .rounded)).monospacedDigit()
+                    Text("observed tok/s").font(.caption).foregroundStyle(Color.agentSpaceSecondary)
+                }
+                MetricProgressTrack(fraction: meterFraction, color: meterColor)
+                Text(snapshot.model ?? "Local Codex metadata")
+                    .font(.caption).foregroundStyle(Color.agentSpaceSecondary)
+            } else {
+                Text("Live output speed appears here when Codex reports an active turn.")
+                    .font(.callout).foregroundStyle(Color.agentSpaceSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(18)
+        .agentSpacePanel()
+    }
+
+    private var fullMeter: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(alignment: .center) {
                 ZStack {
@@ -69,7 +105,7 @@ struct LiveSpeedMeterView: View {
     }
 
     private var meterColor: Color {
-        snapshot.active ? .green : Color.white.opacity(0.22)
+        snapshot.active ? .green : Color.agentSpaceSecondary
     }
 
     private var formattedSpeed: String {

@@ -20,6 +20,14 @@ User brief: improve the Mac app, add light/dark palettes, use the same Phosphor 
 - All 28 exported glyphs contain both full foreground and the 20% secondary alpha.
 - Impeccable context and colorize/Operate/craft-floor guidance used. Its HTML/CSS detector has no native SwiftUI verdict; native review remains required.
 
-## Remaining visual gate
+## Native visual evidence
 
-A first native pass confirmed the Light palette and shared Settings/sidebar preference, but exposed blank glyphs and illustrations when SwiftUI loaded the package assets by name. Loading explicit NSImages from the module bundle fixes that path; the renderer and smoke check share it. The Mac locked again during the candidate restart, so final visual confirmation of the images, all eight views in both themes, normal/minimum windows, keyboard/Reduce Motion and confirmation cancellation is pending a user unlock. Do not infer those checks from the website simulation or automated smoke. This PR remains draft until that gate is complete. No production merge or deployment is included.
+The Mac became available. At code revision 28c7017, all eight native pages were inspected in Light and Dark at a normal 1102pt width and key views at the 940pt minimum content width. Native body minimum height is 620pt; screenshots also include the 52pt toolbar. Glyphs and illustrations render, both appearance controls agree, System resolves to the Mac appearance, and Dark persists through a fixture-process relaunch.
+
+The review exposed two bundle/image issues: SwiftUI name-based asset lookup produced blank images, and an AppKit segmented picker used the 128px intrinsic image size instead of the SwiftUI frame. The renderer now loads explicit NSImages, sets each glyph's intrinsic point size and template flag, and shares that path with the standalone smoke check. The sidebar begins with navigation; no logo, app name or tagline remains. The --demo cleanup warning stays in the footer.
+
+Usage 7/30/90-day controls update totals and charts. Protected worktree selection remains disabled. Both themed confirmations list the two public fixture worktrees, keep their acknowledgement unchecked and final action disabled, and were cancelled without removal. Sidebar hide/show works. The --reduce-motion candidate was inspected with settled charts; the keyboard/reduced-motion policy test also passes. Public captures use --screenshots without an in-image Demo data label, with example data disclosed outside the image.
+
+## Remaining interaction gate
+
+The keyboard Show Window command opened an additional WindowGroup window. Closing the test window left the process running, but CUA then timed out while trying to bind the windowless state. A fixture-process relaunch succeeded; this does not prove direct menu/keyboard reopening after the last window closes. A Tab/Right focus probe also left focus on the window; full keyboard traversal remains unconfirmed, and no Mac keyboard-navigation setting was changed. Keep the app PR draft for those two manual interaction checks. No production merge or public release is included.

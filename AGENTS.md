@@ -16,4 +16,8 @@ Services scan local numeric metadata, filesystem and Git evidence. Never index o
 Use Impeccable once per UI milestone and preserve the native midnight identity. Inspect the copied app at normal and minimum window sizes, with keyboard navigation, sidebar toggles, range changes, close/reopen and confirmation cancellation. Native accessibility labels and reduced motion remain required. Per the user's 2026-09-27 request, publication screenshots use --screenshots without an in-image “Demo data” label; disclose example values in the surrounding page caption. Both capture modes must keep live scans and cleanup disabled.
 
 ## Release
-Test the exact candidate's copied standalone bundle outside the checkout with fixture credentials. CI must run Production runtime smoke. Verify both architectures, package resources, signature and downloaded artifact. State signing and notarization separately. Keep release assets recoverable. Version is in VERSION.
+Test the exact candidate's copied standalone bundle outside the checkout with fixture credentials.
+Run ./scripts/runtime-smoke.sh locally on that bundle for the exact candidate SHA.
+GitHub Actions are disabled by standing account policy and are not a release gate.
+Verify both architectures, package resources, signature and downloaded artifact.
+State signing and notarization separately. Keep release assets recoverable. Version is in VERSION.
